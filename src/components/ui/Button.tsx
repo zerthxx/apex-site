@@ -16,7 +16,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-copper text-ink-flip font-semibold hover:bg-copper-light shadow-glow/50 focus-visible:ring-2 focus-visible:ring-copper/50",
+    "bg-gradient-to-br from-copper to-copper-light text-ink-flip font-semibold shadow-glow hover:shadow-glow focus-visible:ring-2 focus-visible:ring-copper/50 group overflow-hidden",
   secondary:
     "border border-wire-bold text-ink hover:border-copper hover:text-copper bg-transparent",
   ghost:
@@ -75,6 +75,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           </span>
         ) : null}
+        {variant === "primary" && !isLoading && (
+          <span
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%] opacity-0 group-hover:opacity-100 animate-shimmer pointer-events-none"
+          />
+        )}
         <span className={cn("flex items-center gap-inherit", isLoading && "invisible")}>
           {leftIcon && <span className="shrink-0">{leftIcon}</span>}
           {children}

@@ -14,15 +14,12 @@ export function ContactCtaSection() {
 
   return (
     <section className="relative py-24 md:py-32 overflow-hidden bg-elevated border-t border-wire">
-      {/* Background orb */}
-      <div
-        aria-hidden
-        className="absolute top-1/2 right-0 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-copper/8 blur-[120px] pointer-events-none"
-      />
-      <div
-        aria-hidden
-        className="absolute top-1/2 left-0 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-teal-brand/5 blur-[100px] pointer-events-none"
-      />
+      {/* Mesh gradient background */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] rounded-full bg-copper/10 blur-[160px] translate-x-1/3 -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full bg-teal-brand/8 blur-[120px] -translate-x-1/4 translate-y-1/3" />
+        <div className="absolute inset-0 bg-gradient-to-t from-base/60 to-transparent" />
+      </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <motion.div
@@ -62,9 +59,13 @@ export function ContactCtaSection() {
             </Button>
           </motion.div>
 
-          <motion.p variants={fadeUp} className="text-xs text-ink-ghost">
-            Vastaamme 24 tunnin sisällä · Ei sitoumuksia · Ilmainen kartoitus
-          </motion.p>
+          <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-ink-ghost">
+            <span>Vastaamme 24 tunnin sisällä</span>
+            <span className="text-wire-bold hidden sm:inline">·</span>
+            <span>Ei sitoumuksia</span>
+            <span className="text-wire-bold hidden sm:inline">·</span>
+            <span>Ilmainen kartoitus</span>
+          </motion.div>
         </motion.div>
       </div>
     </section>

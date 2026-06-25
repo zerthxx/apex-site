@@ -5,7 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { Timer, Code2, Building2, HeartHandshake, type LucideProps } from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { DIFFERENTIATORS } from "@/lib/constants";
-import { slideInLeft, slideInRight, staggerContainer } from "@/lib/animations";
+import { fadeUp, slideInLeft, staggerContainer } from "@/lib/animations";
 
 const ICON_MAP: Record<string, React.FC<LucideProps>> = {
   Timer, Code2, Building2, HeartHandshake,
@@ -47,9 +47,15 @@ export function WhyApexSection() {
               return (
                 <motion.div
                   key={item.title}
-                  variants={slideInRight}
-                  className="flex flex-col gap-3 p-6 rounded-xl border border-wire bg-elevated"
+                  variants={fadeUp}
+                  className="relative flex flex-col gap-3 p-6 rounded-xl border border-wire bg-elevated overflow-hidden"
                 >
+                  <span
+                    aria-hidden
+                    className="absolute top-2 right-4 font-display text-7xl font-bold text-copper/[0.06] select-none leading-none pointer-events-none"
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
                   <div className="w-11 h-11 rounded-xl bg-copper/10 border border-copper/20 flex items-center justify-center text-copper">
                     <Icon size={20} strokeWidth={1.5} />
                   </div>

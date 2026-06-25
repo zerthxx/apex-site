@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Testimonial } from "@/lib/types";
@@ -38,20 +37,14 @@ export function TestimonialCard({ testimonial: t, className }: TestimonialCardPr
       </span>
 
       {/* Quote */}
-      <p className="text-ink-dim text-base italic leading-relaxed">
+      <p className="text-ink-dim text-[0.9375rem] italic leading-relaxed">
         &ldquo;{t.quote}&rdquo;
       </p>
 
       {/* Author */}
       <div className="flex items-center gap-3 mt-auto pt-4 border-t border-wire">
-        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-elevated shrink-0">
-          <Image
-            src={t.avatar}
-            alt={t.name}
-            fill
-            className="object-cover"
-            sizes="40px"
-          />
+        <div className="w-10 h-10 rounded-full bg-copper/20 border border-copper/30 flex items-center justify-center text-copper text-sm font-semibold shrink-0 select-none">
+          {t.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
         </div>
         <div>
           <p className="font-heading font-semibold text-ink text-sm">{t.name}</p>

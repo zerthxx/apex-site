@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -9,16 +9,19 @@ import { AnimatedCounter } from "@/components/shared/AnimatedCounter";
 import { fadeUp, staggerContainer } from "@/lib/animations";
 
 function HeroVisual() {
+  const prefersReduced = useReducedMotion();
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
       style={{ rotate: -2 }}
-      className="relative w-full max-w-md mx-auto animate-float-slow"
+      className={`relative w-full max-w-md mx-auto${!prefersReduced ? " animate-float-slow" : ""}`}
     >
       {/* Dashboard mock card */}
-      <div className="rounded-2xl border border-copper/30 bg-elevated shadow-glow overflow-hidden">
+      <div className="relative rounded-2xl border border-white/8 bg-surface/60 backdrop-blur-xl shadow-modal overflow-hidden">
+        {/* Subtle inner gradient */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-copper/5 to-transparent pointer-events-none" />
         {/* Header bar */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-wire bg-surface/80">
           <div className="flex gap-1.5">
@@ -81,16 +84,17 @@ const STATS = [
 ];
 
 export function HeroSection() {
+  const prefersReduced = useReducedMotion();
   return (
     <section className="relative min-h-dvh flex flex-col overflow-hidden">
       {/* Animated background orbs */}
       <div
         aria-hidden
-        className="absolute -top-40 -right-20 w-[700px] h-[700px] rounded-full bg-copper/5 blur-[120px] animate-float-slow pointer-events-none"
+        className={`absolute -top-40 -right-20 w-[700px] h-[700px] rounded-full bg-copper/5 blur-[120px] pointer-events-none${!prefersReduced ? " animate-float-slow" : ""}`}
       />
       <div
         aria-hidden
-        className="absolute -bottom-20 -left-20 w-[500px] h-[500px] rounded-full bg-teal-brand/5 blur-[100px] animate-float-fast pointer-events-none"
+        className={`absolute -bottom-20 -left-20 w-[500px] h-[500px] rounded-full bg-teal-brand/5 blur-[100px] pointer-events-none${!prefersReduced ? " animate-float-fast" : ""}`}
       />
       {/* Topographic texture */}
       <div aria-hidden className="absolute inset-0 topo-texture pointer-events-none" />
@@ -114,7 +118,9 @@ export function HeroSection() {
               className="font-display font-bold text-ink text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-tight tracking-tight"
             >
               Rakennamme ohjelmistoja, jotka{" "}
-              <span className="text-copper">kasvattavat</span>{" "}
+              <span className="bg-gradient-to-r from-copper via-copper-light to-teal-brand bg-clip-text text-transparent">
+                kasvattavat
+              </span>{" "}
               liiketoimintaasi.
             </motion.h1>
 

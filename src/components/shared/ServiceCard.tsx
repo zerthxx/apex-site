@@ -40,6 +40,11 @@ export function ServiceCard({ service, className }: ServiceCardProps) {
           {service.title}
         </h3>
         <p className="text-ink-dim text-sm leading-relaxed">{service.description}</p>
+        {service.startingPrice && (
+          <p className="text-xs text-ink-ghost mt-2">
+            alkaen <span className="text-copper font-semibold">{service.startingPrice}</span>
+          </p>
+        )}
       </div>
 
       {/* Arrow */}

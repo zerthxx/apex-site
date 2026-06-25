@@ -13,6 +13,12 @@ const CLIENTS = [
 
 const doubled = [...CLIENTS, ...CLIENTS];
 
+function Dot() {
+  return (
+    <span aria-hidden className="w-1 h-1 rounded-full bg-copper/30 shrink-0 inline-block" />
+  );
+}
+
 export function LogoBarSection() {
   return (
     <section className="py-12 border-y border-wire bg-surface/30">
@@ -22,23 +28,23 @@ export function LogoBarSection() {
         </p>
       </div>
 
-      {/* Ticker */}
+      {/* Ticker with fade edges */}
       <div
-        className="ticker-wrapper overflow-hidden"
+        className="ticker-wrapper ticker-fade overflow-hidden"
         aria-label="Asiakkaiden nimet"
       >
-        <div className="ticker-track flex gap-16 animate-ticker w-max">
+        <div className="ticker-track flex items-center gap-10 animate-ticker w-max">
           {doubled.map((name, i) => (
             <div
               key={i}
               className={cn(
-                "flex items-center shrink-0",
-                "text-ink-ghost hover:text-ink-dim transition-colors duration-200",
-                "font-heading font-semibold text-sm tracking-wide uppercase"
+                "flex items-center gap-10 shrink-0",
+                "text-ink-ghost/70 hover:text-ink-ghost transition-colors duration-200",
+                "font-heading font-medium text-xs tracking-[0.12em] uppercase"
               )}
             >
-              <span className="mr-16">{name}</span>
-              <span aria-hidden className="text-copper/40 -ml-14">·</span>
+              <span>{name}</span>
+              <Dot />
             </div>
           ))}
         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -14,6 +15,10 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const servicesRef = useRef<HTMLLIElement>(null);
+  const pathname = usePathname();
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -82,9 +87,17 @@ export function Header() {
                     ) : (
                       <Link
                         href={link.href}
-                        className="block px-3 py-2 rounded-lg text-sm font-medium text-ink-dim hover:text-ink transition-colors duration-150"
+                        className={cn(
+                          "relative block px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150",
+                          isActive(link.href)
+                            ? "text-copper"
+                            : "text-ink-dim hover:text-ink"
+                        )}
                       >
                         {link.label}
+                        {isActive(link.href) && (
+                          <span className="absolute -bottom-px left-3 right-3 h-px bg-copper rounded-full" />
+                        )}
                       </Link>
                     )}
                   </li>
