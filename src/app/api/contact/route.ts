@@ -1,0 +1,117 @@
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { Resend } from "resend";
+
+const contactSchema = z.object({
+  nimi: z.string().min(2, "Nimi on liian lyhyt"),
+  sahkoposti: z.string().email("Virheellinen sähköpostiosoite"),
+  puhelin: z.string().optional(),
+  yritys: z.string().optional(),
+  palvelu: z.enum(["verkkosivut", "verkkokauppa", "mobiilisovellus", "ai-ratkaisu", "ohjelmisto", "muu"]),
+  viesti: z.string().min(20, "Viesti on liian lyhyt").max(2000, "Viesti on liian pitkä"),
+  honeypot: z.string().max(0),
+});
+
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY not configured");
+  return new Resend(key);
+}
+
+const RATE_LIMIT: Map<string, { count: number; resetAt: number }> = new Map();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = RATE_LIMIT.get(ip);
+  if (!entry || now > entry.resetAt) {
+    RATE_LIMIT.set(ip, { count: 1, resetAt: now + 3600_000 });
+    return true;
+  }
+  if (entry.count >= 5) return false;
+  entry.count++;
+  return true;
+}
+
+const SERVICE_LABELS: Record<string, string> = {
+  verkkosivut: "Verkkosivut",
+  verkkokauppa: "Verkkokauppa",
+  mobiilisovellus: "Mobiilisovellus",
+  "ai-ratkaisu": "AI-ratkaisu",
+  ohjelmisto: "Ohjelmisto",
+  muu: "Muu",
+};
+
+export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: "Liian monta yhteydenottoa. Odota hetki." }, { status: 429 });
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Virheellinen pyyntö" }, { status: 400 });
+  }
+
+  const result = contactSchema.safeParse(body);
+  if (!result.success) {
+    return NextResponse.json({ error: "Validointivirhe", issues: result.error.issues }, { status: 422 });
+  }
+
+  const { nimi, sahkoposti, puhelin, yritys, palvelu, viesti, honeypot } = result.data;
+
+  if (honeypot && honeypot.length > 0) {
+    return NextResponse.json({ success: true });
+  }
+
+  const serviceLabel = SERVICE_LABELS[palvelu] ?? palvelu;
+  const toEmail = process.env.CONTACT_EMAIL ?? "info@apexsite.fi";
+
+  const resend = getResend();
+
+  await resend.emails.send({
+    from: "Apex Site <noreply@apexsite.fi>",
+    to: toEmail,
+    subject: `Uusi yhteydenotto: ${serviceLabel} — ${nimi}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
+        <h2 style="color:#C8813A;">Uusi yhteydenotto — Apex Site</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:8px 0;color:#666;width:120px;">Nimi</td><td style="padding:8px 0;font-weight:600;">${nimi}</td></tr>
+          <tr><td style="padding:8px 0;color:#666;">Sähköposti</td><td style="padding:8px 0;"><a href="mailto:${sahkoposti}">${sahkoposti}</a></td></tr>
+          ${puhelin ? `<tr><td style="padding:8px 0;color:#666;">Puhelin</td><td style="padding:8px 0;">${puhelin}</td></tr>` : ""}
+          ${yritys ? `<tr><td style="padding:8px 0;color:#666;">Yritys</td><td style="padding:8px 0;">${yritys}</td></tr>` : ""}
+          <tr><td style="padding:8px 0;color:#666;">Palvelu</td><td style="padding:8px 0;">${serviceLabel}</td></tr>
+        </table>
+        <div style="margin-top:16px;padding:16px;background:#f5f5f5;border-radius:8px;">
+          <strong>Viesti:</strong><br/><br/>
+          ${viesti.replace(/\n/g, "<br/>")}
+        </div>
+      </div>
+    `,
+  });
+
+  await resend.emails.send({
+    from: "Apex Site <noreply@apexsite.fi>",
+    to: sahkoposti,
+    subject: "Kiitos yhteydenotostasi — Apex Site",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
+        <h2 style="color:#C8813A;">Hei ${nimi},</h2>
+        <p>Kiitos yhteydenotostasi! Olemme vastaanottaneet viestisi koskien: <strong>${serviceLabel}</strong>.</p>
+        <p>Vastaamme sinulle 24 tunnin kuluessa arkipäivisin. Jos asia on kiireellinen, voit soittaa meille suoraan.</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;"/>
+        <p style="color:#666;font-size:14px;">
+          Apex Site<br/>
+          info@apexsite.fi<br/>
+          Helsinki, Suomi<br/>
+          <a href="https://apexsite.fi" style="color:#C8813A;">apexsite.fi</a>
+        </p>
+      </div>
+    `,
+  });
+
+  return NextResponse.json({ success: true });
+}

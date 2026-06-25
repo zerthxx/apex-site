@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* ─── Static design tokens ─────────────────────────────────────────────── */
+@theme {
+  /* Backgrounds */
+  --color-base:     #0A0C10;
+  --color-surface:  #10141C;
+  --color-elevated: #181E2A;
+  --color-subtle:   #1E2535;
+
+  /* Brand accent — copper/amber */
+  --color-copper:       #C8813A;
+  --color-copper-light: #D99550;
+
+  /* Secondary accent — teal */
+  --color-teal-brand: #2ABFBF;
+
+  /* Text hierarchy */
+  --color-ink:       #F0EEE8;
+  --color-ink-dim:   #A8A49C;
+  --color-ink-ghost: #5E5C58;
+  --color-ink-flip:  #0A0C10;
+
+  /* Borders */
+  --color-wire:      #252B38;
+  --color-wire-bold: #323A4E;
+
+  /* Status */
+  --color-ok:      #3DBD7D;
+  --color-bad:     #E05252;
+  --color-caution: #E8A23C;
+
+  /* Display font (Syne) — loaded via next/font as --font-syne */
+  --font-display: "Syne", sans-serif;
+
+  /* Shadows */
+  --shadow-card:       0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-card-hover: 0 8px 32px rgba(0,0,0,.5), 0 0 0 1px rgba(200,129,58,.2);
+  --shadow-glow:       0 0 24px rgba(200,129,58,.25), 0 0 48px rgba(200,129,58,.10);
+  --shadow-teal:       0 0 24px rgba(42,191,191,.20);
+  --shadow-modal:      0 24px 64px rgba(0,0,0,.65);
+
+  /* Named animations */
+  --animate-float-slow: float-slow 12s ease-in-out infinite alternate;
+  --animate-float-fast: float-fast  8s ease-in-out infinite alternate;
+  --animate-ticker:     ticker      30s linear infinite;
+  --animate-bounce-soft: bounce-soft 2s ease-in-out infinite;
+}
+
+/* Dynamic tokens — Next.js font variables resolved at runtime */
+@theme inline {
+  --font-display: var(--font-syne);
+  --font-sans:    var(--font-inter);
+  --font-heading: var(--font-geist-sans);
+  --font-mono:    var(--font-geist-mono);
+}
+
+/* ─── Base reset ────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: theme(colors.base);
+    color: theme(colors.ink);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: rgba(200, 129, 58, 0.25);
+    color: #F0EEE8;
+  }
+
+  :focus-visible {
+    outline: 2px solid #C8813A;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Smooth scrollbar for webkit */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0A0C10; }
+  ::-webkit-scrollbar-thumb { background: #252B38; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #323A4E; }
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────────────── */
+@keyframes float-slow {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(30px, -40px) scale(1.08); }
+}
+
+@keyframes float-fast {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-20px, 30px) scale(1.06); }
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* ─── Ticker utility ────────────────────────────────────────────────────── */
+.ticker-wrapper:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+/* ─── Topographic texture (hero background overlay) ────────────────────── */
+.topo-texture {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='none' stroke='%23C8813A' stroke-width='0.5' opacity='0.5'%3E%3Cellipse cx='200' cy='200' rx='180' ry='80'/%3E%3Cellipse cx='200' cy='200' rx='150' ry='60'/%3E%3Cellipse cx='200' cy='200' rx='120' ry='45'/%3E%3Cellipse cx='200' cy='200' rx='90' ry='32'/%3E%3Cellipse cx='200' cy='200' rx='60' ry='20'/%3E%3Cellipse cx='200' cy='200' rx='30' ry='10'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.03;
+  background-repeat: repeat;
+  background-size: 400px 400px;
+}
