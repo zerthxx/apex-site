@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Timer, Code2, Building2, HeartHandshake, type LucideProps } from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
+import { TiltCard } from "@/components/ui/TiltCard";
 import { DIFFERENTIATORS } from "@/lib/constants";
 import { fadeUp, slideInLeft, staggerContainer } from "@/lib/animations";
 
@@ -45,27 +46,25 @@ export function WhyApexSection() {
             {DIFFERENTIATORS.map((item, i) => {
               const Icon = ICON_MAP[item.icon] ?? Timer;
               return (
-                <motion.div
-                  key={item.title}
-                  variants={fadeUp}
-                  className="relative flex flex-col gap-3 p-6 rounded-xl border border-wire bg-elevated overflow-hidden"
-                >
-                  <span
-                    aria-hidden
-                    className="absolute top-2 right-4 font-display text-7xl font-bold text-copper/[0.06] select-none leading-none pointer-events-none"
-                  >
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <div className="w-11 h-11 rounded-xl bg-copper/10 border border-copper/20 flex items-center justify-center text-copper">
-                    <Icon size={20} strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <h3 className="font-heading font-semibold text-ink text-base mb-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-copper text-sm font-semibold mb-2">{item.proof}</p>
-                    <p className="text-ink-ghost text-sm leading-relaxed">{item.description}</p>
-                  </div>
+                <motion.div key={item.title} variants={fadeUp}>
+                  <TiltCard className="relative flex flex-col gap-3 p-6 rounded-xl border border-wire bg-elevated overflow-hidden h-full">
+                    <span
+                      aria-hidden
+                      className="absolute top-2 right-4 font-display text-7xl font-bold text-copper/[0.06] select-none leading-none pointer-events-none"
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div className="w-11 h-11 rounded-xl bg-copper/10 border border-copper/20 flex items-center justify-center text-copper">
+                      <Icon size={20} strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-semibold text-ink text-base mb-1">
+                        {item.title}
+                      </h3>
+                      <p className="text-copper text-sm font-semibold mb-2">{item.proof}</p>
+                      <p className="text-ink-ghost text-sm leading-relaxed">{item.description}</p>
+                    </div>
+                  </TiltCard>
                 </motion.div>
               );
             })}
