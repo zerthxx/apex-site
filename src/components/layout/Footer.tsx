@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ExternalLink, Mail, Phone, MapPin } from "lucide-react";
 
 const LinkedinIcon = () => (
@@ -21,11 +22,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Col 1: Brand */}
           <div className="lg:col-span-1 flex flex-col gap-5">
-            <Link
-              href="/"
-              className="font-display font-bold text-2xl text-ink hover:text-copper transition-colors duration-150 self-start"
-            >
-              Apex Site
+            <Link href="/" className="self-start">
+              <Image
+                src="/logo.png"
+                alt="Apex Site"
+                width={140}
+                height={47}
+                className="h-12 w-auto object-contain"
+              />
             </Link>
             <p className="text-ink-ghost text-sm leading-relaxed max-w-xs">
               Rakennamme ohjelmistoja, jotka kasvattavat liiketoimintaasi — verkkosivuista
