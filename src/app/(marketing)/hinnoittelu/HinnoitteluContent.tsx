@@ -7,6 +7,7 @@ import { CheckCircle2, ArrowRight } from "lucide-react";
 import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
 import { Badge } from "@/components/ui/Badge";
 import { PageHero } from "@/components/shared/PageHero";
+import { CardCarousel } from "@/components/ui/CardCarousel";
 import { fadeUp, staggerContainer } from "@/lib/animations";
 
 const SERVICES_PRICING = [
@@ -176,50 +177,31 @@ export function HinnoitteluContent() {
               </div>
             </div>
           </div>
-          <motion.div
-            ref={starterRef}
-            variants={staggerContainer}
-            initial="hidden"
-            animate={starterInView ? "visible" : "hidden"}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
-          >
-            {STARTER_PACKAGES.map((pkg) => (
-              <motion.div
-                key={pkg.name}
-                variants={fadeUp}
-                className={`relative p-6 rounded-xl border flex flex-col ${
-                  pkg.highlight
-                    ? "gradient-border bg-copper/5 shadow-glow"
-                    : "border-wire bg-elevated"
-                }`}
-              >
-                {pkg.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge>
-                  </div>
-                )}
-                <h3 className="font-display font-bold text-ink text-xl mb-1">{pkg.name}</h3>
-                <div className="mb-3">
-                  <span className="text-copper font-bold text-2xl">{pkg.setup}</span>
-                  <span className="text-ink-dim text-sm ml-1">aloitus</span>
-                  <span className="text-ink-ghost mx-2">+</span>
-                  <span className="text-copper font-semibold">{pkg.monthly}</span>
+          {/* Mobile carousel */}
+          <div className="md:hidden max-w-sm mx-auto">
+            <CardCarousel>
+              {STARTER_PACKAGES.map((pkg) => (
+                <div key={pkg.name} className={`relative p-6 rounded-xl border flex flex-col h-full ${pkg.highlight ? "gradient-border bg-copper/5 shadow-glow" : "border-wire bg-elevated"}`}>
+                  {pkg.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
+                  <h3 className="font-display font-bold text-ink text-xl mb-1">{pkg.name}</h3>
+                  <div className="mb-3"><span className="text-copper font-bold text-2xl">{pkg.setup}</span><span className="text-ink-dim text-sm ml-1">aloitus</span><span className="text-ink-ghost mx-2">+</span><span className="text-copper font-semibold">{pkg.monthly}</span></div>
+                  <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
+                  <ul className="space-y-2 flex-1 mb-6">{pkg.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <Link href="/yhteystiedot" className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Pyydä tarjous <ArrowRight size={14} /></Link>
                 </div>
+              ))}
+            </CardCarousel>
+          </div>
+          {/* Desktop grid */}
+          <motion.div ref={starterRef} variants={staggerContainer} initial="hidden" animate={starterInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {STARTER_PACKAGES.map((pkg) => (
+              <motion.div key={pkg.name} variants={fadeUp} className={`relative p-6 rounded-xl border flex flex-col ${pkg.highlight ? "gradient-border bg-copper/5 shadow-glow" : "border-wire bg-elevated"}`}>
+                {pkg.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
+                <h3 className="font-display font-bold text-ink text-xl mb-1">{pkg.name}</h3>
+                <div className="mb-3"><span className="text-copper font-bold text-2xl">{pkg.setup}</span><span className="text-ink-dim text-sm ml-1">aloitus</span><span className="text-ink-ghost mx-2">+</span><span className="text-copper font-semibold">{pkg.monthly}</span></div>
                 <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
-                <ul className="space-y-2 flex-1 mb-6">
-                  {pkg.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-ink-dim">
-                      <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/yhteystiedot"
-                  className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors"
-                >
-                  Pyydä tarjous <ArrowRight size={14} />
-                </Link>
+                <ul className="space-y-2 flex-1 mb-6">{pkg.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                <Link href="/yhteystiedot" className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Pyydä tarjous <ArrowRight size={14} /></Link>
               </motion.div>
             ))}
           </motion.div>
@@ -231,47 +213,27 @@ export function HinnoitteluContent() {
           <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-10 text-center">
             Palveluiden hinnat
           </h2>
-          <motion.div
-            ref={servicesRef}
-            variants={staggerContainer}
-            initial="hidden"
-            animate={servicesInView ? "visible" : "hidden"}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {SERVICES_PRICING.map((svc) => (
-              <motion.div
-                key={svc.name}
-                variants={fadeUp}
-                className={`relative p-6 rounded-xl border flex flex-col ${
-                  svc.highlight
-                    ? "gradient-border bg-copper/5 shadow-glow"
-                    : "border-wire bg-elevated"
-                }`}
-              >
-                {svc.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge>
-                  </div>
-                )}
-                <div className="mb-4">
-                  <h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3>
-                  <p className="text-copper font-semibold text-lg">{svc.price}</p>
-                  <p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p>
+          {/* Mobile carousel */}
+          <div className="md:hidden max-w-sm mx-auto">
+            <CardCarousel>
+              {SERVICES_PRICING.map((svc) => (
+                <div key={svc.name} className={`relative p-6 rounded-xl border flex flex-col h-full ${svc.highlight ? "gradient-border bg-copper/5 shadow-glow" : "border-wire bg-elevated"}`}>
+                  {svc.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
+                  <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
+                  <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <Link href={svc.href} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Lue lisää <ArrowRight size={14} /></Link>
                 </div>
-                <ul className="space-y-2 flex-1 mb-6">
-                  {svc.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-ink-dim">
-                      <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={svc.href}
-                  className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors"
-                >
-                  Lue lisää <ArrowRight size={14} />
-                </Link>
+              ))}
+            </CardCarousel>
+          </div>
+          {/* Desktop grid */}
+          <motion.div ref={servicesRef} variants={staggerContainer} initial="hidden" animate={servicesInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {SERVICES_PRICING.map((svc) => (
+              <motion.div key={svc.name} variants={fadeUp} className={`relative p-6 rounded-xl border flex flex-col ${svc.highlight ? "gradient-border bg-copper/5 shadow-glow" : "border-wire bg-elevated"}`}>
+                {svc.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
+                <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
+                <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                <Link href={svc.href} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Lue lisää <ArrowRight size={14} /></Link>
               </motion.div>
             ))}
           </motion.div>
@@ -288,25 +250,25 @@ export function HinnoitteluContent() {
               Pidä sivustosi turvallisena, nopeana ja ajan tasalla. Kuukausittainen sopimus, ei sitoutumisaikaa.
             </p>
           </div>
-          <motion.div
-            ref={maintenanceRef}
-            variants={staggerContainer}
-            initial="hidden"
-            animate={maintenanceInView ? "visible" : "hidden"}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto"
-          >
+          {/* Mobile carousel */}
+          <div className="md:hidden max-w-sm mx-auto">
+            <CardCarousel>
+              {MAINTENANCE_TIERS.map((tier) => (
+                <div key={tier.name} className="p-6 rounded-xl border border-wire bg-elevated">
+                  <h3 className="font-heading font-bold text-ink mb-1">{tier.name}</h3>
+                  <p className="text-copper font-semibold mb-4">{tier.price}</p>
+                  <ul className="space-y-2">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                </div>
+              ))}
+            </CardCarousel>
+          </div>
+          {/* Desktop grid */}
+          <motion.div ref={maintenanceRef} variants={staggerContainer} initial="hidden" animate={maintenanceInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {MAINTENANCE_TIERS.map((tier) => (
               <motion.div key={tier.name} variants={fadeUp} className="p-6 rounded-xl border border-wire bg-elevated">
                 <h3 className="font-heading font-bold text-ink mb-1">{tier.name}</h3>
                 <p className="text-copper font-semibold mb-4">{tier.price}</p>
-                <ul className="space-y-2">
-                  {tier.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-ink-dim">
-                      <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+                <ul className="space-y-2">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
               </motion.div>
             ))}
           </motion.div>
