@@ -72,6 +72,54 @@ const SERVICES_PRICING = [
   },
 ];
 
+const STARTER_PACKAGES = [
+  {
+    name: "Startti",
+    setup: "299 €",
+    monthly: "49 €/kk",
+    description: "Täydellinen pienelle yritykselle. Ravintola, parturi, kampaamo, paikallinen kauppa.",
+    features: [
+      "Jopa 5 sivua",
+      "Mobiilioptimoidut",
+      "Yhteydenottolomake",
+      "Google Maps -integraatio",
+      "Ylläpito sisältyy",
+      "Ei sitoutumisaikaa",
+    ],
+    highlight: false,
+  },
+  {
+    name: "Kasvu",
+    setup: "599 €",
+    monthly: "79 €/kk",
+    description: "Enemmän sivuja, SEO-optimointi ja Google Analytics. Kasvavalle yritykselle.",
+    features: [
+      "Jopa 10 sivua",
+      "SEO-optimointi",
+      "Google Analytics",
+      "CMS sisällönhallinta",
+      "Blogimahdollisuus",
+      "Kuukausiraportti",
+    ],
+    highlight: true,
+  },
+  {
+    name: "Pro",
+    setup: "999 €",
+    monthly: "99 €/kk",
+    description: "Täysi paketti verkkokaupalla tai varausjärjestelmällä.",
+    features: [
+      "Rajaton sivumäärä",
+      "Verkkokauppa tai varaukset",
+      "Maksujärjestelmä",
+      "Prioriteettituki",
+      "4 h muutostyöt/kk",
+      "Kvartaalikatsaus",
+    ],
+    highlight: false,
+  },
+];
+
 const MAINTENANCE_TIERS = [
   { name: "Perus", price: "150 €/kk", features: ["Tietoturvapäivitykset", "Varmuuskopiointi", "Sähköpostituki", "1 h muutostyöt/kk"] },
   { name: "Kasvu", price: "350 €/kk", features: ["Kaikki Perus-tason ominaisuudet", "Suorituskyvyn seuranta", "Puhelintuki", "4 h muutostyöt/kk", "Kuukausiraportti"] },
@@ -85,10 +133,12 @@ const FAQ = [
 ];
 
 export function HinnoitteluContent() {
+  const starterRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLDivElement>(null);
   const maintenanceRef = useRef<HTMLDivElement>(null);
   const faqRef = useRef<HTMLDivElement>(null);
 
+  const starterInView = useInView(starterRef, { once: true, margin: "-80px" });
   const servicesInView = useInView(servicesRef, { once: true, margin: "-80px" });
   const maintenanceInView = useInView(maintenanceRef, { once: true, margin: "-80px" });
   const faqInView = useInView(faqRef, { once: true, margin: "-80px" });
@@ -101,6 +151,68 @@ export function HinnoitteluContent() {
         description="Kaikki tarjouksemme ovat kiinteitä. Tiedät tarkalleen mitä saat ja mitä maksat — ennen kuin allekirjoitat mitään."
         cta={{ label: "Pyydä ilmainen tarjous", href: "/yhteystiedot" }}
       />
+
+      {/* Starter packages for small businesses */}
+      <section className="py-16 bg-surface/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-teal-brand">Pienyrityksille</span>
+            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-3">
+              Aloita pienellä budjetilla
+            </h2>
+            <p className="text-ink-dim max-w-lg mx-auto">
+              Ravintola, parturi, kampaamo tai muu pieni yritys — saat ammattimaisen sivuston ilman isoa kertamaksua.
+            </p>
+          </div>
+          <motion.div
+            ref={starterRef}
+            variants={staggerContainer}
+            initial="hidden"
+            animate={starterInView ? "visible" : "hidden"}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
+          >
+            {STARTER_PACKAGES.map((pkg) => (
+              <motion.div
+                key={pkg.name}
+                variants={fadeUp}
+                className={`relative p-6 rounded-xl border flex flex-col ${
+                  pkg.highlight
+                    ? "gradient-border bg-copper/5 shadow-glow"
+                    : "border-wire bg-elevated"
+                }`}
+              >
+                {pkg.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge>
+                  </div>
+                )}
+                <h3 className="font-display font-bold text-ink text-xl mb-1">{pkg.name}</h3>
+                <div className="mb-3">
+                  <span className="text-copper font-bold text-2xl">{pkg.setup}</span>
+                  <span className="text-ink-dim text-sm ml-1">aloitus</span>
+                  <span className="text-ink-ghost mx-2">+</span>
+                  <span className="text-copper font-semibold">{pkg.monthly}</span>
+                </div>
+                <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
+                <ul className="space-y-2 flex-1 mb-6">
+                  {pkg.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-ink-dim">
+                      <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/yhteystiedot"
+                  className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors"
+                >
+                  Pyydä tarjous <ArrowRight size={14} />
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
       <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
