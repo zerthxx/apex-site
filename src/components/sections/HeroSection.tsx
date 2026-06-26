@@ -289,9 +289,6 @@ export function HeroSection() {
               <Button size="lg" asChild>
                 <Link href="/yhteystiedot">Pyydä ilmainen tarjous</Link>
               </Button>
-              <Button variant="secondary" size="lg" asChild rightIcon={<ArrowRight size={18} />}>
-                <Link href="/portfolio">Katso portfolio</Link>
-              </Button>
             </motion.div>
 
             {/* Social proof avatars */}
