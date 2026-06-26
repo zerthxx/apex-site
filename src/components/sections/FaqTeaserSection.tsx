@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRef } from "react";
@@ -13,7 +13,7 @@ export function FaqTeaserSection() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-10 md:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div
           ref={ref}
@@ -33,13 +33,13 @@ export function FaqTeaserSection() {
               Usein kysytyt kysymykset
             </h2>
             <p className="text-ink-dim leading-relaxed">
-              Löydät vastaukset yleisimpiin kysymyksiin alta. Jos et löydä vastausta, ota yhteyttä suoraan.
+              LÃ¶ydÃ¤t vastaukset yleisimpiin kysymyksiin alta. Jos et lÃ¶ydÃ¤ vastausta, ota yhteyttÃ¤ suoraan.
             </p>
             <Link
               href="/ukk"
               className="inline-flex items-center gap-2 text-copper text-sm font-semibold hover:gap-3 transition-all duration-150 mt-2"
             >
-              Näe kaikki kysymykset <ArrowRight size={16} />
+              NÃ¤e kaikki kysymykset <ArrowRight size={16} />
             </Link>
           </motion.div>
 
@@ -56,3 +56,4 @@ export function FaqTeaserSection() {
     </section>
   );
 }
+

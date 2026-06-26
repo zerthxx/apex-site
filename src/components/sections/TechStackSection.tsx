@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
@@ -14,11 +14,11 @@ export function TechStackSection() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-10 md:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Teknologia"
-          heading="Teknologiat, joita käytämme"
+          heading="Teknologiat, joita kÃ¤ytÃ¤mme"
           subheading="Valitsemme aina oikean teknologian kullekin projektille."
           className="mb-12"
         />
@@ -63,3 +63,4 @@ export function TechStackSection() {
     </section>
   );
 }
+

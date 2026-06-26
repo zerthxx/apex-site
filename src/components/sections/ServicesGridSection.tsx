@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
@@ -12,12 +12,12 @@ export function ServicesGridSection() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-10 md:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Palvelumme"
-          heading="Mitä rakennamme"
-          subheading="Kaikki digitaaliset palvelut yhdestä paikasta — suunnittelusta tuotantoon."
+          heading="MitÃ¤ rakennamme"
+          subheading="Kaikki digitaaliset palvelut yhdestÃ¤ paikasta â€” suunnittelusta tuotantoon."
           className="mb-12"
         />
 
@@ -38,3 +38,4 @@ export function ServicesGridSection() {
     </section>
   );
 }
+

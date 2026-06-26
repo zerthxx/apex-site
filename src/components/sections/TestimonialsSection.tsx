@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
@@ -12,12 +12,12 @@ export function TestimonialsSection() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-20 md:py-28 bg-surface/30">
+    <section className="py-10 md:py-20 bg-surface/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Asiakkaat"
-          heading="Mitä asiakkaamme sanovat"
-          subheading="Emme väitä olevamme parhaita — asiakkaamme sanovat sen puolestamme."
+          heading="MitÃ¤ asiakkaamme sanovat"
+          subheading="Emme vÃ¤itÃ¤ olevamme parhaita â€” asiakkaamme sanovat sen puolestamme."
           className="mb-12"
         />
 
@@ -38,3 +38,4 @@ export function TestimonialsSection() {
     </section>
   );
 }
+

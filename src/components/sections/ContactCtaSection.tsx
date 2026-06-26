@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRef } from "react";
@@ -13,7 +13,7 @@ export function ContactCtaSection() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="relative py-24 md:py-32 overflow-hidden bg-elevated border-t border-wire">
+    <section className="relative py-12 md:py-24 overflow-hidden bg-elevated border-t border-wire">
       {/* Mesh gradient background */}
       <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] rounded-full bg-copper/10 blur-[160px] translate-x-1/3 -translate-y-1/2" />
@@ -34,12 +34,12 @@ export function ContactCtaSection() {
             className="font-display font-bold text-ink text-4xl sm:text-5xl leading-tight tracking-tight"
           >
             Onko sinulla projekti{" "}
-            <span className="text-copper">mielessä?</span>
+            <span className="text-copper">mielessÃ¤?</span>
           </motion.h2>
 
           <motion.p variants={fadeUp} className="text-ink-dim text-lg leading-relaxed">
             Varaa maksuton 30 minuutin kartoituspuhelu. Kerromme miten voimme auttaa
-            — ilman sitoumuksia.
+            â€” ilman sitoumuksia.
           </motion.p>
 
           <motion.div
@@ -47,7 +47,7 @@ export function ContactCtaSection() {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Button size="lg" asChild>
-              <Link href="/yhteystiedot">Pyydä tarjous</Link>
+              <Link href="/yhteystiedot">PyydÃ¤ tarjous</Link>
             </Button>
             <Button
               variant="secondary"
@@ -60,10 +60,10 @@ export function ContactCtaSection() {
           </motion.div>
 
           <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-ink-ghost">
-            <span>Vastaamme 24 tunnin sisällä</span>
-            <span className="text-wire-bold hidden sm:inline">·</span>
+            <span>Vastaamme 24 tunnin sisÃ¤llÃ¤</span>
+            <span className="text-wire-bold hidden sm:inline">Â·</span>
             <span>Ei sitoumuksia</span>
-            <span className="text-wire-bold hidden sm:inline">·</span>
+            <span className="text-wire-bold hidden sm:inline">Â·</span>
             <span>Ilmainen kartoitus</span>
           </motion.div>
         </motion.div>
@@ -71,3 +71,4 @@ export function ContactCtaSection() {
     </section>
   );
 }
+

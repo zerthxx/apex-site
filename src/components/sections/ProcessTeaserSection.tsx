@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRef } from "react";
@@ -14,7 +14,7 @@ export function ProcessTeaserSection() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-20 md:py-28 bg-surface/30">
+    <section className="py-10 md:py-20 bg-surface/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           ref={ref}
@@ -24,8 +24,8 @@ export function ProcessTeaserSection() {
         >
           <SectionHeader
             eyebrow="Prosessimme"
-            heading="Miten työskentelemme"
-            subheading="Selkeä prosessi, läpinäkyvä kommunikaatio ja tulokset aikataulussa."
+            heading="Miten tyÃ¶skentelemme"
+            subheading="SelkeÃ¤ prosessi, lÃ¤pinÃ¤kyvÃ¤ kommunikaatio ja tulokset aikataulussa."
             className="mb-14"
           />
 
@@ -44,3 +44,4 @@ export function ProcessTeaserSection() {
     </section>
   );
 }
+

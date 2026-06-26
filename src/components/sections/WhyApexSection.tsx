@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
@@ -17,7 +17,7 @@ export function WhyApexSection() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-20 md:py-28 bg-surface/30">
+    <section className="py-10 md:py-20 bg-surface/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           {/* Left: heading */}
@@ -29,8 +29,8 @@ export function WhyApexSection() {
           >
             <SectionHeader
               eyebrow="Miksi Apex Site"
-              heading="Neljä syytä valita meidät"
-              subheading="Emme ole vain toinen toimisto. Tässä on mitä erottaa meidät."
+              heading="NeljÃ¤ syytÃ¤ valita meidÃ¤t"
+              subheading="Emme ole vain toinen toimisto. TÃ¤ssÃ¤ on mitÃ¤ erottaa meidÃ¤t."
               align="left"
             />
           </motion.div>
@@ -74,3 +74,4 @@ export function WhyApexSection() {
     </section>
   );
 }
+

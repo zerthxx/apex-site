@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const CONTACT_DETAILS = [
   { icon: Mail, label: "Sähköposti", value: "info@apexsite.fi", href: "mailto:info@apexsite.fi" },
-  { icon: Phone, label: "Puhelin", value: "+358 XX XXX XXXX", href: "tel:+358XXXXXXXXX" },
+  { icon: Phone, label: "Puhelin", value: "+358 44 2455490", href: "tel:+358442455490" },
   { icon: MapPin, label: "Osoite", value: "Helsinki, Suomi", href: null },
   { icon: Clock, label: "Vastausaika", value: "24 h arkipäivisin", href: null },
 ];

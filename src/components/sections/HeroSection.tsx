@@ -202,7 +202,7 @@ export function HeroSection() {
   }, [prefersReduced]);
 
   return (
-    <section ref={sectionRef} className="relative min-h-dvh flex flex-col overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-[80dvh] md:min-h-dvh flex flex-col overflow-hidden">
       {/* Background orbs */}
       <div
         aria-hidden
@@ -229,20 +229,20 @@ export function HeroSection() {
 
       {/* Main content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex items-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center py-32 lg:py-0 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center py-14 lg:py-0 w-full">
           {/* Left: copy */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4 md:gap-6"
           >
             <motion.div variants={fadeUp}>
               <Badge variant="teal">🇫🇮 Suomalainen ohjelmistotalo</Badge>
             </motion.div>
 
             {/* Word-by-word headline */}
-            <h1 className="font-display font-bold text-ink text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-tight tracking-tight">
+            <h1 className="font-display font-bold text-ink text-3xl sm:text-5xl lg:text-6xl xl:text-7xl leading-tight tracking-tight">
               <span style={{ perspective: 600 }}>
                 {HEADLINE_WORDS.map((word, i) => (
                   <motion.span
