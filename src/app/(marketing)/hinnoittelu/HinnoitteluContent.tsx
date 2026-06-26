@@ -163,6 +163,18 @@ export function HinnoitteluContent() {
             <p className="text-ink-dim max-w-lg mx-auto">
               Ravintola, parturi, kampaamo tai muu pieni yritys — saat ammattimaisen sivuston ilman isoa kertamaksua.
             </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center max-w-xl mx-auto">
+              <div className="flex-1 rounded-xl border border-wire bg-elevated p-4 text-left">
+                <p className="text-xs font-semibold uppercase tracking-widest text-copper mb-1">Meidän hosting</p>
+                <p className="text-ink font-semibold">+ 50 €/kk</p>
+                <p className="text-ink-dim text-xs mt-1">Me pidämme sivustosi käynnissä. Ei teknisiä huolia.</p>
+              </div>
+              <div className="flex-1 rounded-xl border border-wire bg-elevated p-4 text-left">
+                <p className="text-xs font-semibold uppercase tracking-widest text-teal-brand mb-1">Oma hosting</p>
+                <p className="text-ink font-semibold">0 €/kk</p>
+                <p className="text-ink-dim text-xs mt-1">Maksat vain kertaluonteisen aloitusmaksun. Hosting on sinun vastuullasi.</p>
+              </div>
+            </div>
           </div>
           <motion.div
             ref={starterRef}
