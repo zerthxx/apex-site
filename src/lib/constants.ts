@@ -12,7 +12,7 @@ import type {
 export const SITE_URL = "https://apexsite.fi";
 export const COMPANY_NAME = "Apex Site";
 export const COMPANY_EMAIL = "info@apexsite.fi";
-export const COMPANY_PHONE = "+358 50 123 4567";
+export const COMPANY_PHONE = "+358 44 2455490";
 export const COMPANY_ADDRESS = "Helsinki, Finland";
 export const COMPANY_BUSINESS_ID = "1234567-8";
 
