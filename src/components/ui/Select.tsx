@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useId } from "react";
+import { forwardRef, useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,9 +18,10 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, hint, options, placeholder, className, id, ...props }, ref) => {
+  ({ label, error, hint, options, placeholder, className, id, onChange, ...props }, ref) => {
     const generatedId = useId();
     const selectId = id ?? generatedId;
+    const [hasValue, setHasValue] = useState(!!props.value || !!props.defaultValue);
 
     return (
       <div className="flex flex-col gap-1.5">
@@ -34,15 +35,19 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={selectId}
             className={cn(
-              "w-full h-10 rounded-lg bg-elevated border text-ink text-sm appearance-none",
+              "w-full h-10 rounded-lg bg-elevated border text-sm appearance-none",
               "pl-3 pr-8 transition-colors duration-150",
               "focus:outline-none focus:ring-1",
               error
                 ? "border-bad focus:border-bad focus:ring-bad/30"
                 : "border-wire focus:border-copper focus:ring-copper/30",
-              !props.value && props.defaultValue === undefined && "text-ink-ghost",
+              hasValue ? "text-ink" : "text-ink-ghost",
               className
             )}
+            onChange={(e) => {
+              setHasValue(!!e.target.value);
+              onChange?.(e);
+            }}
             {...props}
           >
             {placeholder && (

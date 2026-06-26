@@ -3,7 +3,6 @@ import { HeroSection } from "@/components/sections/HeroSection";
 import { LogoBarSection } from "@/components/sections/LogoBarSection";
 import { ServicesGridSection } from "@/components/sections/ServicesGridSection";
 import { WhyApexSection } from "@/components/sections/WhyApexSection";
-import { PortfolioPreviewSection } from "@/components/sections/PortfolioPreviewSection";
 import { ProcessTeaserSection } from "@/components/sections/ProcessTeaserSection";
 import { TechStackSection } from "@/components/sections/TechStackSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
@@ -24,7 +23,6 @@ export default function HomePage() {
       <LogoBarSection />
       <ServicesGridSection />
       <WhyApexSection />
-      <PortfolioPreviewSection />
       <ProcessTeaserSection />
       <TechStackSection />
       <TestimonialsSection />

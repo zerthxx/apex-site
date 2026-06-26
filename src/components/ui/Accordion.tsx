@@ -46,7 +46,7 @@ export function Accordion({ items, allowMultiple = false, className }: Accordion
               className="flex w-full items-center justify-between gap-4 py-5 text-left text-ink hover:text-copper transition-colors duration-150 focus-visible:outline-none focus-visible:text-copper"
               aria-expanded={isOpen}
             >
-              <span className="font-medium text-base">{item.question}</span>
+              <span className="font-medium text-base text-ink">{item.question}</span>
               <motion.span
                 animate={{ rotate: isOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}

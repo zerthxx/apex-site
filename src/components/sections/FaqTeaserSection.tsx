@@ -6,7 +6,7 @@ import { motion, useInView } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { FAQ_HOME } from "@/lib/constants";
-import { slideInLeft, slideInRight } from "@/lib/animations";
+import { slideInLeft, fadeUp } from "@/lib/animations";
 
 export function FaqTeaserSection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ export function FaqTeaserSection() {
 
           {/* Right */}
           <motion.div
-            variants={slideInRight}
+            variants={fadeUp}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
           >

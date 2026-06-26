@@ -89,11 +89,9 @@ export const NAV_LINKS: NavLink[] = [
       icon: s.icon,
     })),
   },
-  { label: "Portfolio", href: "/portfolio" },
   { label: "Prosessi", href: "/prosessi" },
   { label: "Hinnoittelu", href: "/hinnoittelu" },
   { label: "Meistä", href: "/meista" },
-  { label: "Blogi", href: "/blogi" },
 ];
 
 export const TECH_STACK: TechItem[] = [
@@ -269,8 +267,6 @@ export const FOOTER_NAV = {
   yritys: [
     { label: "Meistä", href: "/meista" },
     { label: "Prosessi", href: "/prosessi" },
-    { label: "Portfolio", href: "/portfolio" },
-    { label: "Blogi", href: "/blogi" },
     { label: "Urat", href: "/urat" },
     { label: "UKK", href: "/ukk" },
   ],
