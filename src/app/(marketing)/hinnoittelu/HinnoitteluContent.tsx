@@ -12,7 +12,7 @@ import { fadeUp, staggerContainer } from "@/lib/animations";
 const SERVICES_PRICING = [
   {
     name: "Verkkosivut",
-    price: "alkaen 2 500 €",
+    price: "alkaen 3 000 €",
     description: "Moderni, nopea ja hakukoneoptimoitu yrityspresenssi verkossa.",
     features: [
       "Responsiivinen design",
@@ -27,7 +27,7 @@ const SERVICES_PRICING = [
   },
   {
     name: "Verkkokauppa",
-    price: "alkaen 5 000 €",
+    price: "alkaen 6 000 €",
     description: "Myyvä verkkokauppa Shopify, WooCommerce tai täysin räätälöitynä.",
     features: [
       "Stripe + Klarna + Paytrail",

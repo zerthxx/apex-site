@@ -30,7 +30,7 @@ export const SERVICES: Service[] = [
     description: "Modernit, nopeat ja konvertoivat verkkosivut yrityksellesi.",
     icon: "Globe",
     href: "/palvelut/verkkosivut",
-    startingPrice: "2 500 €",
+    startingPrice: "3 000 €",
   },
   {
     id: "verkkokaupat",
@@ -39,7 +39,7 @@ export const SERVICES: Service[] = [
     description: "Myy enemmän kauniilla ja toimivalla verkkokaupalla.",
     icon: "ShoppingCart",
     href: "/palvelut/verkkokaupat",
-    startingPrice: "5 000 €",
+    startingPrice: "6 000 €",
   },
   {
     id: "mobiilisovellukset",
@@ -159,7 +159,7 @@ export const FAQ_HOME: FaqItem[] = [
     id: "2",
     question: "Kuinka paljon se maksaa?",
     answer:
-      "Verkkosivut alkavat 2 500 €:sta, verkkokaupat 5 000 €:sta ja mobiilisovellukset 15 000 €:sta. Tarjous on aina ilmainen ja projektikohtainen — hinta riippuu ominaisuuksista ja laajuudesta.",
+      "Verkkosivut alkavat 3 000 €:sta, verkkokaupat 6 000 €:sta ja mobiilisovellukset 15 000 €:sta. Tarjous on aina ilmainen ja projektikohtainen — hinta riippuu ominaisuuksista ja laajuudesta.",
   },
   {
     id: "3",
