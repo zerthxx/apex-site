@@ -40,7 +40,7 @@ export function ContactForm() {
     formState: { errors, isSubmitting },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { palvelu: undefined, honeypot: "" },
+    defaultValues: { palvelu: "" as never, honeypot: "" },
   });
 
   const onSubmit = async (data: ContactFormData) => {
@@ -121,7 +121,7 @@ export function ContactForm() {
         {...register("palvelu")}
         label="Mikä palvelu kiinnostaa? *"
         options={SERVICE_OPTIONS}
-        placeholder="Valitse palvelu..."
+        placeholder="Valitse palvelu"
         error={errors.palvelu?.message}
       />
 
@@ -129,7 +129,7 @@ export function ContactForm() {
       <Textarea
         {...register("viesti")}
         label="Kerro projektistasi *"
-        placeholder="Kuvaile lyhyesti mitä tarvitset, minkälainen aikataulu sinulla on ja muut oleelliset tiedot..."
+        placeholder="Kuvaile mitä tarvitset, minkälainen aikataulu sinulla on, budjetti ja muut oleelliset tiedot. Mitä enemmän kerrot, sitä paremmin voimme auttaa."
         minRows={5}
         error={errors.viesti?.message}
       />
