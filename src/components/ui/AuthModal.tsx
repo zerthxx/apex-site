@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, EyeOff, Mail } from "lucide-react";
+import { X, Eye, EyeOff, Mail, ArrowRight } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 const GoogleIcon = () => (
@@ -30,6 +30,8 @@ function suomenna(msg: string): string {
   if (m.includes("weak password")) return "Salasana on liian heikko.";
   if (m.includes("network") || m.includes("fetch")) return "Yhteysvirhe — tarkista internetyhteys.";
   if (m.includes("invalid login") || m.includes("invalid credentials")) return "Sähköposti tai salasana on väärin.";
+  if (m.includes("token has expired") || m.includes("otp expired")) return "Koodi on vanhentunut — pyydä uusi koodi.";
+  if (m.includes("token") || m.includes("otp")) return "Väärä koodi — tarkista sähköpostisi.";
   return "Jokin meni pieleen. Yritä uudelleen.";
 }
 
@@ -39,11 +41,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
   const [showPw, setShowPw] = useState(false);
   const [showPw2, setShowPw2] = useState(false);
   const [err, setErr] = useState("");
-  const [success, setSuccess] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendDone, setResendDone] = useState(false);
+
+  const [otpStep, setOtpStep] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otpErr, setOtpErr] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [form, setForm] = useState({
     email: "", etunimi: "", sukunimi: "", puhelin: "",
@@ -55,15 +60,75 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     if (isOpen) {
       setTab(defaultTab);
       setErr("");
-      setSuccess(false);
-      setEmailNotConfirmed(false);
-      setResendDone(false);
+      setOtpStep(false);
+      setOtp(["", "", "", "", "", ""]);
+      setOtpErr("");
+      setResendTimer(0);
     }
   }, [isOpen, defaultTab]);
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const t = setTimeout(() => setResendTimer(v => v - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendTimer]);
+
+  useEffect(() => {
+    if (otpStep) setTimeout(() => otpRefs.current[0]?.focus(), 100);
+  }, [otpStep]);
 
   function set(key: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value }));
+  }
+
+  function handleOtpInput(idx: number, val: string) {
+    const digit = val.replace(/\D/g, "").slice(-1);
+    const next = [...otp];
+    next[idx] = digit;
+    setOtp(next);
+    if (digit && idx < 5) otpRefs.current[idx + 1]?.focus();
+  }
+
+  function handleOtpKeyDown(idx: number, e: React.KeyboardEvent) {
+    if (e.key === "Backspace" && !otp[idx] && idx > 0) {
+      const next = [...otp];
+      next[idx - 1] = "";
+      setOtp(next);
+      otpRefs.current[idx - 1]?.focus();
+    }
+  }
+
+  function handleOtpPaste(e: React.ClipboardEvent) {
+    e.preventDefault();
+    const digits = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6).split("");
+    const next = ["", "", "", "", "", ""];
+    digits.forEach((d, i) => { next[i] = d; });
+    setOtp(next);
+    otpRefs.current[Math.min(digits.length, 5)]?.focus();
+  }
+
+  async function verifyOtp() {
+    const token = otp.join("");
+    if (token.length < 6) { setOtpErr("Syötä 6-numeroinen koodi."); return; }
+    setOtpLoading(true);
+    setOtpErr("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.verifyOtp({ email: form.email, token, type: "signup" });
+    setOtpLoading(false);
+    if (error) { setOtpErr(suomenna(error.message)); return; }
+    onClose();
+  }
+
+  async function resendOtp() {
+    if (resendTimer > 0) return;
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email: form.email });
+    if (error) { setOtpErr(suomenna(error.message)); return; }
+    setOtp(["", "", "", "", "", ""]);
+    setOtpErr("");
+    setResendTimer(60);
+    setTimeout(() => otpRefs.current[0]?.focus(), 50);
   }
 
   async function signInWithGoogle() {
@@ -86,25 +151,15 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     setLoading(false);
     if (error) {
       if (error.message.toLowerCase().includes("email not confirmed")) {
-        setEmailNotConfirmed(true);
+        await supabase.auth.resend({ type: "signup", email: form.email });
+        setOtpStep(true);
+        setResendTimer(60);
       } else {
         setErr("Sähköposti tai salasana on väärin.");
       }
       return;
     }
     onClose();
-  }
-
-  async function resendConfirmation() {
-    if (resendLoading) return;
-    setResendLoading(true);
-    setResendDone(false);
-    const supabase = createClient();
-    const { error } = await supabase.auth.resend({ type: "signup", email: form.email });
-    setResendLoading(false);
-    if (error) { setErr(suomenna(error.message)); return; }
-    setResendDone(true);
-    setTimeout(() => setResendDone(false), 4000);
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -133,23 +188,9 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     });
     setLoading(false);
     if (error) { setErr(suomenna(error.message)); return; }
-    setSuccess(true);
+    setOtpStep(true);
+    setResendTimer(60);
   }
-
-  const ResendButton = () => (
-    resendDone ? (
-      <p className="text-green-400 text-sm text-center">✓ Vahvistuslinkki lähetetty!</p>
-    ) : (
-      <button
-        type="button"
-        onClick={resendConfirmation}
-        disabled={resendLoading}
-        className="text-xs text-ink-ghost hover:text-copper transition-colors disabled:opacity-60"
-      >
-        {resendLoading ? "Lähetetään..." : "Ei tullut sähköpostia? Lähetä uudelleen →"}
-      </button>
-    )
-  );
 
   return (
     <AnimatePresence>
@@ -161,153 +202,174 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
             onClick={onClose}
           />
           <motion.div
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10002] w-full max-w-sm"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10002] w-full max-w-sm px-4"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
           >
             <div className="bg-elevated border border-wire rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex gap-1 bg-surface rounded-xl p-1 border border-wire">
-                  <button
-                    onClick={() => { setTab("signin"); setErr(""); setSuccess(false); setEmailNotConfirmed(false); }}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${tab === "signin" ? "bg-copper text-[#0A0C10]" : "text-ink-dim hover:text-ink"}`}
-                  >
-                    Kirjaudu
-                  </button>
-                  <button
-                    onClick={() => { setTab("signup"); setErr(""); setSuccess(false); setEmailNotConfirmed(false); }}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${tab === "signup" ? "bg-copper text-[#0A0C10]" : "text-ink-dim hover:text-ink"}`}
-                  >
-                    Luo tili
-                  </button>
-                </div>
-                <button onClick={onClose} className="text-ink-ghost hover:text-ink transition-colors p-1 rounded-lg">
-                  <X size={20} />
-                </button>
-              </div>
 
-              {/* Kirjaudu — sähköposti ei vahvistettu */}
-              {tab === "signin" && emailNotConfirmed ? (
-                <div className="text-center py-2 flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
-                    <Mail size={20} className="text-amber-400" />
+              {/* OTP-vahvistusnäkymä */}
+              {otpStep ? (
+                <div className="flex flex-col items-center gap-5 py-2">
+                  <div className="w-12 h-12 rounded-full bg-copper/10 border border-copper/20 flex items-center justify-center">
+                    <Mail size={20} className="text-copper" />
                   </div>
-                  <div>
-                    <h3 className="font-display font-bold text-ink mb-1">Vahvista sähköpostisi</h3>
+                  <div className="text-center">
+                    <h3 className="font-display font-bold text-ink mb-1">Syötä vahvistuskoodi</h3>
                     <p className="text-ink-ghost text-sm leading-relaxed">
-                      Tili odottaa vahvistusta osoitteessa <span className="text-ink">{form.email}</span>. Avaa sähköpostin vahvistuslinkki.
+                      Lähetimme 6-numeroisen koodin osoitteeseen{" "}
+                      <span className="text-ink font-medium">{form.email}</span>
                     </p>
                   </div>
-                  {err && <p className="text-red-400 text-xs">{err}</p>}
-                  <ResendButton />
+
+                  <div className="flex gap-2">
+                    {otp.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={el => { otpRefs.current[idx] = el; }}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={e => handleOtpInput(idx, e.target.value)}
+                        onKeyDown={e => handleOtpKeyDown(idx, e)}
+                        onPaste={handleOtpPaste}
+                        className="w-11 h-14 text-center text-xl font-bold rounded-xl bg-surface border border-wire text-ink focus:outline-none focus:border-copper/50 transition-colors"
+                      />
+                    ))}
+                  </div>
+
+                  {otpErr && <p className="text-red-400 text-xs text-center">{otpErr}</p>}
+
                   <button
-                    onClick={() => { setEmailNotConfirmed(false); setErr(""); }}
+                    onClick={verifyOtp}
+                    disabled={otpLoading || otp.join("").length < 6}
+                    className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                  >
+                    {otpLoading ? "Vahvistetaan..." : <>Vahvista tili <ArrowRight size={15} /></>}
+                  </button>
+
+                  <button
+                    onClick={resendOtp}
+                    disabled={resendTimer > 0}
+                    className="text-xs text-ink-ghost hover:text-copper transition-colors disabled:opacity-60"
+                  >
+                    {resendTimer > 0
+                      ? `Lähetä uudelleen (${resendTimer}s)`
+                      : "Ei tullut koodia? Lähetä uudelleen →"}
+                  </button>
+
+                  <button
+                    onClick={() => { setOtpStep(false); setOtpErr(""); }}
                     className="text-xs text-ink-ghost hover:text-ink-dim transition-colors"
                   >
-                    ← Takaisin kirjautumiseen
+                    ← Takaisin
                   </button>
                 </div>
 
-              /* Kirjaudu — normaali lomake */
-              ) : tab === "signin" ? (
-                <form onSubmit={handleSignIn} className="flex flex-col gap-3">
-                  <input type="email" placeholder="Sähköposti *" required value={form.email} onChange={set("email")} className={inputClass} />
-                  <div className="relative">
-                    <input type={showPw ? "text" : "password"} placeholder="Salasana *" required value={form.salasana} onChange={set("salasana")} className={inputClass + " pr-10"} />
-                    <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
-                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  {err && <p className="text-red-400 text-xs">{err}</p>}
-                  <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-1">
-                    {loading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
-                  </button>
-                  <div className="flex items-center gap-3 my-1">
-                    <div className="flex-1 h-px bg-wire" />
-                    <span className="text-ink-ghost text-xs">tai</span>
-                    <div className="flex-1 h-px bg-wire" />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={signInWithGoogle}
-                    disabled={loading}
-                    className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl bg-white text-[#1a1a1a] font-semibold text-sm hover:bg-gray-100 transition-colors duration-150 disabled:opacity-60"
-                  >
-                    <GoogleIcon />
-                    Jatka Googlella
-                  </button>
-                </form>
-
-              /* Luo tili — onnistuminen */
-              ) : success ? (
-                <div className="text-center py-4 flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-                    <Mail size={20} className="text-green-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-display font-bold text-ink mb-2">Tarkista sähköpostisi!</h3>
-                    <p className="text-ink-ghost text-sm leading-relaxed">
-                      Lähetimme vahvistuslinkin osoitteeseen <span className="text-ink">{form.email}</span>. Avaa linkki aktivoidaksesi tilin.
-                    </p>
-                  </div>
-                  {err && <p className="text-red-400 text-xs">{err}</p>}
-                  <ResendButton />
-                  <button onClick={onClose} className="px-6 py-2.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors">
-                    Sulje
-                  </button>
-                </div>
-
-              /* Luo tili — lomake */
               ) : (
-                <form onSubmit={handleSignUp} className="flex flex-col gap-3">
-                  <input type="email" placeholder="Sähköposti *" required value={form.email} onChange={set("email")} className={inputClass} />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input type="text" placeholder="Etunimi *" required value={form.etunimi} onChange={set("etunimi")} className={inputClass} />
-                    <input type="text" placeholder="Sukunimi *" required value={form.sukunimi} onChange={set("sukunimi")} className={inputClass} />
-                  </div>
-                  <input type="tel" placeholder="Puhelinnumero *" required value={form.puhelin} onChange={set("puhelin")} className={inputClass} />
-                  <input type="text" placeholder="Katuosoite *" required value={form.osoite} onChange={set("osoite")} className={inputClass} />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input type="text" placeholder="Postinumero *" required maxLength={5} value={form.postinumero} onChange={set("postinumero")} className={inputClass} />
-                    <input type="text" placeholder="Postitoimipaikka *" required value={form.postitoimipaikka} onChange={set("postitoimipaikka")} className={inputClass} />
-                  </div>
-                  <div className="relative">
-                    <input type={showPw ? "text" : "password"} placeholder="Salasana *" required value={form.salasana} onChange={set("salasana")} className={inputClass + " pr-10"} />
-                    <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
-                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                <>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex gap-1 bg-surface rounded-xl p-1 border border-wire">
+                      <button
+                        onClick={() => { setTab("signin"); setErr(""); }}
+                        className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${tab === "signin" ? "bg-copper text-[#0A0C10]" : "text-ink-dim hover:text-ink"}`}
+                      >
+                        Kirjaudu
+                      </button>
+                      <button
+                        onClick={() => { setTab("signup"); setErr(""); }}
+                        className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${tab === "signup" ? "bg-copper text-[#0A0C10]" : "text-ink-dim hover:text-ink"}`}
+                      >
+                        Luo tili
+                      </button>
+                    </div>
+                    <button onClick={onClose} className="text-ink-ghost hover:text-ink transition-colors p-1 rounded-lg">
+                      <X size={20} />
                     </button>
                   </div>
-                  <div className="relative">
-                    <input type={showPw2 ? "text" : "password"} placeholder="Salasana uudelleen *" required value={form.salasana2} onChange={set("salasana2")} className={inputClass + " pr-10"} />
-                    <button type="button" onClick={() => setShowPw2(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
-                      {showPw2 ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  <label className="flex items-start gap-2.5 cursor-pointer mt-1">
-                    <input
-                      type="checkbox"
-                      checked={acceptTerms}
-                      onChange={(e) => setAcceptTerms(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 shrink-0 accent-copper"
-                    />
-                    <span className="text-xs text-ink-ghost leading-relaxed">
-                      Hyväksyn palvelun{" "}
-                      <a href="/kayttoehdot" className="text-ink-dim underline hover:text-ink">käyttöehdot</a>
-                      {" "}ja{" "}
-                      <a href="/tietosuoja" className="text-ink-dim underline hover:text-ink">tietosuojaselosteen</a>
-                    </span>
-                  </label>
-                  {err && <p className="text-red-400 text-xs">{err}</p>}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-1"
-                  >
-                    {loading ? "Luodaan tiliä..." : "Luo tili"}
-                  </button>
-                </form>
+
+                  {tab === "signin" ? (
+                    <form onSubmit={handleSignIn} className="flex flex-col gap-3">
+                      <input type="email" placeholder="Sähköposti *" required value={form.email} onChange={set("email")} className={inputClass} />
+                      <div className="relative">
+                        <input type={showPw ? "text" : "password"} placeholder="Salasana *" required value={form.salasana} onChange={set("salasana")} className={inputClass + " pr-10"} />
+                        <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
+                          {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                      {err && <p className="text-red-400 text-xs">{err}</p>}
+                      <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-1">
+                        {loading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
+                      </button>
+                      <div className="flex items-center gap-3 my-1">
+                        <div className="flex-1 h-px bg-wire" />
+                        <span className="text-ink-ghost text-xs">tai</span>
+                        <div className="flex-1 h-px bg-wire" />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={signInWithGoogle}
+                        disabled={loading}
+                        className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl bg-white text-[#1a1a1a] font-semibold text-sm hover:bg-gray-100 transition-colors duration-150 disabled:opacity-60"
+                      >
+                        <GoogleIcon />
+                        Jatka Googlella
+                      </button>
+                    </form>
+
+                  ) : (
+                    <form onSubmit={handleSignUp} className="flex flex-col gap-3">
+                      <input type="email" placeholder="Sähköposti *" required value={form.email} onChange={set("email")} className={inputClass} />
+                      <div className="grid grid-cols-2 gap-3">
+                        <input type="text" placeholder="Etunimi *" required value={form.etunimi} onChange={set("etunimi")} className={inputClass} />
+                        <input type="text" placeholder="Sukunimi *" required value={form.sukunimi} onChange={set("sukunimi")} className={inputClass} />
+                      </div>
+                      <input type="tel" placeholder="Puhelinnumero *" required value={form.puhelin} onChange={set("puhelin")} className={inputClass} />
+                      <input type="text" placeholder="Katuosoite *" required value={form.osoite} onChange={set("osoite")} className={inputClass} />
+                      <div className="grid grid-cols-2 gap-3">
+                        <input type="text" placeholder="Postinumero *" required maxLength={5} value={form.postinumero} onChange={set("postinumero")} className={inputClass} />
+                        <input type="text" placeholder="Postitoimipaikka *" required value={form.postitoimipaikka} onChange={set("postitoimipaikka")} className={inputClass} />
+                      </div>
+                      <div className="relative">
+                        <input type={showPw ? "text" : "password"} placeholder="Salasana *" required value={form.salasana} onChange={set("salasana")} className={inputClass + " pr-10"} />
+                        <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
+                          {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input type={showPw2 ? "text" : "password"} placeholder="Salasana uudelleen *" required value={form.salasana2} onChange={set("salasana2")} className={inputClass + " pr-10"} />
+                        <button type="button" onClick={() => setShowPw2(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
+                          {showPw2 ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                      <label className="flex items-start gap-2.5 cursor-pointer mt-1">
+                        <input
+                          type="checkbox"
+                          checked={acceptTerms}
+                          onChange={(e) => setAcceptTerms(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 shrink-0 accent-copper"
+                        />
+                        <span className="text-xs text-ink-ghost leading-relaxed">
+                          Hyväksyn palvelun{" "}
+                          <a href="/kayttoehdot" className="text-ink-dim underline hover:text-ink">käyttöehdot</a>
+                          {" "}ja{" "}
+                          <a href="/tietosuoja" className="text-ink-dim underline hover:text-ink">tietosuojaselosteen</a>
+                        </span>
+                      </label>
+                      {err && <p className="text-red-400 text-xs">{err}</p>}
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-1"
+                      >
+                        {loading ? "Luodaan tiliä..." : "Luo tili"}
+                      </button>
+                    </form>
+                  )}
+                </>
               )}
             </div>
           </motion.div>
