@@ -10,7 +10,7 @@ import { FaqTeaserSection } from "@/components/sections/FaqTeaserSection";
 import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
 
 export const metadata: Metadata = {
-  title: "Apex Site — Ohjelmistotalo Suomessa",
+  title: "Etusivu",
   description:
     "Verkkosivut, verkkokaupat, mobiilisovellukset ja AI-ratkaisut yrityksellesi. Suomalainen ohjelmistotalo Helsingistä.",
   alternates: { canonical: "https://apexsite.fi" },
