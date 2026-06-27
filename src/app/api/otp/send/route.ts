@@ -104,9 +104,9 @@ export async function POST(req: NextRequest) {
   <tr><td align="center" style="padding:0 28px 14px;">
     <table cellpadding="0" cellspacing="0" width="100%">
       <tr><td align="center" style="border-radius:12px;background:linear-gradient(135deg,#E8A020,#2ABFBF);">
-        <a href="https://apexsite.fi" style="display:block;padding:14px 32px;color:#060810;font-size:15px;font-weight:800;text-decoration:none;font-family:sans-serif;">
+        <div style="display:block;padding:14px 32px;color:#060810;font-size:15px;font-weight:800;font-family:sans-serif;">
           🔒&nbsp; Vahvista sähköposti
-        </a>
+        </div>
       </td></tr>
     </table>
   </td></tr>
