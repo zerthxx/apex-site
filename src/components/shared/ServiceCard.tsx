@@ -13,6 +13,15 @@ const ICON_MAP: Record<string, React.FC<LucideProps>> = {
   Globe, ShoppingCart, Smartphone, Cpu, Code2, Layers,
 };
 
+const SERVICE_COLORS: Record<string, string> = {
+  Globe:        "bg-blue-500/10 border-blue-500/20 text-blue-400",
+  ShoppingCart: "bg-green-500/10 border-green-500/20 text-green-400",
+  Smartphone:   "bg-purple-500/10 border-purple-500/20 text-purple-400",
+  Cpu:          "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
+  Code2:        "bg-orange-500/10 border-orange-500/20 text-orange-400",
+  Layers:       "bg-copper/10 border-copper/20 text-copper",
+};
+
 interface ServiceCardProps {
   service: Service;
   className?: string;
@@ -33,7 +42,7 @@ export function ServiceCard({ service, className }: ServiceCardProps) {
         )}
       >
         {/* Icon */}
-        <div className="w-11 h-11 rounded-xl bg-copper/10 border border-copper/20 flex items-center justify-center text-copper group-hover:bg-copper/20 transition-colors duration-200">
+        <div className={cn("w-11 h-11 rounded-xl border flex items-center justify-center transition-colors duration-200", SERVICE_COLORS[service.icon] ?? SERVICE_COLORS.Layers)}>
           <Icon size={20} strokeWidth={1.5} />
         </div>
 

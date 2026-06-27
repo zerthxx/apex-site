@@ -28,9 +28,9 @@ export function TestimonialsSection() {
           animate={isInView ? "visible" : "hidden"}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          {TESTIMONIALS.map((testimonial) => (
+          {TESTIMONIALS.map((testimonial, i) => (
             <motion.div key={testimonial.id} variants={fadeUp}>
-              <TestimonialCard testimonial={testimonial} className="h-full" />
+              <TestimonialCard testimonial={testimonial} index={i} className="h-full" />
             </motion.div>
           ))}
         </motion.div>

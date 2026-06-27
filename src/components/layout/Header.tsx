@@ -4,17 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, ChevronDown } from "lucide-react";
+import { Menu, ChevronDown, LogIn, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { MobileMenu } from "./MobileMenu";
 import { ServicesDropdown } from "./ServicesDropdown";
+import { AuthModal } from "@/components/ui/AuthModal";
 import { NAV_LINKS } from "@/lib/constants";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const servicesRef = useRef<HTMLLIElement>(null);
   const pathname = usePathname();
 
@@ -27,6 +32,30 @@ export function Header() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("open-auth") === "1") {
+      sessionStorage.removeItem("open-auth");
+      setAuthOpen(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function signOut() {
+    if (!isSupabaseConfigured()) return;
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+  }
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -113,6 +142,26 @@ export function Header() {
 
             {/* Right side */}
             <div className="flex items-center gap-3">
+              {user ? (
+                <div className="hidden sm:flex items-center gap-2">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-wire text-sm text-ink-dim">
+                    <User size={14} className="text-copper" />
+                    <span className="max-w-[120px] truncate">{user.email}</span>
+                  </div>
+                  <button onClick={signOut} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-ink-ghost hover:text-ink transition-colors">
+                    <LogOut size={14} />
+                    Kirjaudu ulos
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setAuthOpen(true)}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-ink-dim hover:text-ink border border-wire hover:border-copper/30 transition-all duration-150"
+                >
+                  <LogIn size={14} />
+                  Kirjaudu
+                </button>
+              )}
               <Button size="sm" asChild className="hidden sm:inline-flex">
                 <Link href="/yhteystiedot">Pyydä tarjous</Link>
               </Button>
@@ -132,6 +181,7 @@ export function Header() {
       </header>
 
       <MobileMenu isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   );
 }

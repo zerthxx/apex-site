@@ -176,7 +176,7 @@ export function IntroOverlay() {
           />
 
           <motion.div
-            className="absolute bottom-32 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3"
+            className="absolute bottom-32 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.2, ease: "easeInOut", delay: 0.3 }}
@@ -190,16 +190,27 @@ export function IntroOverlay() {
                 100% { box-shadow: 0 0 22px 7px rgba(99,210,255,0.8),  0 0 55px 18px rgba(99,210,255,0.3); }
               }
             `}</style>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { dismiss(); sessionStorage.setItem("open-auth", "1"); }}
+                className="px-8 py-3.5 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-base tracking-wide hover:bg-copper-light transition-colors duration-200"
+                style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
+              >
+                Kirjaudu
+              </button>
+              <button
+                onClick={() => { dismiss(); sessionStorage.setItem("open-auth", "1"); }}
+                className="px-8 py-3.5 rounded-full bg-white/10 border border-white/30 text-white font-display font-bold text-base tracking-wide hover:bg-white/20 transition-colors duration-200 backdrop-blur-sm"
+              >
+                Luo tili
+              </button>
+            </div>
             <button
               onClick={dismiss}
-              className="px-10 py-4 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-lg tracking-wide hover:bg-copper-light transition-colors duration-200"
-              style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
+              className="text-white/50 text-sm hover:text-white/70 transition-colors duration-150 tracking-wide"
             >
-              Tervetuloa
+              Jatka vierailijana →
             </button>
-            <p className="text-white text-base uppercase tracking-[0.3em] font-semibold whitespace-nowrap opacity-90 drop-shadow-[0_0_12px_rgba(200,129,58,0.6)]">
-              Tervetuloa Apex Site
-            </p>
           </motion.div>
         </motion.div>
       )}

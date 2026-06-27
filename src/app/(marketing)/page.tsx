@@ -8,6 +8,7 @@ import { TechStackSection } from "@/components/sections/TechStackSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
 import { FaqTeaserSection } from "@/components/sections/FaqTeaserSection";
 import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
+import { StatsSection } from "@/components/sections/StatsSection";
 
 export const metadata: Metadata = {
   title: "Etusivu",
@@ -21,6 +22,7 @@ export default function HomePage() {
     <>
       <HeroSection />
       <LogoBarSection />
+      <StatsSection />
       <ServicesGridSection />
       <WhyApexSection />
       <ProcessTeaserSection />
