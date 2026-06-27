@@ -192,14 +192,14 @@ export function IntroOverlay() {
             `}</style>
             <div className="flex gap-3">
               <button
-                onClick={() => { sessionStorage.setItem("open-auth", "signin"); dismiss(); }}
+                onClick={() => { dismiss(); window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signin" })); }}
                 className="px-8 py-3.5 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-base tracking-wide hover:bg-copper-light transition-colors duration-200"
                 style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
               >
                 Kirjaudu
               </button>
               <button
-                onClick={() => { sessionStorage.setItem("open-auth", "signup"); dismiss(); }}
+                onClick={() => { dismiss(); window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signup" })); }}
                 className="px-8 py-3.5 rounded-full bg-white/10 border border-white/30 text-white font-display font-bold text-base tracking-wide hover:bg-white/20 transition-colors duration-200 backdrop-blur-sm"
               >
                 Luo tili

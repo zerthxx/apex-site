@@ -41,6 +41,13 @@ export function Header() {
       setAuthTab(v === "signup" ? "signup" : "signin");
       setAuthOpen(true);
     }
+    const handler = (e: Event) => {
+      const tab = (e as CustomEvent).detail as "signin" | "signup";
+      setAuthTab(tab === "signup" ? "signup" : "signin");
+      setAuthOpen(true);
+    };
+    window.addEventListener("open-auth-modal", handler);
+    return () => window.removeEventListener("open-auth-modal", handler);
   }, []);
 
   useEffect(() => {
