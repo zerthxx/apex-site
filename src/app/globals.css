@@ -214,6 +214,23 @@
   pointer-events: none;
 }
 
+/* Gradient border utility — teal/blue diagonal */
+.gradient-border-teal {
+  position: relative;
+}
+.gradient-border-teal::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #2ABFBF 0%, #0EA5E9 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 /* Gradient border utility — violet diagonal */
 .gradient-border-violet {
   position: relative;
