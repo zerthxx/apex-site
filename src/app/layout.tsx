@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { IntroOverlay } from "@/components/ui/IntroOverlay";
+import { SessionGuard } from "@/components/ui/SessionGuard";
 import { Geist, Geist_Mono, Syne, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -97,6 +98,7 @@ export default function RootLayout({
       className={`${syne.variable} ${inter.variable} ${geistSans.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
+        <SessionGuard />
         <IntroOverlay />
         {children}
       </body>

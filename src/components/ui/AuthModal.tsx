@@ -42,6 +42,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
   const [showPw2, setShowPw2] = useState(false);
   const [err, setErr] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const [otpStep, setOtpStep] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -64,6 +65,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
       setOtp(["", "", "", "", "", ""]);
       setOtpErr("");
       setResendTimer(0);
+      setRememberMe(false);
     }
   }, [isOpen, defaultTab]);
 
@@ -126,6 +128,11 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     }
     const supabase = createClient();
     await supabase.auth.signInWithPassword({ email: form.email, password: form.salasana });
+    if (rememberMe) {
+      document.cookie = "apex-remember=1; Max-Age=2592000; path=/; SameSite=Lax";
+    } else {
+      document.cookie = "apex-tmp=1; path=/; SameSite=Lax";
+    }
     setOtpLoading(false);
     onClose();
   }
@@ -167,20 +174,19 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.salasana });
     setLoading(false);
     if (error) {
-      if (error.message.toLowerCase().includes("email not confirmed")) {
-        await fetch("/api/otp/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: form.email }),
-        });
-        setOtpStep(true);
-        setResendTimer(60);
-      } else {
-        setErr("Sähköposti tai salasana on väärin.");
-      }
+      setLoading(false);
+      setErr("Sähköposti tai salasana on väärin.");
       return;
     }
-    onClose();
+    await supabase.auth.signOut();
+    setLoading(false);
+    await fetch("/api/otp/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email }),
+    });
+    setOtpStep(true);
+    setResendTimer(60);
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -326,6 +332,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
                           {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                       </div>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-4 h-4 accent-copper" />
+                        <span className="text-xs text-ink-ghost">Muista minut</span>
+                      </label>
                       {err && <p className="text-red-400 text-xs">{err}</p>}
                       <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-1">
                         {loading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
