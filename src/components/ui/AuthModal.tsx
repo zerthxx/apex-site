@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Eye, EyeOff } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -29,12 +29,21 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
   const [showPw2, setShowPw2] = useState(false);
   const [err, setErr] = useState("");
   const [success, setSuccess] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const [form, setForm] = useState({
     email: "", etunimi: "", sukunimi: "", puhelin: "",
     osoite: "", postinumero: "", postitoimipaikka: "",
     salasana: "", salasana2: "",
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      setTab(defaultTab);
+      setErr("");
+      setSuccess(false);
+    }
+  }, [isOpen, defaultTab]);
 
   function set(key: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -51,12 +60,25 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     });
   }
 
+  async function handleSignIn(e: React.FormEvent) {
+    e.preventDefault();
+    setErr("");
+    if (!isSupabaseConfigured()) { setErr("Supabase ei ole konfiguroitu."); return; }
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.salasana });
+    setLoading(false);
+    if (error) { setErr("Sähköposti tai salasana on väärin."); return; }
+    onClose();
+  }
+
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault();
     setErr("");
     if (form.salasana !== form.salasana2) { setErr("Salasanat eivät täsmää."); return; }
     if (form.salasana.length < 8) { setErr("Salasanan tulee olla vähintään 8 merkkiä."); return; }
-    if (!isSupabaseConfigured()) { alert("Supabase ei ole konfiguroitu."); return; }
+    if (!acceptTerms) { setErr("Hyväksy käyttöehdot jatkaaksesi."); return; }
+    if (!isSupabaseConfigured()) { setErr("Supabase ei ole konfiguroitu."); return; }
     setLoading(true);
     const supabase = createClient();
     const { error } = await supabase.auth.signUp({
@@ -117,25 +139,33 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
               </div>
 
               {tab === "signin" ? (
-                <div>
-                  <p className="text-ink-ghost text-sm mb-5 leading-relaxed">
-                    Kirjaudu Google-tilillä. Kirjautumisen jälkeen vahvistamme puhelinnumerosi SMS-koodilla.
-                  </p>
+                <form onSubmit={handleSignIn} className="flex flex-col gap-3">
+                  <input type="email" placeholder="Sähköposti *" required value={form.email} onChange={set("email")} className={inputClass} />
+                  <div className="relative">
+                    <input type={showPw ? "text" : "password"} placeholder="Salasana *" required value={form.salasana} onChange={set("salasana")} className={inputClass + " pr-10"} />
+                    <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
+                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {err && <p className="text-red-400 text-xs">{err}</p>}
+                  <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-1">
+                    {loading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
+                  </button>
+                  <div className="flex items-center gap-3 my-1">
+                    <div className="flex-1 h-px bg-wire" />
+                    <span className="text-ink-ghost text-xs">tai</span>
+                    <div className="flex-1 h-px bg-wire" />
+                  </div>
                   <button
+                    type="button"
                     onClick={signInWithGoogle}
                     disabled={loading}
                     className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl bg-white text-[#1a1a1a] font-semibold text-sm hover:bg-gray-100 transition-colors duration-150 disabled:opacity-60"
                   >
                     <GoogleIcon />
-                    {loading ? "Ohjataan..." : "Jatka Googlella"}
+                    Jatka Googlella
                   </button>
-                  <p className="text-xs text-ink-ghost text-center mt-5 leading-relaxed">
-                    Kirjautumalla hyväksyt{" "}
-                    <a href="/kayttoehdot" className="underline hover:text-ink-dim">käyttöehdot</a>
-                    {" "}ja{" "}
-                    <a href="/tietosuoja" className="underline hover:text-ink-dim">tietosuojaselosteen</a>.
-                  </p>
-                </div>
+                </form>
               ) : success ? (
                 <div className="text-center py-4">
                   <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
@@ -176,6 +206,20 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
                       {showPw2 ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
+                  <label className="flex items-start gap-2.5 cursor-pointer mt-1">
+                    <input
+                      type="checkbox"
+                      checked={acceptTerms}
+                      onChange={(e) => setAcceptTerms(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 shrink-0 accent-copper"
+                    />
+                    <span className="text-xs text-ink-ghost leading-relaxed">
+                      Hyväksyn palvelun{" "}
+                      <a href="/kayttoehdot" className="text-ink-dim underline hover:text-ink">käyttöehdot</a>
+                      {" "}ja{" "}
+                      <a href="/tietosuoja" className="text-ink-dim underline hover:text-ink">tietosuojaselosteen</a>
+                    </span>
+                  </label>
                   {err && <p className="text-red-400 text-xs">{err}</p>}
                   <button
                     type="submit"
@@ -184,12 +228,6 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
                   >
                     {loading ? "Luodaan tiliä..." : "Luo tili"}
                   </button>
-                  <p className="text-xs text-ink-ghost text-center leading-relaxed">
-                    Luomalla tilin hyväksyt{" "}
-                    <a href="/kayttoehdot" className="underline hover:text-ink-dim">käyttöehdot</a>
-                    {" "}ja{" "}
-                    <a href="/tietosuoja" className="underline hover:text-ink-dim">tietosuojaselosteen</a>.
-                  </p>
                 </form>
               )}
             </div>
