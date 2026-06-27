@@ -219,12 +219,12 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
                   <div className="text-center">
                     <h3 className="font-display font-bold text-ink mb-1">Syötä vahvistuskoodi</h3>
                     <p className="text-ink-ghost text-sm leading-relaxed">
-                      Lähetimme 6-numeroisen koodin osoitteeseen{" "}
+                      Lähetimme 8-numeroisen koodin osoitteeseen{" "}
                       <span className="text-ink font-medium">{form.email}</span>
                     </p>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
                     {otp.map((digit, idx) => (
                       <input
                         key={idx}
@@ -236,7 +236,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
                         onChange={e => handleOtpInput(idx, e.target.value)}
                         onKeyDown={e => handleOtpKeyDown(idx, e)}
                         onPaste={handleOtpPaste}
-                        className="w-11 h-14 text-center text-xl font-bold rounded-xl bg-surface border border-wire text-ink focus:outline-none focus:border-copper/50 transition-colors"
+                        className="w-9 h-11 text-center text-lg font-bold rounded-lg bg-surface border border-wire text-ink focus:outline-none focus:border-copper/50 transition-colors"
                       />
                     ))}
                   </div>
