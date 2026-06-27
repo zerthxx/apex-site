@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, EyeOff } from "lucide-react";
+import { X, Eye, EyeOff, Mail } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 const GoogleIcon = () => (
@@ -22,6 +22,17 @@ interface AuthModalProps {
 
 const inputClass = "w-full px-4 py-3 rounded-xl bg-surface border border-wire text-ink placeholder:text-ink-ghost text-sm focus:outline-none focus:border-copper/50 transition-colors";
 
+function suomenna(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes("rate limit")) return "Liian monta yritystä — odota hetki ja yritä uudelleen.";
+  if (m.includes("already registered") || m.includes("already exists")) return "Tällä sähköpostilla on jo tili. Kirjaudu sisään.";
+  if (m.includes("invalid email")) return "Tarkista sähköpostiosoite.";
+  if (m.includes("weak password")) return "Salasana on liian heikko.";
+  if (m.includes("network") || m.includes("fetch")) return "Yhteysvirhe — tarkista internetyhteys.";
+  if (m.includes("invalid login") || m.includes("invalid credentials")) return "Sähköposti tai salasana on väärin.";
+  return "Jokin meni pieleen. Yritä uudelleen.";
+}
+
 export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup">(defaultTab);
   const [loading, setLoading] = useState(false);
@@ -30,6 +41,9 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
   const [err, setErr] = useState("");
   const [success, setSuccess] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
 
   const [form, setForm] = useState({
     email: "", etunimi: "", sukunimi: "", puhelin: "",
@@ -42,6 +56,8 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
       setTab(defaultTab);
       setErr("");
       setSuccess(false);
+      setEmailNotConfirmed(false);
+      setResendDone(false);
     }
   }, [isOpen, defaultTab]);
 
@@ -56,9 +72,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
   }
 
@@ -70,8 +84,27 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.salasana });
     setLoading(false);
-    if (error) { setErr("Sähköposti tai salasana on väärin."); return; }
+    if (error) {
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        setEmailNotConfirmed(true);
+      } else {
+        setErr("Sähköposti tai salasana on väärin.");
+      }
+      return;
+    }
     onClose();
+  }
+
+  async function resendConfirmation() {
+    if (resendLoading) return;
+    setResendLoading(true);
+    setResendDone(false);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email: form.email });
+    setResendLoading(false);
+    if (error) { setErr(suomenna(error.message)); return; }
+    setResendDone(true);
+    setTimeout(() => setResendDone(false), 4000);
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -88,7 +121,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
       password: form.salasana,
       options: {
         data: {
-          full_name: `${form.etunimi} ${form.sukunimi}`,
+          full_name: `${form.etunimi} ${form.sukunimi}`.trim(),
           first_name: form.etunimi,
           last_name: form.sukunimi,
           phone: form.puhelin,
@@ -99,9 +132,24 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
       },
     });
     setLoading(false);
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(suomenna(error.message)); return; }
     setSuccess(true);
   }
+
+  const ResendButton = () => (
+    resendDone ? (
+      <p className="text-green-400 text-sm text-center">✓ Vahvistuslinkki lähetetty!</p>
+    ) : (
+      <button
+        type="button"
+        onClick={resendConfirmation}
+        disabled={resendLoading}
+        className="text-xs text-ink-ghost hover:text-copper transition-colors disabled:opacity-60"
+      >
+        {resendLoading ? "Lähetetään..." : "Ei tullut sähköpostia? Lähetä uudelleen →"}
+      </button>
+    )
+  );
 
   return (
     <AnimatePresence>
@@ -123,13 +171,13 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
               <div className="flex items-center justify-between mb-5">
                 <div className="flex gap-1 bg-surface rounded-xl p-1 border border-wire">
                   <button
-                    onClick={() => { setTab("signin"); setErr(""); setSuccess(false); }}
+                    onClick={() => { setTab("signin"); setErr(""); setSuccess(false); setEmailNotConfirmed(false); }}
                     className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${tab === "signin" ? "bg-copper text-[#0A0C10]" : "text-ink-dim hover:text-ink"}`}
                   >
                     Kirjaudu
                   </button>
                   <button
-                    onClick={() => { setTab("signup"); setErr(""); setSuccess(false); }}
+                    onClick={() => { setTab("signup"); setErr(""); setSuccess(false); setEmailNotConfirmed(false); }}
                     className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${tab === "signup" ? "bg-copper text-[#0A0C10]" : "text-ink-dim hover:text-ink"}`}
                   >
                     Luo tili
@@ -140,7 +188,30 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
                 </button>
               </div>
 
-              {tab === "signin" ? (
+              {/* Kirjaudu — sähköposti ei vahvistettu */}
+              {tab === "signin" && emailNotConfirmed ? (
+                <div className="text-center py-2 flex flex-col items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
+                    <Mail size={20} className="text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-ink mb-1">Vahvista sähköpostisi</h3>
+                    <p className="text-ink-ghost text-sm leading-relaxed">
+                      Tili odottaa vahvistusta osoitteessa <span className="text-ink">{form.email}</span>. Avaa sähköpostin vahvistuslinkki.
+                    </p>
+                  </div>
+                  {err && <p className="text-red-400 text-xs">{err}</p>}
+                  <ResendButton />
+                  <button
+                    onClick={() => { setEmailNotConfirmed(false); setErr(""); }}
+                    className="text-xs text-ink-ghost hover:text-ink-dim transition-colors"
+                  >
+                    ← Takaisin kirjautumiseen
+                  </button>
+                </div>
+
+              /* Kirjaudu — normaali lomake */
+              ) : tab === "signin" ? (
                 <form onSubmit={handleSignIn} className="flex flex-col gap-3">
                   <input type="email" placeholder="Sähköposti *" required value={form.email} onChange={set("email")} className={inputClass} />
                   <div className="relative">
@@ -168,21 +239,27 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
                     Jatka Googlella
                   </button>
                 </form>
+
+              /* Luo tili — onnistuminen */
               ) : success ? (
-                <div className="text-center py-4">
-                  <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6 text-green-400">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                <div className="text-center py-4 flex flex-col items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                    <Mail size={20} className="text-green-400" />
                   </div>
-                  <h3 className="font-display font-bold text-ink mb-2">Tili luotu!</h3>
-                  <p className="text-ink-ghost text-sm leading-relaxed">
-                    Lähetimme vahvistuslinkin sähköpostiisi <span className="text-ink">{form.email}</span>. Avaa linkki aktivoidaksesi tilin.
-                  </p>
-                  <button onClick={onClose} className="mt-5 px-6 py-2.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors">
+                  <div>
+                    <h3 className="font-display font-bold text-ink mb-2">Tarkista sähköpostisi!</h3>
+                    <p className="text-ink-ghost text-sm leading-relaxed">
+                      Lähetimme vahvistuslinkin osoitteeseen <span className="text-ink">{form.email}</span>. Avaa linkki aktivoidaksesi tilin.
+                    </p>
+                  </div>
+                  {err && <p className="text-red-400 text-xs">{err}</p>}
+                  <ResendButton />
+                  <button onClick={onClose} className="px-6 py-2.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors">
                     Sulje
                   </button>
                 </div>
+
+              /* Luo tili — lomake */
               ) : (
                 <form onSubmit={handleSignUp} className="flex flex-col gap-3">
                   <input type="email" placeholder="Sähköposti *" required value={form.email} onChange={set("email")} className={inputClass} />

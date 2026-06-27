@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     if (!error && data.user) {
       const meta = data.user.user_metadata ?? {};
-      const profileComplete = meta.phone && meta.address && meta.postal_code && meta.city;
+      const profileComplete = meta.first_name && meta.phone && meta.address && meta.postal_code && meta.city;
       if (!profileComplete) {
         return NextResponse.redirect(`${origin}/?tiedot=1`);
       }

@@ -23,9 +23,13 @@ export function IntroOverlay() {
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setLoggedIn(true);
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setLoggedIn(true);
     });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -228,6 +232,7 @@ export function IntroOverlay() {
                 <button
                   onClick={() => { window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signup" })); }}
                   className="px-5 py-2 md:px-8 md:py-3.5 rounded-full bg-white/10 border border-white/30 text-white font-display font-bold text-sm md:text-base tracking-wide hover:bg-white/20 transition-colors duration-200 backdrop-blur-sm whitespace-nowrap"
+                  style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
                 >
                   Luo tili
                 </button>

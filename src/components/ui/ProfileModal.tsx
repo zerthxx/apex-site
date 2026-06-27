@@ -45,6 +45,22 @@ export function ProfileModal() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!session) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const m = data.user?.user_metadata ?? {};
+      setProfile(p => ({
+        etunimi: p.etunimi || m.first_name || (m.full_name ?? "").split(" ")[0] || "",
+        sukunimi: p.sukunimi || m.last_name || (m.full_name ?? "").split(" ").slice(1).join(" ") || "",
+        puhelin: p.puhelin || m.phone || "",
+        osoite: p.osoite || m.address || "",
+        postinumero: p.postinumero || m.postal_code || "",
+        kaupunki: p.kaupunki || m.city || "",
+      }));
+    });
+  }, [session]);
+
   function setP(key: keyof typeof profile) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
       setProfile(p => ({ ...p, [key]: e.target.value }));
