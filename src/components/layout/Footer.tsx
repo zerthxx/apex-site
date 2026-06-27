@@ -24,7 +24,7 @@ export function Footer() {
           <div className="lg:col-span-1 flex flex-col gap-5">
             <Link href="/" className="self-start">
               <Image
-                src="/logo.png"
+                src="/apex-logo-new.png"
                 alt="Apex Site"
                 width={140}
                 height={47}
