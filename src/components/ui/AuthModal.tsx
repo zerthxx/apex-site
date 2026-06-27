@@ -44,7 +44,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const [otpStep, setOtpStep] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", "", "", ""]);
   const [otpErr, setOtpErr] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -61,7 +61,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
       setTab(defaultTab);
       setErr("");
       setOtpStep(false);
-      setOtp(["", "", "", "", "", ""]);
+      setOtp(["", "", "", "", "", "", "", ""]);
       setOtpErr("");
       setResendTimer(0);
     }
@@ -87,7 +87,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     const next = [...otp];
     next[idx] = digit;
     setOtp(next);
-    if (digit && idx < 5) otpRefs.current[idx + 1]?.focus();
+    if (digit && idx < 7) otpRefs.current[idx + 1]?.focus();
   }
 
   function handleOtpKeyDown(idx: number, e: React.KeyboardEvent) {
@@ -110,7 +110,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
 
   async function verifyOtp() {
     const token = otp.join("");
-    if (token.length < 6) { setOtpErr("Syötä 6-numeroinen koodi."); return; }
+    if (token.length < 8) { setOtpErr("Syötä 8-numeroinen koodi."); return; }
     setOtpLoading(true);
     setOtpErr("");
     const supabase = createClient();
@@ -245,7 +245,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
 
                   <button
                     onClick={verifyOtp}
-                    disabled={otpLoading || otp.join("").length < 6}
+                    disabled={otpLoading || otp.join("").length < 8}
                     className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {otpLoading ? "Vahvistetaan..." : <>Vahvista tili <ArrowRight size={15} /></>}
