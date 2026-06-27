@@ -44,7 +44,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const [otpStep, setOtpStep] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpErr, setOtpErr] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -61,7 +61,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
       setTab(defaultTab);
       setErr("");
       setOtpStep(false);
-      setOtp(["", "", "", "", "", "", "", ""]);
+      setOtp(["", "", "", "", "", ""]);
       setOtpErr("");
       setResendTimer(0);
     }
@@ -87,7 +87,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     const next = [...otp];
     next[idx] = digit;
     setOtp(next);
-    if (digit && idx < 7) otpRefs.current[idx + 1]?.focus();
+    if (digit && idx < 5) otpRefs.current[idx + 1]?.focus();
   }
 
   function handleOtpKeyDown(idx: number, e: React.KeyboardEvent) {
@@ -110,11 +110,11 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
 
   async function verifyOtp() {
     const token = otp.join("");
-    if (token.length < 8) { setOtpErr("Syötä 8-numeroinen koodi."); return; }
+    if (token.length < 6) { setOtpErr("Syötä 6-numeroinen koodi."); return; }
     setOtpLoading(true);
     setOtpErr("");
     const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({ email: form.email, token, type: "signup" });
+    const { error } = await supabase.auth.verifyOtp({ email: form.email, token, type: "email" });
     setOtpLoading(false);
     if (error) { setOtpErr(suomenna(error.message)); return; }
     onClose();
@@ -123,7 +123,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
   async function resendOtp() {
     if (resendTimer > 0) return;
     const supabase = createClient();
-    const { error } = await supabase.auth.resend({ type: "signup", email: form.email });
+    const { error } = await supabase.auth.signInWithOtp({
+      email: form.email,
+      options: { shouldCreateUser: false },
+    });
     if (error) { setOtpErr(suomenna(error.message)); return; }
     setOtp(["", "", "", "", "", ""]);
     setOtpErr("");
@@ -151,7 +154,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     setLoading(false);
     if (error) {
       if (error.message.toLowerCase().includes("email not confirmed")) {
-        await supabase.auth.resend({ type: "signup", email: form.email });
+        await supabase.auth.signInWithOtp({ email: form.email, options: { shouldCreateUser: false } });
         setOtpStep(true);
         setResendTimer(60);
       } else {
@@ -188,6 +191,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     });
     setLoading(false);
     if (error) { setErr(suomenna(error.message)); return; }
+    await supabase.auth.signInWithOtp({ email: form.email, options: { shouldCreateUser: false } });
     setOtpStep(true);
     setResendTimer(60);
   }
@@ -219,7 +223,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
                   <div className="text-center">
                     <h3 className="font-display font-bold text-ink mb-1">Syötä vahvistuskoodi</h3>
                     <p className="text-ink-ghost text-sm leading-relaxed">
-                      Lähetimme 8-numeroisen koodin osoitteeseen{" "}
+                      Lähetimme 6-numeroisen koodin osoitteeseen{" "}
                       <span className="text-ink font-medium">{form.email}</span>
                     </p>
                   </div>
@@ -245,7 +249,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
 
                   <button
                     onClick={verifyOtp}
-                    disabled={otpLoading || otp.join("").length < 8}
+                    disabled={otpLoading || otp.join("").length < 6}
                     className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {otpLoading ? "Vahvistetaan..." : <>Vahvista tili <ArrowRight size={15} /></>}
