@@ -99,6 +99,15 @@
 }
 
 /* ─── Keyframes ─────────────────────────────────────────────────────────── */
+@keyframes float-card {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+.animate-float-card {
+  animation: float-card 3s ease-in-out infinite;
+  will-change: transform;
+}
+
 @keyframes float-slow {
   from { transform: translate(0, 0) scale(1); }
   to   { transform: translate(30px, -40px) scale(1.08); }
