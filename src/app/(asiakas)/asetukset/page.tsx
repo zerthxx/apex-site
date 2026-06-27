@@ -188,16 +188,14 @@ export default function AsetuksetPage() {
 
           {tab === "salasana" && (
             <form onSubmit={saveSalasana} className="flex flex-col gap-4">
-              {true ? (
-                <>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-surface border border-wire mb-1">
-                    <AlertCircle size={15} className="text-ink-ghost mt-0.5 shrink-0" />
-                    <p className="text-xs text-ink-ghost">
-                      {provider === "google"
-                        ? "Olet kirjautunut Google-tilillä. Voit silti asettaa salasanan jolloin voit kirjautua myös sähköpostilla ja salasanalla."
-                        : "Salasanan vaihto lähettää vahvistuslinkin sähköpostiisi."}
-                    </p>
-                  </div>
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-surface border border-wire mb-1">
+                <AlertCircle size={15} className="text-ink-ghost mt-0.5 shrink-0" />
+                <p className="text-xs text-ink-ghost">
+                  {provider === "google"
+                    ? "Olet kirjautunut Google-tilillä. Voit silti asettaa salasanan jolloin voit kirjautua myös sähköpostilla ja salasanalla."
+                    : "Salasanan vaihto lähettää vahvistuslinkin sähköpostiisi."}
+                </p>
+              </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-medium text-ink-dim">Uusi salasana</label>
                     <div className="relative">
@@ -223,8 +221,6 @@ export default function AsetuksetPage() {
                   >
                     {loading ? "Vaihdetaan..." : "Vaihda salasana"}
                   </button>
-                </>
-              )}
             </form>
           )}
 
