@@ -33,13 +33,13 @@ export function FaqTeaserSection() {
               Usein kysytyt kysymykset
             </h2>
             <p className="text-ink-dim leading-relaxed">
-              LÃ¶ydÃ¤t vastaukset yleisimpiin kysymyksiin alta. Jos et lÃ¶ydÃ¤ vastausta, ota yhteyttÃ¤ suoraan.
+              Löydät vastaukset yleisimpiin kysymyksiin alta. Jos et löydä vastausta, ota yhteyttä suoraan.
             </p>
             <Link
               href="/ukk"
               className="inline-flex items-center gap-2 text-copper text-sm font-semibold hover:gap-3 transition-all duration-150 mt-2"
             >
-              NÃ¤e kaikki kysymykset <ArrowRight size={16} />
+              Näe kaikki kysymykset <ArrowRight size={16} />
             </Link>
           </motion.div>
 

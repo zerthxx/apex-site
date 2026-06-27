@@ -24,8 +24,8 @@ export function ProcessTeaserSection() {
         >
           <SectionHeader
             eyebrow="Prosessimme"
-            heading="Miten tyÃ¶skentelemme"
-            subheading="SelkeÃ¤ prosessi, lÃ¤pinÃ¤kyvÃ¤ kommunikaatio ja tulokset aikataulussa."
+            heading="Miten työskentelemme"
+            subheading="Selkeä prosessi, läpinäkyvä kommunikaatio ja tulokset aikataulussa."
             className="mb-14"
           />
 

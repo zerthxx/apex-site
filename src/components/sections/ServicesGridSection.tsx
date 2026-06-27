@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
@@ -16,8 +16,8 @@ export function ServicesGridSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Palvelumme"
-          heading="MitÃ¤ rakennamme"
-          subheading="Kaikki digitaaliset palvelut yhdestÃ¤ paikasta â€” suunnittelusta tuotantoon."
+          heading="Mitä rakennamme"
+          subheading="Kaikki digitaaliset palvelut yhdestä paikasta — suunnittelusta tuotantoon."
           className="mb-12"
         />
 
@@ -38,4 +38,3 @@ export function ServicesGridSection() {
     </section>
   );
 }
-

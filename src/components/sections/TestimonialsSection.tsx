@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
@@ -16,8 +16,8 @@ export function TestimonialsSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Asiakkaat"
-          heading="MitÃ¤ asiakkaamme sanovat"
-          subheading="Emme vÃ¤itÃ¤ olevamme parhaita â€” asiakkaamme sanovat sen puolestamme."
+          heading="Mitä asiakkaamme sanovat"
+          subheading="Emme väitä olevamme parhaita — asiakkaamme sanovat sen puolestamme."
           className="mb-12"
         />
 
@@ -38,4 +38,3 @@ export function TestimonialsSection() {
     </section>
   );
 }
-

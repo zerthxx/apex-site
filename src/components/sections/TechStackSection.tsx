@@ -18,7 +18,7 @@ export function TechStackSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Teknologia"
-          heading="Teknologiat, joita kÃ¤ytÃ¤mme"
+          heading="Teknologiat, joita käytämme"
           subheading="Valitsemme aina oikean teknologian kullekin projektille."
           className="mb-12"
         />

@@ -29,8 +29,8 @@ export function WhyApexSection() {
           >
             <SectionHeader
               eyebrow="Miksi Apex Site"
-              heading="NeljÃ¤ syytÃ¤ valita meidÃ¤t"
-              subheading="Emme ole vain toinen toimisto. TÃ¤ssÃ¤ on mitÃ¤ erottaa meidÃ¤t."
+              heading="Neljä syytä valita meidät"
+              subheading="Emme ole vain toinen toimisto. Tässä on mitä erottaa meidät."
               align="left"
             />
           </motion.div>
