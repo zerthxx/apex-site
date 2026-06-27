@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 const GoogleIcon = () => (
@@ -17,24 +17,66 @@ const GoogleIcon = () => (
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultTab?: "signin" | "signup";
 }
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+const inputClass = "w-full px-4 py-3 rounded-xl bg-surface border border-wire text-ink placeholder:text-ink-ghost text-sm focus:outline-none focus:border-copper/50 transition-colors";
+
+export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalProps) {
+  const [tab, setTab] = useState<"signin" | "signup">(defaultTab);
   const [loading, setLoading] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [showPw2, setShowPw2] = useState(false);
+  const [err, setErr] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const [form, setForm] = useState({
+    email: "", etunimi: "", sukunimi: "", puhelin: "",
+    osoite: "", postinumero: "", postitoimipaikka: "",
+    salasana: "", salasana2: "",
+  });
+
+  function set(key: keyof typeof form) {
+    return (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((f) => ({ ...f, [key]: e.target.value }));
+  }
 
   async function signInWithGoogle() {
-    if (!isSupabaseConfigured()) {
-      alert("Supabase ei ole vielä konfiguroitu. Lisää API-avaimet .env.local-tiedostoon.");
-      return;
-    }
+    if (!isSupabaseConfigured()) { alert("Supabase ei ole konfiguroitu."); return; }
     setLoading(true);
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  }
+
+  async function handleSignUp(e: React.FormEvent) {
+    e.preventDefault();
+    setErr("");
+    if (form.salasana !== form.salasana2) { setErr("Salasanat eivät täsmää."); return; }
+    if (form.salasana.length < 8) { setErr("Salasanan tulee olla vähintään 8 merkkiä."); return; }
+    if (!isSupabaseConfigured()) { alert("Supabase ei ole konfiguroitu."); return; }
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.salasana,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          full_name: `${form.etunimi} ${form.sukunimi}`,
+          first_name: form.etunimi,
+          last_name: form.sukunimi,
+          phone: form.puhelin,
+          address: form.osoite,
+          postal_code: form.postinumero,
+          city: form.postitoimipaikka,
+        },
       },
     });
+    setLoading(false);
+    if (error) { setErr(error.message); return; }
+    setSuccess(true);
   }
 
   return (
@@ -43,9 +85,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         <>
           <motion.div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={onClose}
           />
           <motion.div
@@ -55,33 +95,103 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="bg-elevated border border-wire rounded-2xl p-8 shadow-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display font-bold text-xl text-ink">Kirjaudu sisään</h2>
+            <div className="bg-elevated border border-wire rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex gap-1 bg-surface rounded-xl p-1 border border-wire">
+                  <button
+                    onClick={() => { setTab("signin"); setErr(""); setSuccess(false); }}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${tab === "signin" ? "bg-copper text-[#0A0C10]" : "text-ink-dim hover:text-ink"}`}
+                  >
+                    Kirjaudu
+                  </button>
+                  <button
+                    onClick={() => { setTab("signup"); setErr(""); setSuccess(false); }}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${tab === "signup" ? "bg-copper text-[#0A0C10]" : "text-ink-dim hover:text-ink"}`}
+                  >
+                    Luo tili
+                  </button>
+                </div>
                 <button onClick={onClose} className="text-ink-ghost hover:text-ink transition-colors p-1 rounded-lg">
                   <X size={20} />
                 </button>
               </div>
 
-              <p className="text-ink-ghost text-sm mb-6 leading-relaxed">
-                Kirjaudu Google-tilillä. Kirjautumisen jälkeen vahvistamme puhelinnumerosi SMS-koodilla.
-              </p>
-
-              <button
-                onClick={signInWithGoogle}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl bg-white text-[#1a1a1a] font-semibold text-sm hover:bg-gray-100 transition-colors duration-150 disabled:opacity-60"
-              >
-                <GoogleIcon />
-                {loading ? "Ohjataan..." : "Jatka Googlella"}
-              </button>
-
-              <p className="text-xs text-ink-ghost text-center mt-5 leading-relaxed">
-                Kirjautumalla hyväksyt{" "}
-                <a href="/kayttoehdot" className="underline hover:text-ink-dim">käyttöehdot</a>
-                {" "}ja{" "}
-                <a href="/tietosuoja" className="underline hover:text-ink-dim">tietosuojaselosteen</a>.
-              </p>
+              {tab === "signin" ? (
+                <div>
+                  <p className="text-ink-ghost text-sm mb-5 leading-relaxed">
+                    Kirjaudu Google-tilillä. Kirjautumisen jälkeen vahvistamme puhelinnumerosi SMS-koodilla.
+                  </p>
+                  <button
+                    onClick={signInWithGoogle}
+                    disabled={loading}
+                    className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl bg-white text-[#1a1a1a] font-semibold text-sm hover:bg-gray-100 transition-colors duration-150 disabled:opacity-60"
+                  >
+                    <GoogleIcon />
+                    {loading ? "Ohjataan..." : "Jatka Googlella"}
+                  </button>
+                  <p className="text-xs text-ink-ghost text-center mt-5 leading-relaxed">
+                    Kirjautumalla hyväksyt{" "}
+                    <a href="/kayttoehdot" className="underline hover:text-ink-dim">käyttöehdot</a>
+                    {" "}ja{" "}
+                    <a href="/tietosuoja" className="underline hover:text-ink-dim">tietosuojaselosteen</a>.
+                  </p>
+                </div>
+              ) : success ? (
+                <div className="text-center py-4">
+                  <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6 text-green-400">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                  <h3 className="font-display font-bold text-ink mb-2">Tili luotu!</h3>
+                  <p className="text-ink-ghost text-sm leading-relaxed">
+                    Lähetimme vahvistuslinkin sähköpostiisi <span className="text-ink">{form.email}</span>. Avaa linkki aktivoidaksesi tilin.
+                  </p>
+                  <button onClick={onClose} className="mt-5 px-6 py-2.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors">
+                    Sulje
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSignUp} className="flex flex-col gap-3">
+                  <input type="email" placeholder="Sähköposti *" required value={form.email} onChange={set("email")} className={inputClass} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder="Etunimi *" required value={form.etunimi} onChange={set("etunimi")} className={inputClass} />
+                    <input type="text" placeholder="Sukunimi *" required value={form.sukunimi} onChange={set("sukunimi")} className={inputClass} />
+                  </div>
+                  <input type="tel" placeholder="Puhelinnumero *" required value={form.puhelin} onChange={set("puhelin")} className={inputClass} />
+                  <input type="text" placeholder="Katuosoite *" required value={form.osoite} onChange={set("osoite")} className={inputClass} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder="Postinumero *" required maxLength={5} value={form.postinumero} onChange={set("postinumero")} className={inputClass} />
+                    <input type="text" placeholder="Postitoimipaikka *" required value={form.postitoimipaikka} onChange={set("postitoimipaikka")} className={inputClass} />
+                  </div>
+                  <div className="relative">
+                    <input type={showPw ? "text" : "password"} placeholder="Salasana *" required value={form.salasana} onChange={set("salasana")} className={inputClass + " pr-10"} />
+                    <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
+                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input type={showPw2 ? "text" : "password"} placeholder="Salasana uudelleen *" required value={form.salasana2} onChange={set("salasana2")} className={inputClass + " pr-10"} />
+                    <button type="button" onClick={() => setShowPw2(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-ghost hover:text-ink-dim">
+                      {showPw2 ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {err && <p className="text-red-400 text-xs">{err}</p>}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3.5 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-1"
+                  >
+                    {loading ? "Luodaan tiliä..." : "Luo tili"}
+                  </button>
+                  <p className="text-xs text-ink-ghost text-center leading-relaxed">
+                    Luomalla tilin hyväksyt{" "}
+                    <a href="/kayttoehdot" className="underline hover:text-ink-dim">käyttöehdot</a>
+                    {" "}ja{" "}
+                    <a href="/tietosuoja" className="underline hover:text-ink-dim">tietosuojaselosteen</a>.
+                  </p>
+                </form>
+              )}
             </div>
           </motion.div>
         </>

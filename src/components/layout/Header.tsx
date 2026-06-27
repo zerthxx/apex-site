@@ -19,6 +19,7 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<"signin" | "signup">("signin");
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const servicesRef = useRef<HTMLLIElement>(null);
   const pathname = usePathname();
@@ -34,8 +35,10 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    if (sessionStorage.getItem("open-auth") === "1") {
+    const v = sessionStorage.getItem("open-auth");
+    if (v === "signin" || v === "signup" || v === "1") {
       sessionStorage.removeItem("open-auth");
+      setAuthTab(v === "signup" ? "signup" : "signin");
       setAuthOpen(true);
     }
   }, []);
@@ -155,7 +158,7 @@ export function Header() {
                 </div>
               ) : (
                 <button
-                  onClick={() => setAuthOpen(true)}
+                  onClick={() => { setAuthTab("signin"); setAuthOpen(true); }}
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-ink-dim hover:text-ink border border-wire hover:border-copper/30 transition-all duration-150"
                 >
                   <LogIn size={14} />
@@ -181,7 +184,7 @@ export function Header() {
       </header>
 
       <MobileMenu isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
-      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} defaultTab={authTab} />
     </>
   );
 }
