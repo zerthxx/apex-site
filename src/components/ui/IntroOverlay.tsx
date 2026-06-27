@@ -181,13 +181,23 @@ export function IntroOverlay() {
             animate={{ opacity: 1 }}
             transition={{ duration: 1.2, ease: "easeInOut", delay: 0.3 }}
           >
+            <style>{`
+              @keyframes glow-shift {
+                0%   { box-shadow: 0 0 22px 7px rgba(99,210,255,0.8),  0 0 55px 18px rgba(99,210,255,0.3); }
+                25%  { box-shadow: 0 0 22px 7px rgba(180,80,255,0.8),  0 0 55px 18px rgba(180,80,255,0.3); }
+                50%  { box-shadow: 0 0 22px 7px rgba(255,70,100,0.8),  0 0 55px 18px rgba(255,70,100,0.3); }
+                75%  { box-shadow: 0 0 22px 7px rgba(50,230,130,0.8),  0 0 55px 18px rgba(50,230,130,0.3); }
+                100% { box-shadow: 0 0 22px 7px rgba(99,210,255,0.8),  0 0 55px 18px rgba(99,210,255,0.3); }
+              }
+            `}</style>
             <button
               onClick={dismiss}
-              className="px-10 py-4 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-lg tracking-wide shadow-[0_0_40px_rgba(200,129,58,0.5)] hover:bg-copper-light transition-colors duration-200"
+              className="px-10 py-4 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-lg tracking-wide hover:bg-copper-light transition-colors duration-200"
+              style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
             >
               Tervetuloa
             </button>
-            <p className="text-ink text-sm uppercase tracking-widest font-semibold opacity-70">
+            <p className="text-white text-base uppercase tracking-[0.3em] font-semibold whitespace-nowrap opacity-90 drop-shadow-[0_0_12px_rgba(200,129,58,0.6)]">
               Tervetuloa Apex Site
             </p>
           </motion.div>
