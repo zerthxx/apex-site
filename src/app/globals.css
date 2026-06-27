@@ -197,6 +197,40 @@
   pointer-events: none;
 }
 
+/* Gradient border utility — white/silver */
+.gradient-border-white {
+  position: relative;
+}
+.gradient-border-white::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Gradient border utility — violet diagonal */
+.gradient-border-violet {
+  position: relative;
+}
+.gradient-border-violet::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 /* Perspective wrapper for 3D tilt cards */
 .perspective-1000 {
   perspective: 1000px;

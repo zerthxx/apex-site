@@ -27,6 +27,21 @@ const SERVICES_PRICING = [
     highlight: false,
   },
   {
+    name: "AI-ratkaisut",
+    price: "alkaen 4 000 €",
+    description: "Automaatiot, chatbotit ja AI-integraatiot liiketoimintaasi.",
+    features: [
+      "Prosessikartoitus",
+      "RAG-ratkaisut",
+      "OpenAI / Anthropic",
+      "Työnkulun automaatio",
+      "Dashboard",
+      "Koulutus tiimille",
+    ],
+    href: "/palvelut/ai-ratkaisut",
+    highlight: false,
+  },
+  {
     name: "Verkkokauppa",
     price: "alkaen 6 000 €",
     description: "Myyvä verkkokauppa Shopify, WooCommerce tai täysin räätälöitynä.",
@@ -54,21 +69,6 @@ const SERVICES_PRICING = [
       "3 kk takuu",
     ],
     href: "/palvelut/mobiilisovellukset",
-    highlight: false,
-  },
-  {
-    name: "AI-ratkaisut",
-    price: "alkaen 4 000 €",
-    description: "Automaatiot, chatbotit ja AI-integraatiot liiketoimintaasi.",
-    features: [
-      "Prosessikartoitus",
-      "RAG-ratkaisut",
-      "OpenAI / Anthropic",
-      "Työnkulun automaatio",
-      "Dashboard",
-      "Koulutus tiimille",
-    ],
-    href: "/palvelut/ai-ratkaisut",
     highlight: false,
   },
 ];
@@ -122,9 +122,9 @@ const STARTER_PACKAGES = [
 ];
 
 const MAINTENANCE_TIERS = [
-  { name: "Perus", price: "150 €/kk", features: ["Tietoturvapäivitykset", "Varmuuskopiointi", "Sähköpostituki", "1 h muutostyöt/kk"] },
-  { name: "Kasvu", price: "350 €/kk", features: ["Kaikki Perus-tason ominaisuudet", "Suorituskyvyn seuranta", "Puhelintuki", "4 h muutostyöt/kk", "Kuukausiraportti"] },
-  { name: "Pro", price: "750 €/kk", features: ["Kaikki Kasvu-tason ominaisuudet", "Prioriteettituki (2h vasteaika)", "8 h muutostyöt/kk", "Kvartaalikatsaus", "CRO-suositukset"] },
+  { name: "Perus", price: "150 €/kk", highlight: false, features: ["Tietoturvapäivitykset", "Varmuuskopiointi", "Sähköpostituki", "1 h muutostyöt/kk"] },
+  { name: "Kasvu", price: "350 €/kk", highlight: true, features: ["Kaikki Perus-tason ominaisuudet", "Suorituskyvyn seuranta", "Puhelintuki", "4 h muutostyöt/kk", "Kuukausiraportti"] },
+  { name: "Pro", price: "750 €/kk", highlight: false, features: ["Kaikki Kasvu-tason ominaisuudet", "Prioriteettituki (2h vasteaika)", "8 h muutostyöt/kk", "Kvartaalikatsaus", "CRO-suositukset"] },
 ];
 
 const FAQ = [
@@ -178,11 +178,11 @@ export function HinnoitteluContent() {
             </div>
           </div>
           {/* Mobile carousel */}
-          <div className="md:hidden max-w-sm mx-auto">
-            <CardCarousel>
+          <div className="md:hidden">
+            <CardCarousel defaultIndex={STARTER_PACKAGES.findIndex(p => p.highlight)}>
               {STARTER_PACKAGES.map((pkg) => (
-                <div key={pkg.name} className={`relative p-6 rounded-xl border flex flex-col h-full ${pkg.highlight ? "gradient-border bg-copper/5 shadow-glow" : "border-wire bg-elevated"}`}>
-                  {pkg.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
+                <div key={pkg.name} className={`p-6 rounded-xl border flex flex-col h-full ${pkg.highlight ? "gradient-border bg-elevated shadow-glow" : pkg.name === "Pro" ? "gradient-border-violet bg-elevated" : pkg.name === "Startti" ? "gradient-border-white bg-elevated" : "border-wire bg-elevated"}`}>
+                  {pkg.highlight && <div className="flex justify-center mb-4"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
                   <h3 className="font-display font-bold text-ink text-xl mb-1">{pkg.name}</h3>
                   <div className="mb-3"><span className="text-copper font-bold text-2xl">{pkg.setup}</span><span className="text-ink-dim text-sm ml-1">aloitus</span><span className="text-ink-ghost mx-2">+</span><span className="text-copper font-semibold">{pkg.monthly}</span></div>
                   <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
@@ -195,8 +195,8 @@ export function HinnoitteluContent() {
           {/* Desktop grid */}
           <motion.div ref={starterRef} variants={staggerContainer} initial="hidden" animate={starterInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {STARTER_PACKAGES.map((pkg) => (
-              <motion.div key={pkg.name} variants={fadeUp} className={`relative p-6 rounded-xl border flex flex-col ${pkg.highlight ? "gradient-border bg-copper/5 shadow-glow" : "border-wire bg-elevated"}`}>
-                {pkg.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
+              <motion.div key={pkg.name} variants={fadeUp} className={`p-6 rounded-xl border flex flex-col ${pkg.highlight ? "gradient-border bg-elevated shadow-glow" : pkg.name === "Pro" ? "gradient-border-violet bg-elevated" : pkg.name === "Startti" ? "gradient-border-white bg-elevated" : "border-wire bg-elevated"}`}>
+                {pkg.highlight && <div className="flex justify-center mb-4"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
                 <h3 className="font-display font-bold text-ink text-xl mb-1">{pkg.name}</h3>
                 <div className="mb-3"><span className="text-copper font-bold text-2xl">{pkg.setup}</span><span className="text-ink-dim text-sm ml-1">aloitus</span><span className="text-ink-ghost mx-2">+</span><span className="text-copper font-semibold">{pkg.monthly}</span></div>
                 <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
@@ -214,11 +214,11 @@ export function HinnoitteluContent() {
             Palveluiden hinnat
           </h2>
           {/* Mobile carousel */}
-          <div className="md:hidden max-w-sm mx-auto">
-            <CardCarousel>
+          <div className="md:hidden">
+            <CardCarousel defaultIndex={SERVICES_PRICING.findIndex(s => s.highlight)}>
               {SERVICES_PRICING.map((svc) => (
-                <div key={svc.name} className={`relative p-6 rounded-xl border flex flex-col h-full ${svc.highlight ? "gradient-border bg-copper/5 shadow-glow" : "border-wire bg-elevated"}`}>
-                  {svc.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
+                <div key={svc.name} className={`p-6 rounded-xl border flex flex-col h-full ${svc.highlight ? "gradient-border bg-elevated shadow-glow" : "border-wire bg-elevated"}`}>
+                  {svc.highlight && <div className="flex justify-center mb-4"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
                   <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
                   <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
                   <Link href={svc.href} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Lue lisää <ArrowRight size={14} /></Link>
@@ -229,7 +229,7 @@ export function HinnoitteluContent() {
           {/* Desktop grid */}
           <motion.div ref={servicesRef} variants={staggerContainer} initial="hidden" animate={servicesInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {SERVICES_PRICING.map((svc) => (
-              <motion.div key={svc.name} variants={fadeUp} className={`relative p-6 rounded-xl border flex flex-col ${svc.highlight ? "gradient-border bg-copper/5 shadow-glow" : "border-wire bg-elevated"}`}>
+              <motion.div key={svc.name} variants={fadeUp} className={`relative p-6 rounded-xl border flex flex-col ${svc.highlight ? "gradient-border bg-elevated shadow-glow" : "border-wire bg-elevated"}`}>
                 {svc.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
                 <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
                 <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
@@ -251,13 +251,14 @@ export function HinnoitteluContent() {
             </p>
           </div>
           {/* Mobile carousel */}
-          <div className="md:hidden max-w-sm mx-auto">
-            <CardCarousel>
+          <div className="md:hidden">
+            <CardCarousel defaultIndex={MAINTENANCE_TIERS.findIndex(t => t.highlight)}>
               {MAINTENANCE_TIERS.map((tier) => (
-                <div key={tier.name} className="p-6 rounded-xl border border-wire bg-elevated">
+                <div key={tier.name} className={`p-6 rounded-xl border flex flex-col h-full ${tier.highlight ? "gradient-border bg-elevated shadow-glow" : tier.name === "Perus" ? "gradient-border-white bg-elevated" : "gradient-border-violet bg-elevated"}`}>
+                  {tier.highlight && <div className="flex justify-center mb-4"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
                   <h3 className="font-heading font-bold text-ink mb-1">{tier.name}</h3>
                   <p className="text-copper font-semibold mb-4">{tier.price}</p>
-                  <ul className="space-y-2">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <ul className="space-y-2 flex-1">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
                 </div>
               ))}
             </CardCarousel>
@@ -265,10 +266,11 @@ export function HinnoitteluContent() {
           {/* Desktop grid */}
           <motion.div ref={maintenanceRef} variants={staggerContainer} initial="hidden" animate={maintenanceInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {MAINTENANCE_TIERS.map((tier) => (
-              <motion.div key={tier.name} variants={fadeUp} className="p-6 rounded-xl border border-wire bg-elevated">
+              <motion.div key={tier.name} variants={fadeUp} className={`relative p-6 rounded-xl border flex flex-col ${tier.highlight ? "gradient-border bg-elevated shadow-glow" : tier.name === "Perus" ? "gradient-border-white bg-elevated" : "gradient-border-violet bg-elevated"}`}>
+                {tier.highlight && <div className="flex justify-center mb-4"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
                 <h3 className="font-heading font-bold text-ink mb-1">{tier.name}</h3>
                 <p className="text-copper font-semibold mb-4">{tier.price}</p>
-                <ul className="space-y-2">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                <ul className="space-y-2 flex-1">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
               </motion.div>
             ))}
           </motion.div>
