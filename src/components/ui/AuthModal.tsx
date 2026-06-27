@@ -18,6 +18,8 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: "signin" | "signup";
+  initialOtp?: string;
+  initialEmail?: string;
 }
 
 const inputClass = "w-full px-4 py-3 rounded-xl bg-surface border border-wire text-ink placeholder:text-ink-ghost text-sm focus:outline-none focus:border-copper/50 transition-colors";
@@ -35,7 +37,7 @@ function suomenna(msg: string): string {
   return "Jokin meni pieleen. Yritä uudelleen.";
 }
 
-export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, defaultTab = "signin", initialOtp, initialEmail }: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup">(defaultTab);
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
@@ -61,13 +63,22 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     if (isOpen) {
       setTab(defaultTab);
       setErr("");
-      setOtpStep(false);
-      setOtp(["", "", "", "", "", ""]);
       setOtpErr("");
       setResendTimer(0);
       setRememberMe(false);
+      if (initialOtp && initialEmail) {
+        const digits = initialOtp.slice(0, 6).split("");
+        const filled = ["", "", "", "", "", ""];
+        digits.forEach((d, i) => { filled[i] = d; });
+        setOtp(filled);
+        setForm(f => ({ ...f, email: initialEmail }));
+        setOtpStep(true);
+      } else {
+        setOtp(["", "", "", "", "", ""]);
+        setOtpStep(false);
+      }
     }
-  }, [isOpen, defaultTab]);
+  }, [isOpen, defaultTab, initialOtp, initialEmail]);
 
   useEffect(() => {
     if (resendTimer <= 0) return;
