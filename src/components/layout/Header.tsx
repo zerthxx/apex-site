@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, ChevronDown, LogIn, LogOut, User } from "lucide-react";
+import { Menu, ChevronDown, LogIn, LogOut, User, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { MobileMenu } from "./MobileMenu";
@@ -21,7 +21,9 @@ export function Header() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<"signin" | "signup">("signin");
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const servicesRef = useRef<HTMLLIElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -71,6 +73,9 @@ export function Header() {
     const handleClickOutside = (e: MouseEvent) => {
       if (servicesRef.current && !servicesRef.current.contains(e.target as Node)) {
         setServicesOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -153,15 +158,33 @@ export function Header() {
             {/* Right side */}
             <div className="flex items-center gap-3">
               {user ? (
-                <div className="hidden sm:flex items-center gap-2">
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-wire text-sm text-ink-dim">
+                <div className="hidden sm:block relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen(v => !v)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-wire text-sm text-ink-dim hover:border-copper/30 transition-all duration-150"
+                  >
                     <User size={14} className="text-copper" />
                     <span className="max-w-[120px] truncate">{user.email}</span>
-                  </div>
-                  <button onClick={signOut} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-ink-ghost hover:text-ink transition-colors">
-                    <LogOut size={14} />
-                    Kirjaudu ulos
+                    <ChevronDown size={12} className={cn("transition-transform duration-150", userMenuOpen && "rotate-180")} />
                   </button>
+                  {userMenuOpen && (
+                    <div className="absolute right-0 top-full mt-1.5 w-48 bg-elevated border border-wire rounded-xl shadow-xl py-1 z-50">
+                      <Link
+                        href="/asetukset"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-dim hover:text-ink hover:bg-surface transition-colors"
+                      >
+                        <Settings size={14} /> Asetukset
+                      </Link>
+                      <div className="h-px bg-wire mx-2 my-1" />
+                      <button
+                        onClick={() => { setUserMenuOpen(false); signOut(); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-ghost hover:text-ink hover:bg-surface transition-colors"
+                      >
+                        <LogOut size={14} /> Kirjaudu ulos
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <button
@@ -189,6 +212,23 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {/* Keltainen varoitusbanneri — näkyy kun profiilitiedot puuttuvat */}
+      {user && !user.user_metadata?.first_name && (
+        <div className="fixed top-16 md:top-20 left-0 right-0 z-20 bg-amber-400/95 backdrop-blur-sm border-b border-amber-500/50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3">
+            <p className="text-sm font-medium text-amber-950">
+              Profiilitietosi ovat puutteelliset — täydennä ne jotta voimme palvella sinua paremmin.
+            </p>
+            <Link
+              href="/asetukset"
+              className="shrink-0 text-sm font-bold text-amber-950 underline underline-offset-2 hover:text-amber-800 transition-colors whitespace-nowrap"
+            >
+              Klikkaa tässä →
+            </Link>
+          </div>
+        </div>
+      )}
 
       <MobileMenu isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} defaultTab={authTab} />
