@@ -113,21 +113,35 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     if (token.length < 6) { setOtpErr("Syötä 6-numeroinen koodi."); return; }
     setOtpLoading(true);
     setOtpErr("");
+    const res = await fetch("/api/otp/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email, code: token }),
+    });
+    if (!res.ok) {
+      const { error } = await res.json();
+      setOtpErr(error ?? "Väärä koodi.");
+      setOtpLoading(false);
+      return;
+    }
     const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({ email: form.email, token, type: "email" });
+    await supabase.auth.signInWithPassword({ email: form.email, password: form.salasana });
     setOtpLoading(false);
-    if (error) { setOtpErr(suomenna(error.message)); return; }
     onClose();
   }
 
   async function resendOtp() {
     if (resendTimer > 0) return;
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: form.email,
-      options: { shouldCreateUser: false },
+    const res = await fetch("/api/otp/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email }),
     });
-    if (error) { setOtpErr(suomenna(error.message)); return; }
+    if (!res.ok) {
+      const { error } = await res.json();
+      setOtpErr(error ?? "Lähetys epäonnistui.");
+      return;
+    }
     setOtp(["", "", "", "", "", ""]);
     setOtpErr("");
     setResendTimer(60);
@@ -154,7 +168,11 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     setLoading(false);
     if (error) {
       if (error.message.toLowerCase().includes("email not confirmed")) {
-        await supabase.auth.signInWithOtp({ email: form.email, options: { shouldCreateUser: false } });
+        await fetch("/api/otp/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: form.email }),
+        });
         setOtpStep(true);
         setResendTimer(60);
       } else {
@@ -191,7 +209,11 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     });
     setLoading(false);
     if (error) { setErr(suomenna(error.message)); return; }
-    await supabase.auth.signInWithOtp({ email: form.email, options: { shouldCreateUser: false } });
+    await fetch("/api/otp/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email }),
+    });
     setOtpStep(true);
     setResendTimer(60);
   }
