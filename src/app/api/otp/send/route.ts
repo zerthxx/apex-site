@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
   <!-- Logo -->
   <tr><td align="center" style="padding:36px 32px 20px;">
-    <img src="https://apexsite.fi/icon.png" alt="Apex Site" width="56" height="56" style="display:block;margin:0 auto 12px;" />
+    <img src="https://apexsite.fi/icon.png" alt="Apex Site" width="100" height="100" style="display:block;margin:0 auto 12px;" />
     <div style="font-size:24px;font-weight:900;font-family:sans-serif;letter-spacing:-0.5px;">
       <span style="color:#C8813A;">Apex</span><span style="color:#F0EEE8;">Site</span>
     </div>
