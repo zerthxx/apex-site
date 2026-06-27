@@ -70,7 +70,8 @@ export function ProfileModal() {
     });
     setLoading(false);
     if (error) { setErr(error.message); return; }
-    sessionStorage.removeItem("intro-seen");
+    sessionStorage.setItem("intro-seen", "1");
+    window.dispatchEvent(new CustomEvent("dismiss-intro"));
     setOpen(false);
     router.replace("/");
   }
@@ -80,11 +81,11 @@ export function ProfileModal() {
       {open && (
         <>
           <motion.div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10100]"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           />
           <motion.div
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[201] w-full max-w-sm px-4"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10101] w-full max-w-sm px-4"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}

@@ -182,6 +182,14 @@ export default function AsetuksetPage() {
         <div className="bg-elevated border border-wire rounded-2xl p-6 shadow-sm">
           {status && <StatusBanner type={status.type} message={status.message} />}
 
+          {tab === "tiedot" && !profile.puhelin.trim() && (
+            <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-amber-400/95 border border-amber-500/50 mb-4">
+              <p className="text-sm font-medium text-amber-950">
+                Puhelinnumero puuttuu — lisää se jotta voimme ottaa sinuun yhteyttä.
+              </p>
+            </div>
+          )}
+
           {tab === "tiedot" && (
             <form onSubmit={saveTiedot} className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-3">

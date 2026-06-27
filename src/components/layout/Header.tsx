@@ -159,7 +159,7 @@ export function Header() {
             {/* Right side */}
             <div className="flex items-center gap-3">
               {user ? (
-                <div className="hidden sm:block relative" ref={userMenuRef}>
+                <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen(v => !v)}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-wire text-sm text-ink-dim hover:border-copper/30 transition-all duration-150"
@@ -216,16 +216,25 @@ export function Header() {
         </div>
       </header>
 
-      {/* Keltainen varoitusbanneri — näkyy kun profiilitiedot puuttuvat */}
+      {/* Keltainen varoitusbanneri */}
       {user && (() => {
         const m = user.user_metadata ?? {};
-        const incomplete = !m.first_name || !m.last_name || !m.phone || !m.address || !m.postal_code || !m.city;
-        return incomplete;
+        const missingPhone = !m.phone;
+        const incomplete = !m.first_name || !m.last_name || !m.address || !m.postal_code || !m.city;
+        const message = missingPhone
+          ? "Puhelinnumero puuttuu — lisää se jotta voimme ottaa sinuun yhteyttä."
+          : "Profiilitietosi ovat puutteelliset — täydennä ne jotta voimme palvella sinua paremmin.";
+        return (missingPhone || incomplete) ? message : null;
       })() && (
         <div className="fixed top-16 md:top-20 left-0 right-0 z-20 bg-amber-400/95 backdrop-blur-sm border-b border-amber-500/50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-amber-950">
-              Profiilitietosi ovat puutteelliset — täydennä ne jotta voimme palvella sinua paremmin.
+              {(() => {
+                const m = user.user_metadata ?? {};
+                return !m.phone
+                  ? "Puhelinnumero puuttuu — lisää se jotta voimme ottaa sinuun yhteyttä."
+                  : "Profiilitietosi ovat puutteelliset — täydennä ne jotta voimme palvella sinua paremmin.";
+              })()}
             </p>
             <Link
               href="/asetukset"

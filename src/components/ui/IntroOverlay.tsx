@@ -10,6 +10,7 @@ export function IntroOverlay() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState<Phase>("loading");
+  const [loggedIn, setLoggedIn] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const framesRef = useRef<ImageBitmap[]>([]);
@@ -18,6 +19,20 @@ export function IntroOverlay() {
   useEffect(() => {
     if (pathname === "/" && !sessionStorage.getItem("intro-seen")) setVisible(true);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setLoggedIn(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    const handler = () => dismiss();
+    window.addEventListener("dismiss-intro", handler);
+    return () => window.removeEventListener("dismiss-intro", handler);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = visible ? "hidden" : "";
@@ -193,21 +208,31 @@ export function IntroOverlay() {
                 100% { box-shadow: 0 0 22px 7px rgba(99,210,255,0.8),  0 0 55px 18px rgba(99,210,255,0.3); }
               }
             `}</style>
-            <div className="flex gap-3">
+            {loggedIn ? (
               <button
-                onClick={() => { window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signin" })); }}
-                className="px-8 py-3.5 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-base tracking-wide hover:bg-copper-light transition-colors duration-200"
+                onClick={dismiss}
+                className="px-7 py-2.5 md:px-10 md:py-3.5 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-sm md:text-base tracking-wide hover:bg-copper-light transition-colors duration-200"
                 style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
               >
-                Kirjaudu
+                Aloita →
               </button>
-              <button
-                onClick={() => { window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signup" })); }}
-                className="px-8 py-3.5 rounded-full bg-white/10 border border-white/30 text-white font-display font-bold text-base tracking-wide hover:bg-white/20 transition-colors duration-200 backdrop-blur-sm"
-              >
-                Luo tili
-              </button>
-            </div>
+            ) : (
+              <div className="flex gap-2 md:gap-3">
+                <button
+                  onClick={() => { window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signin" })); }}
+                  className="px-5 py-2 md:px-8 md:py-3.5 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-sm md:text-base tracking-wide hover:bg-copper-light transition-colors duration-200"
+                  style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
+                >
+                  Kirjaudu
+                </button>
+                <button
+                  onClick={() => { window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signup" })); }}
+                  className="px-5 py-2 md:px-8 md:py-3.5 rounded-full bg-white/10 border border-white/30 text-white font-display font-bold text-sm md:text-base tracking-wide hover:bg-white/20 transition-colors duration-200 backdrop-blur-sm"
+                >
+                  Luo tili
+                </button>
+              </div>
+            )}
             <button
               onClick={async () => {
                 if (isSupabaseConfigured()) {
