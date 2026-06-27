@@ -129,9 +129,11 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
     const supabase = createClient();
     await supabase.auth.signInWithPassword({ email: form.email, password: form.salasana });
     if (rememberMe) {
-      document.cookie = "apex-remember=1; Max-Age=2592000; path=/; SameSite=Lax";
+      localStorage.setItem("apex-remember", "1");
+      sessionStorage.setItem("apex-session", "1");
     } else {
-      document.cookie = "apex-tmp=1; path=/; SameSite=Lax";
+      localStorage.removeItem("apex-remember");
+      sessionStorage.setItem("apex-session", "1");
     }
     setOtpLoading(false);
     onClose();
