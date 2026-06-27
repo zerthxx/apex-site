@@ -11,9 +11,10 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
-      // If user has no phone, send to phone verification step
-      if (!data.user.phone) {
-        return NextResponse.redirect(`${origin}/kirjaudu?step=puhelin`);
+      const meta = data.user.user_metadata ?? {};
+      const profileComplete = meta.phone && meta.address && meta.postal_code && meta.city;
+      if (!profileComplete) {
+        return NextResponse.redirect(`${origin}/kirjaudu?step=tiedot`);
       }
       return NextResponse.redirect(`${origin}${next}`);
     }
