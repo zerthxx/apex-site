@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { IntroOverlay } from "@/components/ui/IntroOverlay";
 import { Geist, Geist_Mono, Syne, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -88,7 +89,10 @@ export default function RootLayout({
       dir="ltr"
       className={`${syne.variable} ${inter.variable} ${geistSans.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full flex flex-col antialiased">
+        <IntroOverlay />
+        {children}
+      </body>
     </html>
   );
 }
