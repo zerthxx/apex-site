@@ -20,8 +20,6 @@ export function Header() {
   const [servicesOpen, setServicesOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<"signin" | "signup">("signin");
-  const [initialOtp, setInitialOtp] = useState<string | undefined>();
-  const [initialEmail, setInitialEmail] = useState<string | undefined>();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const servicesRef = useRef<HTMLLIElement>(null);
@@ -39,17 +37,6 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const otpCode = params.get("otp");
-    const otpEmail = params.get("email");
-    if (otpCode && otpEmail) {
-      setInitialOtp(otpCode);
-      setInitialEmail(otpEmail);
-      setAuthTab("signin");
-      setAuthOpen(true);
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-
     const v = sessionStorage.getItem("open-auth");
     if (v === "signin" || v === "signup" || v === "1") {
       sessionStorage.removeItem("open-auth");
@@ -260,7 +247,7 @@ export function Header() {
       )}
 
       <MobileMenu isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
-      <AuthModal isOpen={authOpen} onClose={() => { setAuthOpen(false); setInitialOtp(undefined); setInitialEmail(undefined); }} defaultTab={authTab} initialOtp={initialOtp} initialEmail={initialEmail} />
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} defaultTab={authTab} />
     </>
   );
 }
