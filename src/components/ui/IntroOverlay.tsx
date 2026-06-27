@@ -63,9 +63,9 @@ export function IntroOverlay() {
     }
 
     function startCapture() {
-      // Read video's actual dimensions, capped at 1920×1080
-      captureW = Math.min(video!.videoWidth || 1920, 1920);
-      captureH = Math.min(video!.videoHeight || 1080, 1080);
+      const isMobile = window.innerWidth < 768;
+      captureW = Math.min(video!.videoWidth || 1920, isMobile ? 640 : 1920);
+      captureH = Math.min(video!.videoHeight || 1080, isMobile ? 360 : 1080);
       captureCanvas.width = captureW;
       captureCanvas.height = captureH;
 
@@ -132,6 +132,10 @@ export function IntroOverlay() {
     };
 
     const onEnded = () => {
+      if (window.innerWidth < 768) {
+        setPhase("pingpong");
+        return;
+      }
       if (framesRef.current.length > 0) {
         startPingPong(framesRef.current);
       } else {

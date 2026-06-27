@@ -190,6 +190,7 @@ export function HeroSection() {
 
   useEffect(() => {
     if (prefersReduced) return;
+    if ("ontouchstart" in window) return;
     const el = sectionRef.current;
     if (!el) return;
     const onMove = (e: MouseEvent) => {

@@ -47,8 +47,8 @@ export function TiltCard({ children, className, intensity = 6 }: TiltCardProps) 
     <div className="perspective-1000">
       <motion.div
         ref={ref}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
+        onMouseMove={typeof window !== "undefined" && "ontouchstart" in window ? undefined : onMouseMove}
+        onMouseLeave={typeof window !== "undefined" && "ontouchstart" in window ? undefined : onMouseLeave}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
         className={cn("relative group", className)}
       >

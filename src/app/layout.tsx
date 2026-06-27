@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IntroOverlay } from "@/components/ui/IntroOverlay";
 import { Geist, Geist_Mono, Syne, Inter } from "next/font/google";
 import "./globals.css";
@@ -29,6 +29,13 @@ const geistMono = Geist_Mono({
   weight: ["400"],
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://apexsite.fi"),

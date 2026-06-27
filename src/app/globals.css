@@ -66,6 +66,10 @@
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
 
+  button, a, input, select, textarea, [role="button"] {
+    touch-action: manipulation;
+  }
+
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
