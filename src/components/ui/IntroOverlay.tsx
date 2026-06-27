@@ -227,7 +227,7 @@ export function IntroOverlay() {
                 </button>
                 <button
                   onClick={() => { window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signup" })); }}
-                  className="px-5 py-2 md:px-8 md:py-3.5 rounded-full bg-white/10 border border-white/30 text-white font-display font-bold text-sm md:text-base tracking-wide hover:bg-white/20 transition-colors duration-200 backdrop-blur-sm"
+                  className="px-5 py-2 md:px-8 md:py-3.5 rounded-full bg-white/10 border border-white/30 text-white font-display font-bold text-sm md:text-base tracking-wide hover:bg-white/20 transition-colors duration-200 backdrop-blur-sm whitespace-nowrap"
                 >
                   Luo tili
                 </button>
