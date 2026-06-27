@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Phone, ArrowRight, ShieldCheck } from "lucide-react";
 
-export default function KirjauduPage() {
+function KirjauduContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const step = searchParams.get("step");
@@ -114,5 +114,17 @@ export default function KirjauduPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function KirjauduPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-base flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-copper/30 border-t-copper rounded-full animate-spin" />
+      </div>
+    }>
+      <KirjauduContent />
+    </Suspense>
   );
 }
