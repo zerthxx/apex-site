@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     siteName: "Apex Site",
     images: [
       {
-        url: "/og-default.jpg",
+        url: "/og-default.png",
         width: 1200,
         height: 630,
         alt: "Apex Site — Ohjelmistotalo Suomessa",
