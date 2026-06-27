@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type Phase = "loading" | "playing" | "pingpong";
 
 export function IntroOverlay() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState<Phase>("loading");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -13,8 +16,8 @@ export function IntroOverlay() {
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    if (!sessionStorage.getItem("intro-seen")) setVisible(true);
-  }, []);
+    if (pathname === "/" && !sessionStorage.getItem("intro-seen")) setVisible(true);
+  }, [pathname]);
 
   useEffect(() => {
     document.body.style.overflow = visible ? "hidden" : "";
@@ -206,7 +209,17 @@ export function IntroOverlay() {
               </button>
             </div>
             <button
-              onClick={dismiss}
+              onClick={async () => {
+                if (isSupabaseConfigured()) {
+                  const supabase = createClient();
+                  const { data } = await supabase.auth.getUser();
+                  if (data.user) {
+                    const meta = data.user.user_metadata ?? {};
+                    if (!meta.address) await supabase.auth.signOut();
+                  }
+                }
+                dismiss();
+              }}
               className="text-white/50 text-sm hover:text-white/70 transition-colors duration-150 tracking-wide"
             >
               Jatka vierailijana →

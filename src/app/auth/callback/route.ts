@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       const meta = data.user.user_metadata ?? {};
       const profileComplete = meta.phone && meta.address && meta.postal_code && meta.city;
       if (!profileComplete) {
-        return NextResponse.redirect(`${origin}/kirjaudu?step=tiedot`);
+        return NextResponse.redirect(`${origin}/?tiedot=1`);
       }
       return NextResponse.redirect(`${origin}${next}`);
     }

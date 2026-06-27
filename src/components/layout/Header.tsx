@@ -66,6 +66,7 @@ export function Header() {
     if (!isSupabaseConfigured()) return;
     const supabase = createClient();
     await supabase.auth.signOut();
+    sessionStorage.removeItem("intro-seen");
     setUser(null);
   }
 
@@ -163,8 +164,10 @@ export function Header() {
                     onClick={() => setUserMenuOpen(v => !v)}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-wire text-sm text-ink-dim hover:border-copper/30 transition-all duration-150"
                   >
-                    <User size={14} className="text-copper" />
-                    <span className="max-w-[120px] truncate">{user.email}</span>
+                    <User size={16} className="text-copper" />
+                    {user.user_metadata?.first_name && (
+                      <span className="text-sm text-ink-dim">{user.user_metadata.first_name}</span>
+                    )}
                     <ChevronDown size={12} className={cn("transition-transform duration-150", userMenuOpen && "rotate-180")} />
                   </button>
                   {userMenuOpen && (
@@ -214,7 +217,11 @@ export function Header() {
       </header>
 
       {/* Keltainen varoitusbanneri — näkyy kun profiilitiedot puuttuvat */}
-      {user && !user.user_metadata?.first_name && (
+      {user && (() => {
+        const m = user.user_metadata ?? {};
+        const incomplete = !m.first_name || !m.last_name || !m.phone || !m.address || !m.postal_code || !m.city;
+        return incomplete;
+      })() && (
         <div className="fixed top-16 md:top-20 left-0 right-0 z-20 bg-amber-400/95 backdrop-blur-sm border-b border-amber-500/50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-amber-950">

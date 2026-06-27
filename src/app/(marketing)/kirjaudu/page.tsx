@@ -47,6 +47,7 @@ function KirjauduContent() {
     });
     setLoading(false);
     if (error) { setErr(error.message); return; }
+    sessionStorage.removeItem("intro-seen");
     router.push("/");
   }
 

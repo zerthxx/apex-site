@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { ProfileModal } from "@/components/ui/ProfileModal";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { LogoBarSection } from "@/components/sections/LogoBarSection";
 import { ServicesGridSection } from "@/components/sections/ServicesGridSection";
@@ -20,6 +22,9 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
+      <Suspense>
+        <ProfileModal />
+      </Suspense>
       <HeroSection />
       <LogoBarSection />
       <StatsSection />

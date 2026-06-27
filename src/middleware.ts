@@ -26,20 +26,7 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (user) {
-    const path = request.nextUrl.pathname;
-    const isAuthPath = path.startsWith("/kirjaudu") || path.startsWith("/auth");
-    if (!isAuthPath) {
-      const meta = user.user_metadata ?? {};
-      const profileComplete = meta.address && meta.postal_code && meta.city && meta.phone;
-      if (!profileComplete) {
-        return NextResponse.redirect(new URL("/kirjaudu?step=tiedot", request.url));
-      }
-    }
-  }
-
+  await supabase.auth.getUser();
   return supabaseResponse;
 }
 
