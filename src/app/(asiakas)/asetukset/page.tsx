@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Lock, Shield, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import { User, Lock, Shield, Eye, EyeOff, CheckCircle, AlertCircle, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-type Tab = "tiedot" | "salasana" | "tili";
+type Tab = "tiedot" | "salasana" | "ilmoitukset" | "tili";
 
 const inputClass = "w-full px-4 py-3 rounded-xl bg-surface border border-wire text-ink placeholder:text-ink-ghost text-sm focus:outline-none focus:border-copper/50 transition-colors";
 
@@ -39,6 +39,12 @@ export default function AsetuksetPage() {
   const [showPw2, setShowPw2] = useState(false);
   const [passwords, setPasswords] = useState({ nykyinen: "", uusi: "", vahvista: "" });
 
+  const [notifications, setNotifications] = useState({ projects: true, invoices: true, news: false });
+  const [notifLoading, setNotifLoading] = useState(false);
+
+  const [deleteStep, setDeleteStep] = useState<"idle" | "confirm" | "done">("idle");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -54,6 +60,9 @@ export default function AsetuksetPage() {
         postinumero: m.postal_code ?? "",
         kaupunki: m.city ?? "",
       });
+      if (m.notifications) {
+        setNotifications(m.notifications);
+      }
     });
   }, []);
 
@@ -140,18 +149,44 @@ export default function AsetuksetPage() {
     }
   }
 
+  async function saveNotifications() {
+    setNotifLoading(true);
+    const { error } = await supabase.auth.updateUser({ data: { notifications } });
+    setNotifLoading(false);
+    if (error) showStatus("error", error.message);
+    else showStatus("success", "Ilmoitusasetukset tallennettu.");
+  }
+
   async function signOutAll() {
     await supabase.auth.signOut({ scope: "global" });
     router.push("/");
   }
 
+  async function requestDeletion() {
+    setDeleteLoading(true);
+    const res = await fetch("/api/account/delete-request", { method: "POST" });
+    setDeleteLoading(false);
+    if (res.ok) {
+      setDeleteStep("done");
+    } else {
+      showStatus("error", "Pyyntö epäonnistui. Ota yhteyttä suoraan sähköpostilla.");
+    }
+  }
+
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "tiedot", label: "Omat tiedot", icon: <User size={15} /> },
     { id: "salasana", label: "Salasana", icon: <Lock size={15} /> },
+    { id: "ilmoitukset", label: "Ilmoitukset", icon: <Bell size={15} /> },
     { id: "tili", label: "Tili", icon: <Shield size={15} /> },
   ];
 
   const provider = user?.app_metadata?.provider ?? "email";
+
+  const notifOptions = [
+    { key: "projects" as const, label: "Projektin päivitykset", desc: "Tiedotukset projektisi edistymisestä ja valmistumisesta" },
+    { key: "invoices" as const, label: "Laskut ja maksut", desc: "Laskutusilmoitukset ja maksukuitit" },
+    { key: "news" as const, label: "Uutiset ja tarjoukset", desc: "Apexin uutiset, vinkit ja kampanjat" },
+  ];
 
   return (
     <div className="min-h-screen bg-base py-10 px-4">
@@ -284,12 +319,47 @@ export default function AsetuksetPage() {
               </div>
               <button
                 type="submit"
-                    disabled={loading || !passwords.uusi}
-                    className="w-full py-3 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-2"
-                  >
-                    {loading ? "Vaihdetaan..." : "Vaihda salasana"}
-                  </button>
+                disabled={loading || !passwords.uusi}
+                className="w-full py-3 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-2"
+              >
+                {loading ? "Vaihdetaan..." : "Vaihda salasana"}
+              </button>
             </form>
+          )}
+
+          {tab === "ilmoitukset" && (
+            <div className="flex flex-col gap-5">
+              <p className="text-xs text-ink-ghost">Valitse mitkä sähköposti-ilmoitukset haluat vastaanottaa.</p>
+              {notifOptions.map(({ key, label, desc }) => (
+                <div key={key} className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-ink">{label}</p>
+                    <p className="text-xs text-ink-ghost mt-0.5">{desc}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setNotifications(n => ({ ...n, [key]: !n[key] }))}
+                    className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ${
+                      notifications[key] ? "bg-copper" : "bg-wire"
+                    }`}
+                    aria-checked={notifications[key]}
+                    role="switch"
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                      notifications[key] ? "translate-x-5" : "translate-x-0"
+                    }`} />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={saveNotifications}
+                disabled={notifLoading}
+                className="w-full py-3 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-2"
+              >
+                {notifLoading ? "Tallennetaan..." : "Tallenna asetukset"}
+              </button>
+            </div>
           )}
 
           {tab === "tili" && (
@@ -335,14 +405,56 @@ export default function AsetuksetPage() {
                 </div>
               </div>
 
-              <div className="border-t border-wire pt-5">
-                <p className="text-xs font-medium text-ink-dim mb-3">Vaaravyöhyke</p>
+              <div className="border-t border-wire pt-5 flex flex-col gap-3">
+                <p className="text-xs font-medium text-ink-dim">Vaaravyöhyke</p>
                 <button
                   onClick={signOutAll}
                   className="w-full py-3 rounded-xl border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors"
                 >
                   Kirjaudu ulos kaikista laitteista
                 </button>
+
+                {deleteStep === "idle" && (
+                  <button
+                    onClick={() => setDeleteStep("confirm")}
+                    className="w-full py-3 rounded-xl border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors"
+                  >
+                    Pyydä tilin poistamista
+                  </button>
+                )}
+
+                {deleteStep === "confirm" && (
+                  <div className="flex flex-col gap-3 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+                    <div>
+                      <p className="text-sm font-medium text-red-400">Oletko varma?</p>
+                      <p className="text-xs text-ink-ghost mt-1">
+                        Lähetämme tilinpoistoilmoituksen ylläpidolle. Käsittelemme pyynnön 3 arkipäivän kuluessa ja otamme sinuun yhteyttä ennen poistamista.
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setDeleteStep("idle")}
+                        className="flex-1 py-2 rounded-lg border border-wire text-ink-ghost text-sm hover:text-ink transition-colors"
+                      >
+                        Peruuta
+                      </button>
+                      <button
+                        onClick={requestDeletion}
+                        disabled={deleteLoading}
+                        className="flex-1 py-2 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/30 transition-colors disabled:opacity-60"
+                      >
+                        {deleteLoading ? "Lähetetään..." : "Vahvista pyyntö"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {deleteStep === "done" && (
+                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
+                    <CheckCircle size={15} />
+                    Pyyntö lähetetty. Olemme yhteydessä 3 arkipäivän kuluessa.
+                  </div>
+                )}
               </div>
             </div>
           )}
