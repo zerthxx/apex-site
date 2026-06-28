@@ -10,7 +10,7 @@ import { MOCK_CASE_STUDIES } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Verkkosivut yritykselle — Modernit ja konvertoivat",
   description:
-    "Rakennamme modernit, nopeat ja hakukoneoptimoidut verkkosivut yrityksellesi. Alkaen 2 500 €.",
+    "Rakennamme modernit, nopeat ja hakukoneoptimoidut verkkosivut yrityksellesi. Alkaen 3 000 €.",
   alternates: { canonical: "https://apexsite.fi/palvelut/verkkosivut" },
 };
 
@@ -100,7 +100,7 @@ export default function VerkkosivutPage() {
                 Toimitus sisältää kaiken mitä tarvitset toimivaan, näkyvään ja konvertoivaan
                 verkkosivustoon. Ei lisäkustannuksia, ei yllätyksiä.
               </p>
-              <p className="text-copper font-semibold">Alkaen 2 500 €</p>
+              <p className="text-copper font-semibold">Alkaen 3 000 €</p>
             </div>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {DELIVERABLES.map((item) => (

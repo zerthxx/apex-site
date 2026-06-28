@@ -44,9 +44,6 @@ export default function PortfolioPage() {
             {MOCK_CASE_STUDIES.map((study) => (
               <CaseStudyCard key={study.slug} study={study} />
             ))}
-            {MOCK_CASE_STUDIES.map((study) => (
-              <CaseStudyCard key={study.slug + "-2"} study={{ ...study, slug: study.slug + "-2" }} />
-            ))}
           </div>
         </div>
       </section>

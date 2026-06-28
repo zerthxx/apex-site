@@ -25,7 +25,6 @@ export default function TietosuojaPage() {
               <h2 className="font-display font-bold text-ink text-2xl mb-4">1. Rekisterinpitäjä</h2>
               <p className="text-ink-dim leading-relaxed">
                 Apex Site<br />
-                Y-tunnus: [Y-tunnus]<br />
                 Osoite: Helsinki, Suomi<br />
                 Sähköposti: info@apexsite.fi
               </p>
