@@ -39,7 +39,7 @@ export function ChatBot() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: newMessages }),
       });
-      if (!res.ok) { openCrisp(); return; }
+      if (!res.ok) { setMessages(m => [...m, { role: "assistant", content: "Pahoittelen, jokin meni pieleen. Kokeile Live-tuki -nappia." }]); return; }
       const data = await res.json();
       const reply: string = data.reply ?? "Pahoittelen, jokin meni pieleen.";
       if (reply.startsWith("[HANDOFF]")) {
@@ -59,7 +59,7 @@ export function ChatBot() {
         setMessages(m => [...m, { role: "assistant", content: reply }]);
       }
     } catch {
-      openCrisp();
+      setMessages(m => [...m, { role: "assistant", content: "Pahoittelen, yhteysvirhe. Kokeile Live-tuki -nappia." }]);
     } finally {
       setLoading(false);
     }
