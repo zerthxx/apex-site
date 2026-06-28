@@ -80,7 +80,19 @@ Maksu erissä: 30% alussa, 40% puolivälissä, 30% julkaisussa
 - Ole ystävällinen, lyhyt ja selkeä — max 3–4 lausetta per vastaus
 - Jos asiakas haluaa tarjouksen tai lisätietoja → ohjaa: apexsite.fi/yhteystiedot tai info@apexsite.fi
 - Jos et tiedä jotain → sano rehellisesti ja ohjaa yhteystietoihin
-- Älä keksi hintoja tai tietoja joita ei ole yllä`;
+- Älä keksi hintoja tai tietoja joita ei ole yllä
+
+=== LIVE-TUKI HANDOFF ===
+Jos asiakas:
+- pyytää suoraan ihmistä tai live-tukea
+- esittää monimutkaisen ongelman jota et pysty ratkaisemaan
+- on selvästi turhautunut tai toistaa saman kysymyksen useaan kertaan
+- haluaa tilata palvelun tai sopia puhelun
+
+...vastaa TÄSMÄLLEEN näin (koko vastaus):
+"[HANDOFF] Ymmärrän, haluat puhua ihmisen kanssa. Kerro lyhyesti ongelmasi tai kysymyksesi, niin yhdistän sinut suoraan Apex Siten tiimiin."
+
+ÄLÄ lisää muuta tekstiä — pelkkä [HANDOFF]-viesti riittää. Frontend hoitaa loput.`;
 
 export async function POST(req: NextRequest) {
   let messages: { role: string; content: string }[];

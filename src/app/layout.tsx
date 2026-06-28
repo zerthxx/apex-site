@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IntroOverlay } from "@/components/ui/IntroOverlay";
 import { SessionGuard } from "@/components/ui/SessionGuard";
 import { ChatBot } from "@/components/ui/ChatBot";
+import { CrispChat } from "@/components/ui/CrispChat";
 import { Geist, Geist_Mono, Syne, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -103,6 +104,7 @@ export default function RootLayout({
         <IntroOverlay />
         {children}
         <ChatBot />
+        <CrispChat />
       </body>
     </html>
   );

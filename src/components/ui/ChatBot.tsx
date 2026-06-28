@@ -32,7 +32,23 @@ export function ChatBot() {
         body: JSON.stringify({ messages: newMessages }),
       });
       const data = await res.json();
-      setMessages(m => [...m, { role: "assistant", content: data.reply ?? "Pahoittelen, jokin meni pieleen." }]);
+      const reply: string = data.reply ?? "Pahoittelen, jokin meni pieleen.";
+      if (reply.startsWith("[HANDOFF]")) {
+        const displayText = reply.replace("[HANDOFF]", "").trim();
+        setMessages(m => [...m, {
+          role: "assistant",
+          content: displayText || "Yhdistän sinut nyt live-tukeen — odota hetki! 👋",
+        }]);
+        setTimeout(() => {
+          setOpen(false);
+          if (typeof window !== "undefined" && (window as any).$crisp) {
+            (window as any).$crisp.push(["do", "chat:show"]);
+            (window as any).$crisp.push(["do", "chat:open"]);
+          }
+        }, 1500);
+      } else {
+        setMessages(m => [...m, { role: "assistant", content: reply }]);
+      }
     } catch {
       setMessages(m => [...m, { role: "assistant", content: "Pahoittelen, yhteysvirhe. Yritä uudelleen." }]);
     } finally {
@@ -42,7 +58,6 @@ export function ChatBot() {
 
   return (
     <>
-      {/* Chat window */}
       {open && (
         <div className="fixed bottom-24 right-5 z-50 w-[340px] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-wire bg-elevated shadow-2xl overflow-hidden">
           {/* Header */}
@@ -80,27 +95,28 @@ export function ChatBot() {
                 </div>
               </div>
             )}
+
             <div ref={bottomRef} />
           </div>
 
           {/* Input */}
           <div className="p-3 border-t border-wire flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && send()}
-              placeholder="Kirjoita viesti..."
-              className="flex-1 px-3 py-2 text-sm rounded-xl bg-surface border border-wire text-ink placeholder:text-ink-ghost focus:outline-none focus:border-copper/50 transition-colors"
-            />
-            <button
-              onClick={send}
-              disabled={!input.trim() || loading}
-              className="w-9 h-9 rounded-xl bg-copper flex items-center justify-center hover:bg-copper-light transition-colors disabled:opacity-50"
-            >
-              <Send size={14} className="text-[#0A0C10]" />
-            </button>
-          </div>
+              <input
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && send()}
+                placeholder="Kirjoita viesti..."
+                className="flex-1 px-3 py-2 text-sm rounded-xl bg-surface border border-wire text-ink placeholder:text-ink-ghost focus:outline-none focus:border-copper/50 transition-colors"
+              />
+              <button
+                onClick={send}
+                disabled={!input.trim() || loading}
+                className="w-9 h-9 rounded-xl bg-copper flex items-center justify-center hover:bg-copper-light transition-colors disabled:opacity-50"
+              >
+                <Send size={14} className="text-[#0A0C10]" />
+              </button>
+            </div>
         </div>
       )}
 
