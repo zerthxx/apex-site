@@ -276,17 +276,15 @@ export function HinnoitteluContent() {
             variants={staggerContainer}
             initial="hidden"
             animate={addOnsInView ? "visible" : "hidden"}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto"
           >
             {ADD_ONS.map((addon) => (
-              <motion.div key={addon.name} variants={fadeUp} className="flex items-start gap-4 p-5 rounded-xl border border-wire bg-elevated hover:border-copper/30 transition-colors">
-                <CheckCircle2 size={16} className="text-copper shrink-0 mt-0.5" />
+              <motion.div key={addon.name} variants={fadeUp} className="flex items-start gap-2.5 p-3 rounded-xl border border-wire bg-elevated hover:border-copper/30 transition-colors">
+                <CheckCircle2 size={13} className="text-copper shrink-0 mt-0.5" />
                 <div>
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="font-semibold text-ink text-sm">{addon.name}</span>
-                    <span className="text-copper font-bold text-sm">{addon.price}</span>
-                  </div>
-                  <p className="text-ink-ghost text-xs leading-relaxed">{addon.desc}</p>
+                  <p className="font-semibold text-ink text-xs leading-tight">{addon.name}</p>
+                  <p className="text-copper font-bold text-xs mt-0.5">{addon.price}</p>
+                  <p className="text-ink-ghost text-[10px] leading-relaxed mt-1">{addon.desc}</p>
                 </div>
               </motion.div>
             ))}
