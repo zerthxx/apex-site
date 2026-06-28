@@ -18,6 +18,14 @@ export function ChatBot() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  function openCrisp() {
+    setOpen(false);
+    if (typeof window !== "undefined" && (window as any).$crisp) {
+      (window as any).$crisp.push(["do", "chat:show"]);
+      (window as any).$crisp.push(["do", "chat:open"]);
+    }
+  }
+
   async function send() {
     const text = input.trim();
     if (!text || loading) return;
@@ -31,6 +39,7 @@ export function ChatBot() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: newMessages }),
       });
+      if (!res.ok) { openCrisp(); return; }
       const data = await res.json();
       const reply: string = data.reply ?? "Pahoittelen, jokin meni pieleen.";
       if (reply.startsWith("[HANDOFF]")) {
@@ -50,7 +59,7 @@ export function ChatBot() {
         setMessages(m => [...m, { role: "assistant", content: reply }]);
       }
     } catch {
-      setMessages(m => [...m, { role: "assistant", content: "Pahoittelen, yhteysvirhe. Yritä uudelleen." }]);
+      openCrisp();
     } finally {
       setLoading(false);
     }
@@ -69,7 +78,10 @@ export function ChatBot() {
               <p className="text-sm font-semibold text-ink">Apex AI</p>
               <p className="text-[10px] text-green-400">● Online</p>
             </div>
-            <button onClick={() => setOpen(false)} className="text-ink-ghost hover:text-ink transition-colors">
+            <button onClick={openCrisp} className="text-[10px] text-copper hover:text-copper-light transition-colors font-medium whitespace-nowrap">
+              Live-tuki
+            </button>
+            <button onClick={() => setOpen(false)} className="text-ink-ghost hover:text-ink transition-colors ml-1">
               <X size={16} />
             </button>
           </div>
