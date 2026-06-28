@@ -121,6 +121,21 @@ const STARTER_PACKAGES = [
   },
 ];
 
+const ADD_ONS = [
+  { name: "Livechat-asennus", price: "150 €", desc: "Tidio tai Tawk.to -chat asiakkaille. Asiakas hallinnoi itse." },
+  { name: "Google Analytics", price: "100 €", desc: "Kävijäseuranta ja raportointi Google Analyticsiin." },
+  { name: "Evästebanneri (GDPR)", price: "150 €", desc: "GDPR-yhteensopiva evästehallinta ja suostumusbanneri." },
+  { name: "Yhteydenottolomake", price: "100 €", desc: "Lomake joka lähettää viestit suoraan sähköpostiin." },
+  { name: "Google Maps -integraatio", price: "100 €", desc: "Kartta, osoite ja aukioloajat sivulle." },
+  { name: "Nopeutusoptimointi", price: "200 €", desc: "Sivuston latausajan optimointi paremmalle sijoitukselle." },
+  { name: "Logo-suunnittelu", price: "250 €", desc: "Ammattimainen logo yrityksellesi." },
+  { name: "Some-linkit & ikonit", price: "75 €", desc: "Instagram, Facebook, TikTok ja muut somelinkit sivulle." },
+  { name: "Sähköposti-asennus", price: "100 €", desc: "Yritysdomain-sähköposti esim. support@sinundomain.fi." },
+  { name: "Chatbot-asennus (AI)", price: "300 €", desc: "Tekoälychatbot joka vastaa asiakkaille automaattisesti 24/7." },
+  { name: "Varausjärjestelmä", price: "350 €", desc: "Online-ajanvaraus kalenterilla asiakkaillesi." },
+  { name: "Somejakotoiminnot", price: "100 €", desc: "Open Graph -kuvat ja some-jakopainikkeet." },
+];
+
 const MAINTENANCE_TIERS = [
   { name: "Perus", price: "150 €/kk", highlight: false, features: ["Tietoturvapäivitykset", "Varmuuskopiointi", "Sähköpostituki", "1 h muutostyöt/kk"] },
   { name: "Standardi", price: "350 €/kk", highlight: false, features: ["Kaikki Perus-tason ominaisuudet", "Suorituskyvyn seuranta", "Puhelintuki", "4 h muutostyöt/kk", "Kuukausiraportti"] },
@@ -136,11 +151,13 @@ const FAQ = [
 export function HinnoitteluContent() {
   const starterRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLDivElement>(null);
+  const addOnsRef = useRef<HTMLDivElement>(null);
   const maintenanceRef = useRef<HTMLDivElement>(null);
   const faqRef = useRef<HTMLDivElement>(null);
 
   const starterInView = useInView(starterRef, { once: true, margin: "-80px" });
   const servicesInView = useInView(servicesRef, { once: true, margin: "-80px" });
+  const addOnsInView = useInView(addOnsRef, { once: true, margin: "-80px" });
   const maintenanceInView = useInView(maintenanceRef, { once: true, margin: "-80px" });
   const faqInView = useInView(faqRef, { once: true, margin: "-80px" });
 
@@ -242,7 +259,47 @@ export function HinnoitteluContent() {
         </div>
       </section>
 
+      {/* Add-ons */}
       <section className="py-16 bg-surface/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Lisäpalvelut</span>
+            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-3">
+              Yksittäiset lisäykset
+            </h2>
+            <p className="text-ink-dim max-w-lg mx-auto">
+              Tarvitsetko vain yhden ominaisuuden? Lisätään se sivustollesi ilman koko pakettia.
+            </p>
+          </div>
+          <motion.div
+            ref={addOnsRef}
+            variants={staggerContainer}
+            initial="hidden"
+            animate={addOnsInView ? "visible" : "hidden"}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto"
+          >
+            {ADD_ONS.map((addon) => (
+              <motion.div key={addon.name} variants={fadeUp} className="flex items-start gap-4 p-5 rounded-xl border border-wire bg-elevated hover:border-copper/30 transition-colors">
+                <CheckCircle2 size={16} className="text-copper shrink-0 mt-0.5" />
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="font-semibold text-ink text-sm">{addon.name}</span>
+                    <span className="text-copper font-bold text-sm">{addon.price}</span>
+                  </div>
+                  <p className="text-ink-ghost text-xs leading-relaxed">{addon.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+          <div className="text-center mt-8">
+            <Link href="/yhteystiedot" className="inline-flex items-center gap-2 text-sm font-medium text-copper hover:text-copper-light transition-colors">
+              Kysy lisäpalvelusta <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-3">
