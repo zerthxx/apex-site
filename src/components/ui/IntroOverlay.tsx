@@ -190,7 +190,7 @@ export function IntroOverlay() {
             src="/videos/apex-site-intro-1.mp4"
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ display: phase === "pingpong" ? "none" : "block" }}
           />
