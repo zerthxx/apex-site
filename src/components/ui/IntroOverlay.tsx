@@ -16,8 +16,6 @@ export function IntroOverlay() {
   const framesRef = useRef<ImageBitmap[]>([]);
   const rafRef = useRef<number>(0);
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
   useEffect(() => {
     if (pathname === "/" && !sessionStorage.getItem("intro-seen")) setVisible(true);
   }, [pathname]);
@@ -47,7 +45,6 @@ export function IntroOverlay() {
 
   useEffect(() => {
     if (!visible) return;
-    if (isMobile) { setPhase("pingpong"); return; }
     const video = videoRef.current;
     if (!video) return;
 
@@ -136,7 +133,7 @@ export function IntroOverlay() {
 
     const onEnded = () => {
       if (window.innerWidth < 768) {
-        setPhase("pingpong");
+        dismiss();
         return;
       }
       if (framesRef.current.length > 0) {
@@ -155,14 +152,21 @@ export function IntroOverlay() {
       video.play().catch(() => {});
     };
 
-    video.addEventListener("canplaythrough", onCanPlay, { once: true });
+    const fallback = setTimeout(() => {
+      video.load();
+      video.play().catch(() => {});
+      setPhase("playing");
+    }, 4000);
+
+    video.addEventListener("canplay", onCanPlay, { once: true });
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("ended", onEnded, { once: true });
 
     return () => {
+      clearTimeout(fallback);
       capturing = false;
       cancelAnimationFrame(rafRef.current);
-      video.removeEventListener("canplaythrough", onCanPlay);
+      video.removeEventListener("canplay", onCanPlay);
       video.removeEventListener("timeupdate", onTimeUpdate);
       video.removeEventListener("ended", onEnded);
       video.pause();
@@ -193,7 +197,7 @@ export function IntroOverlay() {
             src="/videos/apex-site-intro-1.mp4"
             muted
             playsInline
-            preload="metadata"
+            preload="auto"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ display: phase === "pingpong" ? "none" : "block" }}
           />
