@@ -267,6 +267,7 @@ export const FOOTER_NAV = {
   yritys: [
     { label: "Meistä", href: "/meista" },
     { label: "Prosessi", href: "/prosessi" },
+    { label: "Tietoturva", href: "/tietoturva" },
     { label: "Urat", href: "/urat" },
     { label: "UKK", href: "/ukk" },
   ],

@@ -156,6 +156,12 @@ export function Footer() {
             >
               Käyttöehdot
             </Link>
+            <Link
+              href="/evastekaytanto"
+              className="text-xs text-ink-ghost hover:text-ink-dim transition-colors duration-150"
+            >
+              Evästekäytäntö
+            </Link>
           </div>
         </div>
       </div>

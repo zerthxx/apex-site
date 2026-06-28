@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageHero } from "@/components/shared/PageHero";
 import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "Meistä — Apex Site, suomalainen ohjelmistotalo",
@@ -13,27 +15,27 @@ export const metadata: Metadata = {
 const VALUES = [
   {
     title: "Laatu ennen nopeutta",
-    description: "Emme leikkaa kulmia. Jokainen projekti tehdään niin hyvin, että olemme ylpeitä laittamaan nimemme siihen.",
+    description: "Emme leikkaa kulmia. Jokainen projekti tehdään niin hyvin, että voimme ylpeänä laittaa nimemme siihen.",
   },
   {
-    title: "Pitkäaikaiset kumppanuudet",
-    description: "Haluamme olla kumppanisi vuosia — ei vain kertatoimittaja. Siksi jokainen projekti alkaa ymmärtämisellä.",
+    title: "Pitkäaikaiset suhteet",
+    description: "Haluamme olla kumppanisi vuosia — ei vain kertatoimittaja. Siksi jokainen projekti alkaa kuuntelemisella.",
   },
   {
-    title: "Avoimuus ja rehellisyys",
-    description: "Jos projekti ei sovi meille, sanomme sen suoraan. Jos löydämme paremman tavan, kerromme siitä.",
+    title: "Rehellinen viestintä",
+    description: "Jos projekti ei sovi meille, sanomme sen suoraan. Jos löydämme paremman tavan, kerromme siitä heti.",
   },
   {
-    title: "Tekninen excellence",
-    description: "Pysymme modernien teknologioiden kärjessä ja soveltamme parhaita käytäntöjä jokaisessa projektissa.",
+    title: "Moderni tekniikka",
+    description: "Käytämme parhaita nykytyökaluja — ei vanhentunutta teknologiaa — jotta sivusi kestää ja kasvaa vuosia.",
   },
 ];
 
 const STATS = [
-  { value: "47+", label: "projektia toimitettu" },
-  { value: "98%", label: "tyytyväisiä asiakkaita" },
-  { value: "2.8v", label: "keskimääräinen asiakassuhde" },
-  { value: "< 48h", label: "tarjous toimitusaika" },
+  { value: "< 48h", label: "Tarjous toimitusaika" },
+  { value: "100%", label: "Lähdekoodi sinulle" },
+  { value: "6 kk", label: "Takuu julkaisun jälkeen" },
+  { value: "0", label: "Piilokustannuksia" },
 ];
 
 export default function MeistaPage() {
@@ -59,29 +61,35 @@ export default function MeistaPage() {
         </div>
       </section>
 
+      {/* Main story */}
       <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div>
-              <Badge variant="teal" className="mb-4">Tarinaamme</Badge>
+              <Badge variant="teal" className="mb-4">Meistä</Badge>
               <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-6">
-                Rakennettu kokemuksesta
+                Rakennamme digitaalisia ratkaisuja, jotka auttavat yrityksiä kasvamaan.
               </h2>
               <div className="space-y-4 text-ink-dim leading-relaxed">
                 <p>
-                  Apex Site syntyi turhautumisesta. Perustajat olivat vuosia törmänneet samaan ongelmaan:
-                  asiakkaat maksoivat paljon, mutta saivat vähän. Projektit viivästyivät, budjetti ylittyi,
-                  koodi oli heikkoa.
+                  Emme usko valmiisiin malleihin tai yhden koon ratkaisuihin. Jokainen yritys on erilainen,
+                  ja siksi suunnittelemme ja kehitämme jokaisen projektin asiakkaan tavoitteiden, tarpeiden
+                  ja liiketoiminnan mukaan.
                 </p>
                 <p>
-                  Päätimme rakentaa toisenlaisen ohjelmistotalon. Sellaisen, jossa sovitut asiat pidetään.
-                  Jossa asiakkaan liiketoiminta — ei teknologia — on lähtöpiste. Jossa koodi on niin hyvää,
-                  että voit luovuttaa sen kenelle tahansa jatkokehitettäväksi.
+                  Olipa kyseessä moderni verkkosivusto, tehokas verkkokauppa, älykäs AI-ratkaisu tai
+                  mobiilisovellus, tavoitteenamme on luoda ratkaisu, joka näyttää ammattimaiselta, toimii
+                  nopeasti ja tuottaa todellista arvoa yrityksellesi.
                 </p>
                 <p>
-                  Tänään Apex Sitellä on takana yli 47 projektia. 98 % asiakkaistamme on suositellut meitä
-                  eteenpäin. Keskimääräinen asiakassuhteemme kestää 2.8 vuotta — koska tuloksemme puhuvat
-                  puolestaan.
+                  Panostamme laatuun, suorituskykyyn, tietoturvaan ja selkeään käyttökokemukseen.
+                  Käytämme moderneja teknologioita rakentaaksemme ratkaisuja, jotka ovat luotettavia,
+                  helposti laajennettavia ja valmiita tukemaan yrityksesi kasvua myös tulevaisuudessa.
+                </p>
+                <p>
+                  Meille yhteistyö ei pääty projektin julkaisuun. Olemme tukenasi myös sen jälkeen
+                  tarjoamalla ylläpitoa, teknistä tukea ja jatkuvaa kehitystä, jotta digitaalinen
+                  ratkaisusi pysyy ajan tasalla ja toimii parhaalla mahdollisella tavalla.
                 </p>
               </div>
             </div>
@@ -97,17 +105,35 @@ export default function MeistaPage() {
         </div>
       </section>
 
+      {/* Location */}
       <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl text-center">
           <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-6">Sijaintimme</h2>
           <p className="text-ink-dim leading-relaxed mb-4">
-            Pääkonttorimme on Helsingissä, mutta palvelemme asiakkaita koko Suomessa — ja kansainvälisesti
-            tarpeen mukaan. Suurin osa asiakasyhteistyöstä tapahtuu etänä, mutta järjestämme tapaamisia
-            myös kasvotusten.
+            Toimimme Helsingistä käsin, mutta palvelemme asiakkaita koko Suomessa.
+            Useimmat projektit hoituvat etänä sujuvasti, mutta järjestämme mielellämme
+            tapaamisia myös kasvotusten — kun se tuntuu oikealta.
           </p>
           <p className="text-ink-dim">
             <span className="text-ink font-medium">Osoite:</span> Helsinki, Suomi
           </p>
+        </div>
+      </section>
+
+      {/* CTA banner */}
+      <section className="py-16 bg-surface/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl text-center">
+          <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-4">
+            Sinun ideasi. Meidän osaamisemme.{" "}
+            <span className="text-copper">Yhteinen menestys.</span>
+          </h2>
+          <p className="text-ink-dim leading-relaxed mb-8">
+            Varaa maksuton 30 minuutin kartoituspuhelu ja aloitetaan yhdessä digitaalinen ratkaisu,
+            joka vie yrityksesi seuraavalle tasolle.
+          </p>
+          <Button size="lg" asChild>
+            <Link href="/yhteystiedot">Varaa maksuton kartoitus</Link>
+          </Button>
         </div>
       </section>
 
