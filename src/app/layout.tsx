@@ -42,6 +42,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://apexsite.fi"),
+  verification: {
+    google: "lS73-v0-IvVui-_lnoLJQfa7KEGZ5NKvmfQbRjtIthc",
+  },
   title: {
     default: "Apex Site — Ohjelmistotalo Suomessa",
     template: "%s | Apex Site",
