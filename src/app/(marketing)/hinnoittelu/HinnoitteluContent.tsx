@@ -259,45 +259,7 @@ export function HinnoitteluContent() {
         </div>
       </section>
 
-      {/* Add-ons */}
       <section className="py-16 bg-surface/30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Lisäpalvelut</span>
-            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-3">
-              Yksittäiset lisäykset
-            </h2>
-            <p className="text-ink-dim max-w-lg mx-auto">
-              Tarvitsetko vain yhden ominaisuuden? Lisätään se sivustollesi ilman koko pakettia.
-            </p>
-          </div>
-          <motion.div
-            ref={addOnsRef}
-            variants={staggerContainer}
-            initial="hidden"
-            animate={addOnsInView ? "visible" : "hidden"}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto"
-          >
-            {ADD_ONS.map((addon) => (
-              <motion.div key={addon.name} variants={fadeUp} className="flex items-start gap-2.5 p-3 rounded-xl border border-wire bg-elevated hover:border-copper/30 transition-colors">
-                <CheckCircle2 size={13} className="text-copper shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-ink text-xs leading-tight">{addon.name}</p>
-                  <p className="text-copper font-bold text-xs mt-0.5">{addon.price}</p>
-                  <p className="text-ink-ghost text-[10px] leading-relaxed mt-1">{addon.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-          <div className="text-center mt-8">
-            <Link href="/yhteystiedot" className="inline-flex items-center gap-2 text-sm font-medium text-copper hover:text-copper-light transition-colors">
-              Kysy lisäpalvelusta <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-3">
@@ -331,6 +293,44 @@ export function HinnoitteluContent() {
               </motion.div>
             ))}
           </motion.div>
+        </div>
+      </section>
+
+      {/* Add-ons */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Lisäpalvelut</span>
+            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-3">
+              Yksittäiset lisäykset
+            </h2>
+            <p className="text-ink-dim max-w-lg mx-auto">
+              Tarvitsetko vain yhden ominaisuuden? Lisätään se sivustollesi ilman koko pakettia.
+            </p>
+          </div>
+          <motion.div
+            ref={addOnsRef}
+            variants={staggerContainer}
+            initial="hidden"
+            animate={addOnsInView ? "visible" : "hidden"}
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto"
+          >
+            {ADD_ONS.map((addon) => (
+              <motion.div key={addon.name} variants={fadeUp} className="flex items-start gap-2.5 p-3 rounded-xl border border-wire bg-elevated hover:border-copper/30 transition-colors">
+                <CheckCircle2 size={13} className="text-copper shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-ink text-xs leading-tight">{addon.name}</p>
+                  <p className="text-copper font-bold text-xs mt-0.5">{addon.price}</p>
+                  <p className="text-ink-ghost text-[10px] leading-relaxed mt-1">{addon.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+          <div className="text-center mt-8">
+            <Link href="/yhteystiedot" className="inline-flex items-center gap-2 text-sm font-medium text-copper hover:text-copper-light transition-colors">
+              Kysy lisäpalvelusta <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       </section>
 
