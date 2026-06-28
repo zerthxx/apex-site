@@ -44,7 +44,6 @@ export default function MeistaPage() {
         title="Ohjelmistotalo, joka välittää lopputuloksesta."
         description="Apex Site on helsinkiläinen ohjelmistotalo, joka rakentaa laadukkaita digitaalisia tuotteita pk-yrityksille ja kasvuyrityksille. Emme ole halvin vaihtoehto — olemme paras."
         cta={{ label: "Ota yhteyttä", href: "/yhteystiedot" }}
-        secondaryCta={{ label: "Katso portfolio", href: "/portfolio" }}
       />
 
       <section className="py-16">
