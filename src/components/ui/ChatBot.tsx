@@ -88,6 +88,12 @@ export function ChatBot() {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-80">
+            <button
+              onClick={openCrisp}
+              className="w-full py-2 rounded-xl border border-copper/40 text-copper text-xs font-semibold hover:bg-copper/10 transition-colors flex items-center justify-center gap-1.5"
+            >
+              💬 Aloita live-chat tiimin kanssa
+            </button>
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
