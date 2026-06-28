@@ -91,6 +91,7 @@ export const NAV_LINKS: NavLink[] = [
   },
   { label: "Prosessi", href: "/prosessi" },
   { label: "Hinnoittelu", href: "/hinnoittelu" },
+  { label: "Blogi", href: "/blogi" },
   { label: "Meistä", href: "/meista" },
 ];
 
@@ -267,6 +268,7 @@ export const FOOTER_NAV = {
   yritys: [
     { label: "Meistä", href: "/meista" },
     { label: "Prosessi", href: "/prosessi" },
+    { label: "Blogi", href: "/blogi" },
     { label: "Tietoturva", href: "/tietoturva" },
     { label: "Urat", href: "/urat" },
     { label: "UKK", href: "/ukk" },
