@@ -78,7 +78,7 @@ export function ChatBot() {
               <p className="text-sm font-semibold text-ink">Apex AI</p>
               <p className="text-[10px] text-green-400">● Online</p>
             </div>
-            <button onClick={openCrisp} className="text-[10px] text-copper hover:text-copper-light transition-colors font-medium whitespace-nowrap">
+            <button onClick={openCrisp} className="px-2.5 py-1 rounded-lg bg-copper text-[#0A0C10] text-[10px] font-semibold hover:bg-copper-light transition-colors whitespace-nowrap">
               Live-tuki
             </button>
             <button onClick={() => setOpen(false)} className="text-ink-ghost hover:text-ink transition-colors ml-1">
