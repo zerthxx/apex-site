@@ -16,6 +16,8 @@ export function IntroOverlay() {
   const framesRef = useRef<ImageBitmap[]>([]);
   const rafRef = useRef<number>(0);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   useEffect(() => {
     if (pathname === "/" && !sessionStorage.getItem("intro-seen")) setVisible(true);
   }, [pathname]);
@@ -45,6 +47,7 @@ export function IntroOverlay() {
 
   useEffect(() => {
     if (!visible) return;
+    if (isMobile) { setPhase("pingpong"); return; }
     const video = videoRef.current;
     if (!video) return;
 
