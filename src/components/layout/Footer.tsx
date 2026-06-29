@@ -17,18 +17,19 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-surface border-t border-wire mt-auto">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    <footer className="relative bg-surface border-t border-wire mt-auto">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-copper/30 to-transparent" />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Col 1: Brand */}
           <div className="lg:col-span-1 flex flex-col gap-5">
-            <Link href="/" className="self-start">
+            <Link href="/" className="self-start transition-all duration-200 hover:opacity-80 hover:scale-[1.03]">
               <Image
                 src="/apex-logo-new.png"
                 alt="Apex Site"
                 width={140}
                 height={47}
-                className="h-12 w-auto object-contain"
+                className="h-14 w-auto object-contain"
               />
             </Link>
             <p className="text-ink-ghost text-sm leading-relaxed max-w-xs">
@@ -139,7 +140,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 mt-12 border-t border-wire">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-10 mt-16 border-t border-wire">
           <p className="text-xs text-ink-ghost">
             © {currentYear} Apex Site Oy. Kaikki oikeudet pidätetään.
           </p>

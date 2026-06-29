@@ -1,30 +1,52 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { FileText, ArrowLeft } from "lucide-react";
+import { QuotesClient } from "./QuotesClient";
 
-export default async function TarjouksetPage() {
+export const metadata = { title: "Tarjoukset — Apex Site" };
+
+export default async function QuotesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
+
+  let quotes = null;
+
+  if (isStaff) {
+    const { data } = await supabase
+      .from("quotes")
+      .select(`id, title, status, amount, valid_until, created_at, customers(id, first_name, last_name, email), companies(id, name)`)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    quotes = data;
+  } else {
+    const { data: customerRecord } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (customerRecord) {
+      const { data } = await supabase
+        .from("quotes")
+        .select(`id, title, status, amount, valid_until, created_at, customers(id, first_name, last_name, email), companies(id, name)`)
+        .eq("customer_id", customerRecord.id)
+        .order("created_at", { ascending: false });
+      quotes = data;
+    }
+  }
+
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <Link href="/portaali" className="inline-flex items-center gap-1.5 text-sm text-ink-ghost hover:text-ink transition-colors mb-6">
-        <ArrowLeft size={14} /> Portaali
-      </Link>
-      <div className="flex flex-col items-center justify-center py-20 text-center rounded-xl border border-wire bg-elevated">
-        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-copper/10 border border-copper/20 mb-4">
-          <FileText size={26} className="text-copper" />
-        </div>
-        <h2 className="text-lg font-bold text-ink">Tarjoukset</h2>
-        <p className="text-sm text-ink-dim mt-2 max-w-xs leading-relaxed">
-          Tarjousnäkymä on tulossa pian. Täältä näet kaikki saamasi tarjoukset ja voit hyväksyä tai hylätä ne.
+    <div>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-ink">Tarjoukset</h1>
+        <p className="text-sm text-ink-ghost mt-1">
+          {isStaff ? "Hallitse asiakkaiden tarjouksia" : "Sinulle lähetetyt tarjoukset"}
         </p>
-        <span className="mt-4 inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-full bg-copper/10 text-copper border border-copper/20">
-          Tulossa pian
-        </span>
       </div>
+      <QuotesClient initial={quotes ?? []} isStaff={isStaff} />
     </div>
   );
 }

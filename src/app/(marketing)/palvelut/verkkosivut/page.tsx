@@ -9,6 +9,9 @@ import {
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { HeroAnimation } from "./HeroAnimation";
+import { RevealSection } from "@/components/shared/RevealSection";
+import { ProcessTimeline } from "@/components/shared/ProcessTimeline";
 
 export const metadata: Metadata = {
   title: "Verkkosivut yritykselle — Modernit, nopeat ja hakukoneoptimoidut",
@@ -36,18 +39,18 @@ const INDUSTRIES = [
 ];
 
 const TECHS = [
-  { name: "React", slug: "react" },
-  { name: "Next.js", slug: "nextdotjs" },
-  { name: "TypeScript", slug: "typescript" },
-  { name: "Node.js", slug: "nodedotjs" },
-  { name: "Tailwind CSS", slug: "tailwindcss" },
-  { name: "Framer Motion", slug: "framer" },
-  { name: "PostgreSQL", slug: "postgresql" },
-  { name: "Docker", slug: "docker" },
-  { name: "Vercel", slug: "vercel" },
-  { name: "Cloudflare", slug: "cloudflare" },
-  { name: "Cloudinary", slug: "cloudinary" },
-  { name: "Google Analytics", slug: "googleanalytics" },
+  { name: "React", slug: "react", desc: "Moderni käyttöliittymäkirjasto" },
+  { name: "Next.js", slug: "nextdotjs", desc: "Nopea ja SEO-ystävällinen" },
+  { name: "TypeScript", slug: "typescript", desc: "Tyyppiturvattu JavaScript" },
+  { name: "Node.js", slug: "nodedotjs", desc: "Palvelinpuolen JavaScript" },
+  { name: "Tailwind CSS", slug: "tailwindcss", desc: "Moderni CSS-kehys" },
+  { name: "Framer Motion", slug: "framer", desc: "Premium-animaatiokirjasto" },
+  { name: "PostgreSQL", slug: "postgresql", desc: "Luotettava tietokanta" },
+  { name: "Docker", slug: "docker", desc: "Konttipohjainen käyttöönotto" },
+  { name: "Vercel", slug: "vercel", desc: "Edge-hosting ja CDN" },
+  { name: "Cloudflare", slug: "cloudflare", desc: "Suojaus ja DDoS-esto" },
+  { name: "Cloudinary", slug: "cloudinary", desc: "Kuvanhallinta ja optimointi" },
+  { name: "Google Analytics", slug: "googleanalytics", desc: "Kävijäseuranta ja data" },
 ];
 
 const STEPS = [
@@ -103,6 +106,7 @@ const FAQ = [
   { id: "7", question: "Voitteko uudistaa nykyisen verkkosivuni?", answer: "Kyllä. Voimme uudistaa olemassa olevan sivuston kokonaan tai osittain — design, teknologia tai molemmat." },
   { id: "8", question: "Tarjoatteko jatkuvaa ylläpitoa?", answer: "Kyllä. Ylläpitopaketit sisältävät hostingin, tietoturvapäivitykset, varmuuskopiot, teknisen tuen ja pienet muutostyöt." },
   { id: "9", question: "Miksi verkkosivut maksavat alkaen 3 000 €?", answer: "Jokainen projekti suunnitellaan yrityksen tarpeiden mukaan ilman valmiita teemoja. Lopullinen hinta määräytyy laajuuden, ominaisuuksien ja mahdollisten integraatioiden perusteella. Saat tarkan tarjouksen kartoituspuhelun jälkeen." },
+  { id: "10", question: "Voinko maksaa projektin osissa?", answer: "Kyllä. Isommissa projekteissa käytämme maksuerämenettelyä: aloitusmaksu projektin alussa, välimaksu kehitysvaiheen päätyttyä ja loppumaksu ennen julkaisua. Sovimme maksuaikataulusta aina erikseen projektin laajuuden mukaan." },
 ];
 
 export default function VerkkosivutPage() {
@@ -122,14 +126,17 @@ export default function VerkkosivutPage() {
             <div>
               <Badge variant="accent" className="mb-5">Verkkosivut</Badge>
               <h1 className="font-display font-bold text-ink text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
-                Verkkosivusto, joka näyttää ammattimaiselta, toimii nopeasti ja muuttaa kävijät asiakkaiksi.
+                Verkkosivusto, joka rakentaa yrityksesi uskottavuutta, tuo uusia asiakkaita ja tukee liiketoimintasi kasvua.
               </h1>
               <p className="text-ink-dim text-lg leading-relaxed mb-8">
                 Jokainen sivusto suunnitellaan yrityksesi tavoitteiden mukaan — ilman valmiita teemoja tai kompromisseja.
               </p>
               <div className="flex flex-wrap gap-4 mb-8">
-                <Button asChild size="lg">
-                  <Link href="/yhteystiedot">Varaa maksuton 30 min kartoitus</Link>
+                <Button asChild size="lg" className="group">
+                  <Link href="/yhteystiedot">
+                    Varaa maksuton 30 min kartoitus
+                    <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
                 </Button>
                 <Button asChild variant="secondary" size="lg">
                   <Link href="/hinnoittelu">Katso hinnat <ArrowRight size={16} /></Link>
@@ -145,62 +152,11 @@ export default function VerkkosivutPage() {
               </div>
             </div>
 
-            {/* Right — browser mockup */}
-            <div className="hidden lg:block">
-              <div className="rounded-2xl border border-wire bg-elevated shadow-2xl overflow-hidden">
-                {/* Browser chrome */}
-                <div className="h-9 bg-surface border-b border-wire flex items-center gap-1.5 px-4">
-                  <div className="w-3 h-3 rounded-full bg-bad/50" />
-                  <div className="w-3 h-3 rounded-full bg-copper/50" />
-                  <div className="w-3 h-3 rounded-full bg-ok/50" />
-                  <div className="flex-1 mx-4 h-5 rounded-md bg-wire flex items-center px-3 gap-2">
-                    <div className="w-3 h-3 rounded-full bg-wire-bold shrink-0" />
-                    <span className="text-[10px] text-ink-ghost">apexsite.fi</span>
-                  </div>
-                </div>
-                {/* Mock page content */}
-                <div className="p-5 space-y-4">
-                  {/* Mock nav */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="h-4 w-20 rounded bg-copper/20" />
-                    <div className="flex gap-3">
-                      {[56, 48, 52, 44].map((w, i) => <div key={i} className="h-3 rounded bg-wire" style={{ width: w }} />)}
-                    </div>
-                    <div className="h-7 w-24 rounded-lg bg-copper/30" />
-                  </div>
-                  {/* Mock hero */}
-                  <div className="py-6 space-y-3 border-b border-wire">
-                    <div className="h-3 w-20 rounded bg-copper/30" />
-                    <div className="h-6 w-64 rounded bg-ink/30" />
-                    <div className="h-6 w-52 rounded bg-ink/20" />
-                    <div className="h-4 w-72 rounded bg-ink/10" />
-                    <div className="h-4 w-56 rounded bg-ink/10" />
-                    <div className="flex gap-3 mt-4">
-                      <div className="h-8 w-32 rounded-lg bg-copper/40" />
-                      <div className="h-8 w-28 rounded-lg bg-wire" />
-                    </div>
-                  </div>
-                  {/* Mock cards */}
-                  <div className="grid grid-cols-3 gap-3">
-                    {[0, 1, 2].map(i => (
-                      <div key={i} className="rounded-lg border border-wire p-3 space-y-2">
-                        <div className="w-6 h-6 rounded-md bg-copper/20" />
-                        <div className="h-3 w-full rounded bg-ink/15" />
-                        <div className="h-2.5 w-4/5 rounded bg-ink/10" />
-                        <div className="h-2.5 w-3/5 rounded bg-ink/10" />
-                      </div>
-                    ))}
-                  </div>
-                  {/* Mock stats */}
-                  <div className="flex gap-4 pt-1">
-                    {["Nopea", "Turvallinen", "SEO-optimoitu"].map(l => (
-                      <div key={l} className="flex items-center gap-1.5 text-[10px] text-ink-ghost">
-                        <div className="w-1.5 h-1.5 rounded-full bg-ok/60" />{l}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            {/* Right — animated browser mockup */}
+            <div className="relative">
+              {/* Copper glow behind mockup */}
+              <div className="pointer-events-none absolute -inset-4 rounded-3xl bg-copper/6 blur-2xl" aria-hidden />
+              <HeroAnimation />
             </div>
           </div>
         </div>
@@ -209,295 +165,317 @@ export default function VerkkosivutPage() {
       {/* ─── WHY QUALITY ─────────────────────────────────────── */}
       <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Miksi se on tärkeää</span>
-            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
-              Miksi laadukkaat verkkosivut ovat tärkeitä?
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {WHY_CARDS.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/40 transition-colors duration-200">
-                <div className="w-10 h-10 rounded-xl bg-copper/10 flex items-center justify-center mb-4">
-                  <Icon size={18} className="text-copper" />
+          <RevealSection>
+            <div className="text-center mb-10">
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Miksi se on tärkeää</span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
+                Miksi laadukkaat verkkosivut ovat tärkeitä?
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {WHY_CARDS.map(({ icon: Icon, title, text }) => (
+                <div key={title} className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/40 hover:shadow-glow hover:scale-[1.01] transition-all duration-200">
+                  <div className="w-10 h-10 rounded-xl bg-copper/10 flex items-center justify-center mb-4">
+                    <Icon size={18} className="text-copper" />
+                  </div>
+                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
-                <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
-                <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* ─── WHAT'S INCLUDED ──────────────────────────────────── */}
       <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Toimitussisältö</span>
-            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Mitä palvelu sisältää?</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {[
-              { icon: Palette, title: "Design", items: DESIGN_ITEMS },
-              { icon: Code2, title: "Kehitys", items: DEV_ITEMS },
-              { icon: Rocket, title: "Julkaisun jälkeen", items: AFTER_ITEMS },
-            ].map(({ icon: Icon, title, items }) => (
-              <div key={title} className="p-6 rounded-xl border border-wire bg-elevated">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-9 h-9 rounded-lg bg-copper/10 flex items-center justify-center">
-                    <Icon size={16} className="text-copper" />
-                  </div>
-                  <h3 className="font-heading font-semibold text-ink">{title}</h3>
-                </div>
-                <ul className="space-y-2.5">
-                  {items.map(item => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-ink-dim">
-                      <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-wire">
-            <div>
-              <span className="text-ink-ghost text-sm">Alkaen </span>
-              <span className="text-copper font-bold text-2xl">3 000 €</span>
-              <span className="text-ink-ghost text-sm ml-1">räätälöity toteutus</span>
+          <RevealSection>
+            <div className="text-center mb-10">
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Toimitussisältö</span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Mitä palvelu sisältää?</h2>
             </div>
-            <Button asChild size="md">
-              <Link href="/yhteystiedot">Pyydä tarjous <ArrowRight size={15} /></Link>
-            </Button>
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {[
+                { icon: Palette, title: "Design", items: DESIGN_ITEMS },
+                { icon: Code2, title: "Kehitys", items: DEV_ITEMS },
+                { icon: Rocket, title: "Julkaisun jälkeen", items: AFTER_ITEMS },
+              ].map(({ icon: Icon, title, items }) => (
+                <div key={title} className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:shadow-glow transition-all duration-200">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-9 h-9 rounded-lg bg-copper/10 flex items-center justify-center">
+                      <Icon size={16} className="text-copper" />
+                    </div>
+                    <h3 className="font-heading font-semibold text-ink">{title}</h3>
+                  </div>
+                  <ul className="space-y-2.5">
+                    {items.map(item => (
+                      <li key={item} className="flex items-start gap-2 text-sm text-ink-dim">
+                        <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-wire">
+              <div>
+                <span className="text-ink-ghost text-sm">Alkaen </span>
+                <span className="text-copper font-bold text-2xl">3 000 €</span>
+                <span className="text-ink-ghost text-sm ml-1">räätälöity toteutus</span>
+              </div>
+              <Button asChild size="md" className="group">
+                <Link href="/yhteystiedot">
+                  Pyydä tarjous
+                  <ArrowRight size={15} className="transition-transform duration-200 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* ─── WHO IS IT FOR ────────────────────────────────────── */}
       <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Kohderyhmä</span>
-          <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-8">Kenelle palvelu sopii?</h2>
-          <div className="flex flex-wrap gap-3 justify-center">
-            {INDUSTRIES.map((ind, i) => (
-              <span
-                key={ind}
-                className={`px-4 py-2 rounded-full border text-sm transition-colors ${
-                  i === INDUSTRIES.length - 1
-                    ? "border-copper/50 text-copper bg-copper/5"
-                    : "border-wire bg-elevated text-ink-dim hover:border-copper/40"
-                }`}
-              >
-                {ind}
-              </span>
-            ))}
-          </div>
+          <RevealSection>
+            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Kohderyhmä</span>
+            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-8">Kenelle palvelu sopii?</h2>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {INDUSTRIES.map((ind, i) => (
+                <span
+                  key={ind}
+                  className={`px-4 py-2 rounded-full border text-sm transition-colors ${
+                    i === INDUSTRIES.length - 1
+                      ? "border-copper/50 text-copper bg-copper/5"
+                      : "border-wire bg-elevated text-ink-dim hover:border-copper/40"
+                  }`}
+                >
+                  {ind}
+                </span>
+              ))}
+            </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* ─── TECHNOLOGIES ─────────────────────────────────────── */}
       <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Teknologiat</span>
-            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Modernit työkalut, kestävät tulokset</h2>
-          </div>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-            {TECHS.map(({ name, slug }) => (
-              <div key={name} className="p-4 rounded-xl bg-elevated border border-wire hover:border-copper/30 transition-colors flex flex-col items-center gap-2.5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`https://cdn.simpleicons.org/${slug}/C8813A`}
-                  width={28}
-                  height={28}
-                  alt={name}
-                  loading="lazy"
-                />
-                <span className="text-[11px] text-ink-ghost text-center leading-tight">{name}</span>
-              </div>
-            ))}
-          </div>
+          <RevealSection>
+            <div className="text-center mb-10">
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Teknologiat</span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Modernit työkalut, kestävät tulokset</h2>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+              {TECHS.map(({ name, slug, desc }) => (
+                <div key={name} className="group relative p-4 rounded-xl bg-elevated border border-wire
+                  hover:border-copper/30 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-glow
+                  transition-all duration-200 flex flex-col items-center gap-2.5 cursor-default">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://cdn.simpleicons.org/${slug}/C8813A`}
+                    width={28}
+                    height={28}
+                    alt={name}
+                    loading="lazy"
+                    className="transition-transform duration-200 group-hover:scale-110"
+                  />
+                  <span className="text-[11px] text-ink-ghost text-center leading-tight">{name}</span>
+                  {/* Tooltip — ilmestyy 150 ms viiveellä */}
+                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100
+                    transition-opacity duration-150 delay-150 pointer-events-none z-20">
+                    <div className="bg-surface border border-wire rounded-lg px-3 py-1.5 text-[11px]
+                      text-ink whitespace-nowrap shadow-xl">
+                      {desc}
+                    </div>
+                    <div className="w-2 h-2 bg-surface border-b border-r border-wire rotate-45 mx-auto -mt-1" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* ─── PROCESS ──────────────────────────────────────────── */}
       <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Prosessi</span>
-            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Näin projekti etenee</h2>
-            <p className="text-ink-dim mt-3 max-w-lg mx-auto">Läpinäkyvä prosessi alusta loppuun — tiedät aina missä mennään.</p>
-          </div>
-          <div className="max-w-2xl mx-auto">
-            {STEPS.map((step, i) => (
-              <div key={step.title} className="flex gap-5">
-                <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-full border-2 border-copper bg-copper/10 text-copper font-bold text-sm flex items-center justify-center shrink-0">
-                    {String(i + 1).padStart(2, "0")}
-                  </div>
-                  {i < STEPS.length - 1 && (
-                    <div className="w-px flex-1 bg-gradient-to-b from-copper/40 to-wire/20 my-1 min-h-[2rem]" />
-                  )}
-                </div>
-                <div className="pb-8 pt-1.5">
-                  <h3 className="font-heading font-semibold text-ink mb-1">{step.title}</h3>
-                  <p className="text-ink-dim text-sm leading-relaxed">{step.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <RevealSection>
+            <div className="text-center mb-12">
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Prosessi</span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Näin projekti etenee</h2>
+              <p className="text-ink-dim mt-3 max-w-lg mx-auto">Läpinäkyvä prosessi alusta loppuun — tiedät aina missä mennään.</p>
+            </div>
+          </RevealSection>
+          <ProcessTimeline steps={STEPS} />
         </div>
       </section>
 
       {/* ─── HOSTING ──────────────────────────────────────────── */}
       <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Hosting</span>
-            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Hosting-vaihtoehdot</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Own hosting */}
-            <div className="gradient-border-white bg-elevated p-6 rounded-xl">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-9 h-9 rounded-lg bg-wire flex items-center justify-center">
-                  <Server size={16} className="text-ink-dim" />
-                </div>
-                <h3 className="font-heading font-semibold text-ink">Oma hosting</h3>
-              </div>
-              <p className="text-ink-dim text-sm mb-4">Siirrämme verkkosivuston valitsemallesi palvelimelle. Vastaat itse ylläpidosta.</p>
-              <ul className="space-y-2">
-                {OWN_HOSTING_CONS.map(item => (
-                  <li key={item} className="flex items-start gap-2 text-sm text-ink-ghost">
-                    <XCircle size={14} className="text-bad/70 shrink-0 mt-0.5" />{item}
-                  </li>
-                ))}
-              </ul>
+          <RevealSection>
+            <div className="text-center mb-10">
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Hosting</span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Hosting-vaihtoehdot</h2>
             </div>
-            {/* Apex hosting */}
-            <div className="gradient-border bg-elevated shadow-glow p-6 rounded-xl">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-9 h-9 rounded-lg bg-copper/10 flex items-center justify-center">
-                  <Globe size={16} className="text-copper" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {/* Own hosting */}
+              <div className="gradient-border-white bg-elevated p-6 rounded-xl">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-lg bg-wire flex items-center justify-center">
+                    <Server size={16} className="text-ink-dim" />
+                  </div>
+                  <h3 className="font-heading font-semibold text-ink">Oma hosting</h3>
                 </div>
-                <h3 className="font-heading font-semibold text-ink">Apex Site Hosting</h3>
-                <Badge variant="accent" size="sm">Suositeltu</Badge>
+                <p className="text-ink-dim text-sm mb-4">Siirrämme verkkosivuston valitsemallesi palvelimelle. Vastaat itse ylläpidosta.</p>
+                <ul className="space-y-2">
+                  {OWN_HOSTING_CONS.map(item => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-ink-ghost">
+                      <XCircle size={14} className="text-bad/70 shrink-0 mt-0.5" />{item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <p className="text-ink-dim text-sm mb-4">Kuukausimaksulla hoidamme kaiken puolestasi — sinä keskityt liiketoimintaasi.</p>
-              <ul className="space-y-2">
-                {APEX_HOSTING_ITEMS.map(item => (
-                  <li key={item} className="flex items-start gap-2 text-sm text-ink-dim">
+              {/* Apex hosting */}
+              <div className="gradient-border bg-elevated shadow-glow p-6 rounded-xl">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-lg bg-copper/10 flex items-center justify-center">
+                    <Globe size={16} className="text-copper" />
+                  </div>
+                  <h3 className="font-heading font-semibold text-ink">Apex Site Hosting</h3>
+                  <Badge variant="accent" size="sm">Suositeltu</Badge>
+                </div>
+                <p className="text-ink-dim text-sm mb-4">Kuukausimaksulla hoidamme kaiken puolestasi — sinä keskityt liiketoimintaasi.</p>
+                <ul className="space-y-2">
+                  {APEX_HOSTING_ITEMS.map(item => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-ink-dim">
+                      <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            {/* Why Apex hosting */}
+            <div className="mt-8 p-6 rounded-xl border border-copper/20 bg-copper/5 max-w-3xl mx-auto">
+              <h3 className="font-heading font-semibold text-ink mb-4">Miksi asiakkaat valitsevat Apex Site Hostingin?</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {WHY_APEX_HOSTING.map(item => (
+                  <div key={item} className="flex items-start gap-2 text-sm text-ink-dim">
                     <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{item}
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
-          </div>
-          {/* Why Apex hosting */}
-          <div className="mt-8 p-6 rounded-xl border border-copper/20 bg-copper/5 max-w-3xl mx-auto">
-            <h3 className="font-heading font-semibold text-ink mb-4">Miksi asiakkaat valitsevat Apex Site Hostingin?</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {WHY_APEX_HOSTING.map(item => (
-                <div key={item} className="flex items-start gap-2 text-sm text-ink-dim">
-                  <CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{item}
-                </div>
-              ))}
-            </div>
-          </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* ─── KARTOITUS ────────────────────────────────────────── */}
       <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-4xl mx-auto">
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Maksuton kartoitus</span>
-              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-4">
-                Mitä saat maksuttomassa 30 min kartoituksessa?
-              </h2>
-              <p className="text-ink-dim leading-relaxed mb-6">
-                Ennen kuin teet mitään päätöksiä, haluamme ymmärtää yrityksesi tarpeet. Kartoituspuhelu on täysin maksuton, eikä sido sinua mihinkään.
-              </p>
-              <Button asChild size="md">
-                <Link href="/yhteystiedot">Varaa maksuton kartoitus <ArrowRight size={15} /></Link>
-              </Button>
+          <RevealSection>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-4xl mx-auto">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Maksuton kartoitus</span>
+                <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-4">
+                  Mitä saat maksuttomassa 30 min kartoituksessa?
+                </h2>
+                <p className="text-ink-dim leading-relaxed mb-6">
+                  Ennen kuin teet mitään päätöksiä, haluamme ymmärtää yrityksesi tarpeet. Kartoituspuhelu on täysin maksuton, eikä sido sinua mihinkään.
+                </p>
+                <Button asChild size="md" className="group">
+                  <Link href="/yhteystiedot">
+                    Varaa maksuton kartoitus
+                    <ArrowRight size={15} className="transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              </div>
+              <ul className="space-y-3">
+                {KARTOITUS_ITEMS.map(item => (
+                  <li key={item} className="flex items-start gap-3 p-3.5 rounded-lg bg-elevated border border-wire text-sm text-ink-dim">
+                    <CheckCircle2 size={16} className="text-copper shrink-0 mt-0.5" />{item}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-3">
-              {KARTOITUS_ITEMS.map(item => (
-                <li key={item} className="flex items-start gap-3 p-3.5 rounded-lg bg-elevated border border-wire text-sm text-ink-dim">
-                  <CheckCircle2 size={16} className="text-copper shrink-0 mt-0.5" />{item}
-                </li>
-              ))}
-            </ul>
-          </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* ─── WHY US ───────────────────────────────────────────── */}
       <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Miksi me</span>
-            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
-              Miksi yritykset valitsevat Apex Siten?
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {WHY_US.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/40 transition-colors duration-200">
-                <div className="w-10 h-10 rounded-xl bg-copper/10 flex items-center justify-center mb-4">
-                  <Icon size={18} className="text-copper" />
+          <RevealSection>
+            <div className="text-center mb-10">
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Miksi me</span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
+                Miksi yritykset valitsevat Apex Siten?
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {WHY_US.map(({ icon: Icon, title, text }) => (
+                <div key={title} className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/40 hover:shadow-glow hover:scale-[1.01] transition-all duration-200">
+                  <div className="w-10 h-10 rounded-xl bg-copper/10 flex items-center justify-center mb-4">
+                    <Icon size={18} className="text-copper" />
+                  </div>
+                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
-                <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
-                <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* ─── FAQ ──────────────────────────────────────────────── */}
       <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
-          <div className="text-center mb-8">
-            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">UKK</span>
-            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Usein kysyttyä</h2>
-          </div>
+          <RevealSection>
+            <div className="text-center mb-8">
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">UKK</span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Usein kysyttyä</h2>
+            </div>
+          </RevealSection>
           <FaqAccordion items={FAQ} />
         </div>
       </section>
 
       {/* ─── PRE-CTA ──────────────────────────────────────────── */}
       <section className="py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl text-center">
+        <RevealSection className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl text-center">
           <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-4">
             Valmis kasvattamaan yrityksesi näkyvyyttä verkossa?
           </h2>
           <p className="text-ink-dim text-lg leading-relaxed">
             Laadukas verkkosivusto rakentaa luottamusta, auttaa hankkimaan uusia asiakkaita ja tukee yrityksesi kasvua. Aloita maksuttomalla kartoituspuhelulla — ei sitoumuksia, ei piilokuluja.
           </p>
-        </div>
+        </RevealSection>
       </section>
 
       {/* ─── FINAL CTA ────────────────────────────────────────── */}
-      <section className="py-20 relative overflow-hidden">
+      <section className="py-32 relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-copper/8 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-copper/12 blur-3xl" />
           <div className="absolute top-0 right-1/4 w-[300px] h-[300px] rounded-full bg-teal-brand/5 blur-3xl" />
         </div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <Badge variant="accent" className="mb-5">Aloitetaan</Badge>
-          <h2 className="font-display font-bold text-ink text-3xl sm:text-5xl mb-4 max-w-2xl mx-auto">
+          <h2 className="font-display font-bold text-ink text-3xl sm:text-5xl lg:text-6xl mb-4 max-w-2xl mx-auto">
             Rakennetaan yrityksellesi verkkosivusto, joka tekee vaikutuksen.
           </h2>
           <p className="text-ink-dim text-lg mb-8 max-w-xl mx-auto">
             Varaa maksuton 30 minuutin kartoitus. Suunnitellaan yhdessä juuri sinulle sopiva ratkaisu — ilman sitoumuksia.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button asChild size="lg">
-              <Link href="/yhteystiedot">Varaa maksuton kartoitus <ArrowRight size={16} /></Link>
+            <Button asChild size="lg" className="group">
+              <Link href="/yhteystiedot">
+                Varaa maksuton kartoitus
+                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
             </Button>
-            <Button asChild variant="secondary" size="lg">
+            <Button asChild variant="secondary" size="lg" className="group">
               <Link href="/yhteystiedot?palvelu=verkkosivut">
                 <Phone size={16} />Pyydä tarjous
               </Link>

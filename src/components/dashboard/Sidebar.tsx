@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import {
   LayoutDashboard, FileText, FolderOpen, Receipt, MessageSquare, Paperclip,
   Bell, Monitor, Settings, Users, LogOut, X, ShieldCheck,
+  Building2, Briefcase, CheckSquare, Calendar, BarChart2, CreditCard, Mail, Wrench,
 } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SidebarLink } from "./SidebarLink";
 import { RoleBadge } from "./RoleBadge";
-import { cn } from "@/lib/utils";
 
 interface SidebarProps {
   firstName?: string | null;
@@ -33,6 +33,7 @@ export function Sidebar({
 }: SidebarProps) {
   const router = useRouter();
   const isAdmin = role === "owner" || role === "admin";
+  const isStaff = role === "owner" || role === "admin" || role === "employee";
 
   async function signOut() {
     if (!isSupabaseConfigured()) return;
@@ -64,6 +65,14 @@ export function Sidebar({
       <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
         <SidebarLink href="/dashboard" label="Dashboard" icon={<LayoutDashboard size={16} />} exact onClick={onMobileClose} />
 
+        {isStaff && (
+          <>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">Business</p>
+            <SidebarLink href="/crm/asiakkaat" label="Asiakkaat" icon={<Building2 size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/crm/yritykset" label="Yritykset" icon={<Briefcase size={16} />} onClick={onMobileClose} />
+          </>
+        )}
+
         <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">Asiakasportaali</p>
         <SidebarLink href="/portaali" label="Yhteenveto" icon={<FolderOpen size={16} />} exact onClick={onMobileClose} />
         <SidebarLink href="/portaali/tarjoukset" label="Tarjoukset" icon={<FileText size={16} />} onClick={onMobileClose} />
@@ -72,16 +81,28 @@ export function Sidebar({
         <SidebarLink href="/portaali/viestit" label="Viestit" icon={<MessageSquare size={16} />} onClick={onMobileClose} />
         <SidebarLink href="/portaali/tiedostot" label="Tiedostot" icon={<Paperclip size={16} />} onClick={onMobileClose} />
 
+        {isStaff && (
+          <>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">Hallinta</p>
+            <SidebarLink href="/tehtavat" label="Tehtävät" icon={<CheckSquare size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/kalenteri" label="Kalenteri" icon={<Calendar size={16} />} onClick={onMobileClose} />
+          </>
+        )}
+
         <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">Tili</p>
         <SidebarLink href="/ilmoitukset" label="Ilmoitukset" icon={<Bell size={16} />} badge={unreadNotifications} onClick={onMobileClose} />
         <SidebarLink href="/istunnot" label="Istunnot" icon={<Monitor size={16} />} onClick={onMobileClose} />
-        <SidebarLink href="/asetukset" label="Asetukset" icon={<Settings size={16} />} onClick={onMobileClose} />
+        <SidebarLink href="/asetukset/profiili" label="Asetukset" icon={<Settings size={16} />} onClick={onMobileClose} />
 
         {isAdmin && (
           <>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">Admin</p>
             <SidebarLink href="/admin/kayttajat" label="Käyttäjät" icon={<Users size={16} />} onClick={onMobileClose} />
             <SidebarLink href="/admin/logi" label="Aktiviteettiloki" icon={<ShieldCheck size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/admin/analytiikka" label="Analytiikka" icon={<BarChart2 size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/admin/laskutus" label="Laskutus" icon={<CreditCard size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/admin/sahkopostipohjat" label="Sähköpostipohjat" icon={<Mail size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/admin/asetukset" label="Järjestelmä" icon={<Wrench size={16} />} onClick={onMobileClose} />
           </>
         )}
       </nav>
