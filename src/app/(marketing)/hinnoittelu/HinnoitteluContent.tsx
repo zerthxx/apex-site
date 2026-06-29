@@ -4,9 +4,9 @@ import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion";
-import { CheckCircle2, ArrowRight } from "lucide-react";
-import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
+import { CheckCircle2, ArrowRight, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { PageHero } from "@/components/shared/PageHero";
 import { CardCarousel } from "@/components/ui/CardCarousel";
 import { fadeUp, staggerContainer } from "@/lib/animations";
@@ -150,24 +150,69 @@ const MAINTENANCE_TIERS = [
   { name: "Premium", slug: "premium", price: "750 €/kk", highlight: false, features: ["Kaikki Standardi-tason ominaisuudet", "Prioriteettituki (2h vasteaika)", "8 h muutostyöt/kk", "Kvartaalikatsaus", "CRO-suositukset"] },
 ];
 
+const PRICING_REASONS = [
+  { title: "Ei piilokuluja", text: "Saat aina selkeän tarjouksen." },
+  { title: "Räätälöity tarjous", text: "Maksat vain tarvitsemistasi ominaisuuksista." },
+  { title: "Maksuton kartoitus", text: "30 minuutin kartoitus ilman sitoutumista." },
+  { title: "Skaalautuva ratkaisu", text: "Voit laajentaa projektia myöhemmin." },
+];
+
+const PRICING_STEPS = [
+  { num: "1", label: "Kartoitus" },
+  { num: "2", label: "Tarpeiden määrittely" },
+  { num: "3", label: "Tarjous" },
+  { num: "4", label: "Projektin toteutus" },
+  { num: "5", label: "Julkaisu" },
+];
+
+const INCLUDED = [
+  "Maksuton kartoitus",
+  "Moderni toteutus",
+  "Responsiivinen design",
+  "Testaus",
+  "Julkaisu",
+  "Käyttöönoton tuki",
+];
+
+const TRUST_STATS = [
+  { value: "47+", label: "Projektia" },
+  { value: "98%", label: "Tyytyväisiä asiakkaita" },
+  { value: "5★", label: "Google-arvosana" },
+  { value: "3+", label: "Vuotta kokemusta" },
+];
+
 const FAQ = [
   { q: "Onko hinnoittelu kiinteä vai tuntiperusteiset?", a: "Useimmille projekteille annamme kiinteän hinnan. Isommissa projekteissa voidaan sopia virstanpylväspohjaisesta laskutuksesta. Jatkokehityksessä käytämme tuntihintaa (95–145 €/h)." },
   { q: "Miksi hintanne eroaa halvemmista toimijoista?", a: "Käytämme hyviä materiaaleja, parempia prosesseja ja kokeneitampia ihmisiä. Tyypillinen halpa projekti maksaa enemmän vuoden päästä kun sille tarvitaan uusintakehitystä." },
   { q: "Voiko projektin jakaa eriin?", a: "Kyllä. Projektit laskutetaan tyypillisesti kolmessa erässä: 30% aloituksessa, 40% kehityksen puolivälissä, 30% julkaisun yhteydessä." },
+  { q: "Voinko maksaa projektin osissa?", a: "Kyllä. Laskutamme tyypillisesti kolmessa erässä: 30% aloituksessa, 40% kehityksen puolivälissä ja 30% julkaisussa. Isommille projekteille voidaan sopia yksilöllinen maksutapa." },
+  { q: "Voinko vaihtaa pakettia myöhemmin?", a: "Kyllä. Voit päivittää tai muuttaa pakettia projektin edetessä. Käymme muutoksen läpi ja päivitämme tarjouksen." },
+  { q: "Sisältyykö domain ja hosting?", a: "Domain ei sisälly — se rekisteröidään yleensä asiakkaan omille tunnuksille. Hosting on valittavissa: me hoidamme sen (+50 €/kk) tai asiakas käyttää omaa hostingiaan." },
+  { q: "Voinko käyttää omaa hostingia?", a: "Kyllä. Voit valita oman hostingin ja maksaa vain kertaluonteisen aloitusmaksun. Tällöin hosting on sinun vastuullasi." },
+  { q: "Kuinka nopeasti projekti voidaan aloittaa?", a: "Yleensä aloitamme 1–2 viikon sisällä sopimuksen allekirjoituksesta. Kiireellisemmissä tapauksissa voivat löytyä aikaisemmat aloitusajankohdat — kysy." },
+  { q: "Mitä tapahtuu julkaisun jälkeen?", a: "Projektin päättyessä siirräme sivuston omistajuuden ja lähdekoodit sinulle. Voit valita ylläpitosopimuksen tai hoitaa itse. Tarjoamme myös jatkokehitystä tarpeen mukaan." },
 ];
 
 export function HinnoitteluContent() {
   const router = useRouter();
+  const reasonsRef = useRef<HTMLDivElement>(null);
+  const stepsRef = useRef<HTMLDivElement>(null);
   const starterRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLDivElement>(null);
   const addOnsRef = useRef<HTMLDivElement>(null);
   const maintenanceRef = useRef<HTMLDivElement>(null);
+  const includedRef = useRef<HTMLDivElement>(null);
+  const trustRef = useRef<HTMLDivElement>(null);
   const faqRef = useRef<HTMLDivElement>(null);
 
+  const reasonsInView = useInView(reasonsRef, { once: true, margin: "-80px" });
+  const stepsInView = useInView(stepsRef, { once: true, margin: "-80px" });
   const starterInView = useInView(starterRef, { once: true, margin: "-80px" });
   const servicesInView = useInView(servicesRef, { once: true, margin: "-80px" });
   const addOnsInView = useInView(addOnsRef, { once: true, margin: "-80px" });
   const maintenanceInView = useInView(maintenanceRef, { once: true, margin: "-80px" });
+  const includedInView = useInView(includedRef, { once: true, margin: "-80px" });
+  const trustInView = useInView(trustRef, { once: true, margin: "-80px" });
   const faqInView = useInView(faqRef, { once: true, margin: "-80px" });
 
   return (
@@ -179,8 +224,82 @@ export function HinnoitteluContent() {
         cta={{ label: "Pyydä ilmainen tarjous", href: "/yhteystiedot" }}
       />
 
+      {/* ── MIKSI HINNAT ALKAVAT TÄSTÄ? ── */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-copper mb-3">
+              Läpinäkyvä hinnoittelu
+            </p>
+            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-3">
+              Miksi hinnat alkavat tästä?
+            </h2>
+            <p className="text-ink-dim max-w-lg mx-auto">
+              Jokainen projekti on erilainen. Lopullinen hinta määräytyy yrityksesi tarpeiden,
+              ominaisuuksien ja projektin laajuuden mukaan.
+            </p>
+          </div>
+          <motion.div
+            ref={reasonsRef}
+            variants={staggerContainer}
+            initial="hidden"
+            animate={reasonsInView ? "visible" : "hidden"}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          >
+            {PRICING_REASONS.map((item) => (
+              <motion.div
+                key={item.title}
+                variants={fadeUp}
+                className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:shadow-glow hover:-translate-y-0.5 transition-all duration-200"
+              >
+                <CheckCircle2 size={20} className="text-copper mb-3" />
+                <h3 className="font-heading font-semibold text-ink mb-2">{item.title}</h3>
+                <p className="text-ink-dim text-sm leading-relaxed">{item.text}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── MITEN HINNOITTELU MUODOSTUU? ── */}
+      <section className="py-12 bg-surface/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="font-display font-bold text-ink text-2xl sm:text-3xl">
+              Miten hinnoittelu muodostuu?
+            </h2>
+            <p className="text-ink-dim text-sm mt-2">
+              Hinta ei ole satunnainen — se syntyy selkeän prosessin kautta.
+            </p>
+          </div>
+          <motion.div
+            ref={stepsRef}
+            variants={staggerContainer}
+            initial="hidden"
+            animate={stepsInView ? "visible" : "hidden"}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-0 max-w-3xl mx-auto"
+          >
+            {PRICING_STEPS.map((step, i) => (
+              <motion.div key={step.num} variants={fadeUp} className="flex items-center gap-3">
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-9 h-9 rounded-full bg-copper/10 border border-copper/30 flex items-center justify-center text-copper font-bold text-sm">
+                    {step.num}
+                  </div>
+                  <span className="text-[11px] font-medium text-ink-dim text-center whitespace-nowrap">
+                    {step.label}
+                  </span>
+                </div>
+                {i < PRICING_STEPS.length - 1 && (
+                  <span className="text-ink-ghost hidden sm:inline mx-2 mb-5">→</span>
+                )}
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* Starter packages for small businesses */}
-      <section className="py-16 bg-surface/30">
+      <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <span className="text-xs font-semibold uppercase tracking-[0.15em] text-teal-brand">Pienyrityksille</span>
@@ -240,7 +359,7 @@ export function HinnoitteluContent() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-10 text-center">
             Palveluiden hinnat
@@ -278,7 +397,7 @@ export function HinnoitteluContent() {
         </div>
       </section>
 
-      <section className="py-16 bg-surface/30">
+      <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-3">
@@ -318,7 +437,7 @@ export function HinnoitteluContent() {
       </section>
 
       {/* Add-ons */}
-      <section className="py-16">
+      <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Lisäpalvelut</span>
@@ -355,7 +474,43 @@ export function HinnoitteluContent() {
         </div>
       </section>
 
+      {/* ── MITÄ KAIKKI PROJEKTIT SISÄLTÄVÄT? ── */}
       <section className="py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-copper mb-3">
+              Jokaisessa projektissa
+            </p>
+            <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-3">
+              Mitä kaikki projektit sisältävät?
+            </h2>
+            <p className="text-ink-dim max-w-md mx-auto">
+              Nämä kuuluvat jokaiseen projektiimme — riippumatta koosta tai paketista.
+            </p>
+          </div>
+          <motion.div
+            ref={includedRef}
+            variants={staggerContainer}
+            initial="hidden"
+            animate={includedInView ? "visible" : "hidden"}
+            className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-2xl mx-auto"
+          >
+            {INCLUDED.map((item) => (
+              <motion.div
+                key={item}
+                variants={fadeUp}
+                className="p-5 rounded-xl border border-wire bg-elevated flex items-center gap-3 hover:border-copper/30 transition-colors"
+              >
+                <CheckCircle2 size={18} className="text-copper shrink-0" />
+                <span className="font-heading font-semibold text-ink text-sm">{item}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="py-16 bg-surface/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
           <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-8">
             Usein kysyttyä hinnoittelusta
@@ -377,7 +532,70 @@ export function HinnoitteluContent() {
         </div>
       </section>
 
-      <ContactCtaSection />
+      {/* ── LUOTTAMUSOSIO ── */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-xs font-semibold uppercase tracking-widest text-copper mb-3">
+            Tulokset puhuvat puolestaan
+          </p>
+          <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-10">
+            Miksi asiakkaat valitsevat Apex Siten?
+          </h2>
+          <motion.div
+            ref={trustRef}
+            variants={staggerContainer}
+            initial="hidden"
+            animate={trustInView ? "visible" : "hidden"}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto"
+          >
+            {TRUST_STATS.map(({ value, label }) => (
+              <motion.div key={label} variants={fadeUp} className="text-center">
+                <p className="text-4xl font-bold text-copper leading-none">{value}</p>
+                <p className="text-sm text-ink-dim mt-2">{label}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── VAHVEMPI CTA ── */}
+      <section className="relative py-24 overflow-hidden bg-elevated border-t border-wire">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="w-[600px] h-[600px] rounded-full bg-copper/10 blur-[120px]" />
+        </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative text-center max-w-3xl">
+          <p className="text-ink-ghost text-sm mb-4">
+            Etkö ole varma mikä ratkaisu sopii yrityksellesi?
+          </p>
+          <h2 className="font-display font-bold text-ink text-4xl sm:text-5xl leading-tight mb-5">
+            Varaa maksuton{" "}
+            <span className="text-copper">30 minuutin kartoitus.</span>
+          </h2>
+          <p className="text-ink-dim text-lg leading-relaxed mb-8 max-w-xl mx-auto">
+            Käymme yhdessä läpi yrityksesi tarpeet ja suosittelemme juuri sinulle sopivan
+            ratkaisun ilman sitoutumista.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 mb-6">
+            <Button asChild size="lg" className="group">
+              <Link href="/yhteystiedot">
+                Varaa maksuton kartoitus
+                <ArrowRight
+                  size={18}
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                />
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="lg">
+              <Link href="tel:+358442455490" className="flex items-center gap-2">
+                <Phone size={16} /> Soita meille
+              </Link>
+            </Button>
+          </div>
+          <p className="text-xs text-ink-ghost">
+            Vastaamme 24 tunnissa · Ei sitoutumista · Ilmainen kartoitus
+          </p>
+        </div>
+      </section>
     </>
   );
 }

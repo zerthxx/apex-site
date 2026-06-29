@@ -8,6 +8,9 @@ const contactSchema = z.object({
   puhelin: z.string().optional(),
   yritys: z.string().optional(),
   palvelu: z.enum(["verkkosivut", "startti", "kasvu", "pro", "perus", "standardi", "premium", "verkkokaupat", "mobiilisovellukset", "ai-ratkaisut", "ohjelmistot", "muu"]),
+  budjetti: z.string().optional(),
+  aikataulu: z.string().optional(),
+  yhteydenotto: z.string().optional(),
   viesti: z.string().min(20, "Viesti on liian lyhyt").max(2000, "Viesti on liian pitkä"),
   honeypot: z.string().max(0),
 });
@@ -66,7 +69,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Validointivirhe", issues: result.error.issues }, { status: 422 });
   }
 
-  const { nimi, sahkoposti, puhelin, yritys, palvelu, viesti, honeypot } = result.data;
+  const { nimi, sahkoposti, puhelin, yritys, palvelu, budjetti, aikataulu, yhteydenotto, viesti, honeypot } = result.data;
 
   if (honeypot && honeypot.length > 0) {
     return NextResponse.json({ success: true });
@@ -90,6 +93,9 @@ export async function POST(request: NextRequest) {
           ${puhelin ? `<tr><td style="padding:8px 0;color:#666;">Puhelin</td><td style="padding:8px 0;">${puhelin}</td></tr>` : ""}
           ${yritys ? `<tr><td style="padding:8px 0;color:#666;">Yritys</td><td style="padding:8px 0;">${yritys}</td></tr>` : ""}
           <tr><td style="padding:8px 0;color:#666;">Palvelu</td><td style="padding:8px 0;">${serviceLabel}</td></tr>
+          ${budjetti ? `<tr><td style="padding:8px 0;color:#666;">Budjetti</td><td style="padding:8px 0;">${budjetti}</td></tr>` : ""}
+          ${aikataulu ? `<tr><td style="padding:8px 0;color:#666;">Aikataulu</td><td style="padding:8px 0;">${aikataulu}</td></tr>` : ""}
+          ${yhteydenotto ? `<tr><td style="padding:8px 0;color:#666;">Yhteydenottotapa</td><td style="padding:8px 0;">${yhteydenotto}</td></tr>` : ""}
         </table>
         <div style="margin-top:16px;padding:16px;background:#f5f5f5;border-radius:8px;">
           <strong>Viesti:</strong><br/><br/>
