@@ -1,13 +1,19 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Phone, FileText, Code2, Rocket, HeartHandshake } from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
-import { ProcessSteps } from "@/components/shared/ProcessSteps";
-import { PROCESS_STEPS } from "@/lib/constants";
 import { fadeUp } from "@/lib/animations";
+
+const QUICK_STEPS = [
+  { num: "01", title: "Maksuton kartoitus", icon: Phone },
+  { num: "02", title: "Saat tarjouksen", icon: FileText },
+  { num: "03", title: "Aloitamme kehityksen", icon: Code2 },
+  { num: "04", title: "Julkaisemme ratkaisun", icon: Rocket },
+  { num: "05", title: "Jatkuva ylläpito", icon: HeartHandshake },
+];
 
 export function ProcessTeaserSection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -23,13 +29,39 @@ export function ProcessTeaserSection() {
           animate={isInView ? "visible" : "hidden"}
         >
           <SectionHeader
-            eyebrow="Prosessimme"
-            heading="Miten työskentelemme"
+            eyebrow="Aloittaminen"
+            heading="Näin projekti alkaa"
             subheading="Selkeä prosessi, läpinäkyvä kommunikaatio ja tulokset aikataulussa."
             className="mb-14"
           />
 
-          <ProcessSteps steps={PROCESS_STEPS} variant="horizontal" />
+          {/* Timeline */}
+          <div className="relative flex flex-col md:flex-row gap-6 md:gap-0">
+            {/* Connector line (desktop) */}
+            <div className="hidden md:block absolute top-5 left-[10%] right-[10%] h-px bg-gradient-to-r from-copper/10 via-copper/30 to-copper/10" />
+
+            {QUICK_STEPS.map(({ num, title, icon: Icon }, i) => (
+              <div key={num} className="relative flex flex-col items-center flex-1 text-center px-2">
+                {/* Number circle */}
+                <div className="relative z-10 w-10 h-10 rounded-full border border-copper/40 bg-elevated flex items-center justify-center mb-3 shadow-glow">
+                  <Icon size={16} className="text-copper" />
+                </div>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-copper/60 mb-1">
+                  {num}
+                </span>
+                <p className="text-xs sm:text-sm text-ink-dim font-medium leading-snug max-w-[100px]">
+                  {title}
+                </p>
+
+                {/* Mobile arrow */}
+                {i < QUICK_STEPS.length - 1 && (
+                  <div className="md:hidden mt-3 text-wire">
+                    <ArrowRight size={16} className="rotate-90" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
 
           <div className="mt-10 text-center">
             <Link
@@ -44,4 +76,3 @@ export function ProcessTeaserSection() {
     </section>
   );
 }
-

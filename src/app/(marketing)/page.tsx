@@ -4,7 +4,10 @@ import { ProfileModal } from "@/components/ui/ProfileModal";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { LogoBarSection } from "@/components/sections/LogoBarSection";
 import { ServicesGridSection } from "@/components/sections/ServicesGridSection";
+import { RecentProjectsSection } from "@/components/sections/RecentProjectsSection";
+import { MidPageCtaSection } from "@/components/sections/MidPageCtaSection";
 import { WhyApexSection } from "@/components/sections/WhyApexSection";
+import { HowWeHelpSection } from "@/components/sections/HowWeHelpSection";
 import { ProcessTeaserSection } from "@/components/sections/ProcessTeaserSection";
 import { TechStackSection } from "@/components/sections/TechStackSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
@@ -29,7 +32,10 @@ export default function HomePage() {
       <LogoBarSection />
       <StatsSection />
       <ServicesGridSection />
+      <RecentProjectsSection />
+      <MidPageCtaSection />
       <WhyApexSection />
+      <HowWeHelpSection />
       <ProcessTeaserSection />
       <TechStackSection />
       <TestimonialsSection />

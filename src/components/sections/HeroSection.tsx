@@ -203,7 +203,7 @@ export function HeroSection() {
   }, [prefersReduced]);
 
   return (
-    <section ref={sectionRef} className="relative min-h-[80dvh] md:min-h-dvh flex flex-col overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-[65dvh] md:min-h-[78dvh] flex flex-col overflow-hidden">
       {/* Background orbs */}
       <div
         aria-hidden
@@ -290,6 +290,29 @@ export function HeroSection() {
               <Button size="lg" asChild>
                 <Link href="/yhteystiedot">Pyydä ilmainen tarjous</Link>
               </Button>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="space-y-3">
+              <p className="text-ink-ghost text-sm leading-relaxed max-w-lg">
+                Yksi kumppani kaikkiin digitaalisiin ratkaisuihin – verkkosivut, verkkokaupat,
+                AI-ratkaisut ja mobiilisovellukset.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { emoji: "🌐", label: "Verkkosivut" },
+                  { emoji: "🤖", label: "AI-ratkaisut" },
+                  { emoji: "🛒", label: "Verkkokaupat" },
+                  { emoji: "📱", label: "Mobiilisovellukset" },
+                ].map(({ emoji, label }) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-wire bg-surface/60 text-ink-dim hover:border-copper/30 hover:text-ink transition-all duration-150"
+                  >
+                    <span>{emoji}</span>
+                    {label}
+                  </span>
+                ))}
+              </div>
             </motion.div>
 
             {/* Social proof avatars */}

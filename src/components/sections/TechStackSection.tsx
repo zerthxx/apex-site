@@ -84,6 +84,16 @@ export function TechStackSection() {
             );
           })}
         </motion.div>
+
+        <motion.p
+          variants={fadeUp}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          className="text-ink-ghost text-sm text-center mt-10 max-w-2xl mx-auto leading-relaxed"
+        >
+          Käytämme moderneja ja pitkäikäisiä teknologioita, jotta ratkaisusi on turvallinen,
+          nopea ja helposti laajennettava myös tulevaisuudessa.
+        </motion.p>
       </div>
     </section>
   );
