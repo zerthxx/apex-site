@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useId, useState } from "react";
+import { forwardRef, useId, useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const generatedId = useId();
     const selectId = id ?? generatedId;
     const [hasValue, setHasValue] = useState(!!props.value || !!props.defaultValue);
+
+    useEffect(() => {
+      setHasValue(!!props.value || !!props.defaultValue);
+    }, [props.value, props.defaultValue]);
 
     return (
       <div className="flex flex-col gap-1.5">

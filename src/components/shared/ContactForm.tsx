@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -49,11 +50,16 @@ export function ContactForm() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
     defaultValues: { palvelu: defaultPalvelu as never, honeypot: "" },
   });
+
+  useEffect(() => {
+    setValue("palvelu", defaultPalvelu as never);
+  }, [defaultPalvelu, setValue]);
 
   const onSubmit = async (data: ContactFormData) => {
     try {
