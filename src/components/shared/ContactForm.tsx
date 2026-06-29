@@ -28,10 +28,10 @@ const SERVICE_OPTIONS = [
   { value: "perus", label: "Ylläpito — Perus (150 €/kk)" },
   { value: "standardi", label: "Ylläpito — Standardi (350 €/kk)" },
   { value: "premium", label: "Ylläpito — Premium (750 €/kk)" },
-  { value: "verkkokaupat", label: "Verkkokaupat" },
-  { value: "mobiilisovellukset", label: "Mobiilisovellukset" },
-  { value: "ai-ratkaisut", label: "AI-ratkaisut" },
-  { value: "ohjelmistot", label: "Ohjelmistot / SaaS" },
+  { value: "verkkokaupat", label: "Verkkokauppa (alkaen 6 000 €)" },
+  { value: "mobiilisovellukset", label: "Mobiilisovellus (alkaen 15 000 €)" },
+  { value: "ai-ratkaisut", label: "AI-ratkaisut (alkaen 4 000 €)" },
+  { value: "ohjelmistot", label: "Ohjelmistot / SaaS (tarjous)" },
   { value: "muu", label: "Muu / En ole varma" },
 ];
 
