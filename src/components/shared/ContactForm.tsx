@@ -14,7 +14,7 @@ const contactSchema = z.object({
   sahkoposti: z.string().email("Virheellinen sähköpostiosoite"),
   puhelin: z.string().optional(),
   yritys: z.string().optional(),
-  palvelu: z.enum(["verkkosivut", "verkkokaupat", "mobiilisovellukset", "ai-ratkaisut", "ohjelmistot", "muu"]),
+  palvelu: z.enum(["startti", "kasvu", "pro", "perus", "standardi", "premium", "verkkokaupat", "mobiilisovellukset", "ai-ratkaisut", "ohjelmistot", "muu"]),
   viesti: z.string().min(20, "Kerro lisää projektistasi (vähintään 20 merkkiä)").max(2000),
   honeypot: z.string().max(0),
 });
@@ -22,7 +22,12 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 const SERVICE_OPTIONS = [
-  { value: "verkkosivut", label: "Verkkosivut" },
+  { value: "startti", label: "Verkkosivut — Startti (299 € + 49 €/kk)" },
+  { value: "kasvu", label: "Verkkosivut — Kasvu (599 € + 79 €/kk)" },
+  { value: "pro", label: "Verkkosivut — Pro (999 € + 99 €/kk)" },
+  { value: "perus", label: "Ylläpito — Perus (150 €/kk)" },
+  { value: "standardi", label: "Ylläpito — Standardi (350 €/kk)" },
+  { value: "premium", label: "Ylläpito — Premium (750 €/kk)" },
   { value: "verkkokaupat", label: "Verkkokaupat" },
   { value: "mobiilisovellukset", label: "Mobiilisovellukset" },
   { value: "ai-ratkaisut", label: "AI-ratkaisut" },
