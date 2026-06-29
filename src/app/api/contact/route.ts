@@ -7,7 +7,7 @@ const contactSchema = z.object({
   sahkoposti: z.string().email("Virheellinen sähköpostiosoite"),
   puhelin: z.string().optional(),
   yritys: z.string().optional(),
-  palvelu: z.enum(["verkkosivut", "verkkokauppa", "mobiilisovellus", "ai-ratkaisu", "ohjelmisto", "muu"]),
+  palvelu: z.enum(["verkkosivut", "startti", "kasvu", "pro", "perus", "standardi", "premium", "verkkokaupat", "mobiilisovellukset", "ai-ratkaisut", "ohjelmistot", "muu"]),
   viesti: z.string().min(20, "Viesti on liian lyhyt").max(2000, "Viesti on liian pitkä"),
   honeypot: z.string().max(0),
 });
@@ -33,12 +33,18 @@ function checkRateLimit(ip: string): boolean {
 }
 
 const SERVICE_LABELS: Record<string, string> = {
-  verkkosivut: "Verkkosivut",
-  verkkokauppa: "Verkkokauppa",
-  mobiilisovellus: "Mobiilisovellus",
-  "ai-ratkaisu": "AI-ratkaisu",
-  ohjelmisto: "Ohjelmisto",
-  muu: "Muu",
+  verkkosivut: "Verkkosivut (räätälöity)",
+  startti: "Verkkosivut — Startti",
+  kasvu: "Verkkosivut — Kasvu",
+  pro: "Verkkosivut — Pro",
+  perus: "Ylläpito — Perus",
+  standardi: "Ylläpito — Standardi",
+  premium: "Ylläpito — Premium",
+  verkkokaupat: "Verkkokauppa",
+  mobiilisovellukset: "Mobiilisovellus",
+  "ai-ratkaisut": "AI-ratkaisut",
+  ohjelmistot: "Ohjelmistot / SaaS",
+  muu: "Muu / En ole varma",
 };
 
 export async function POST(request: NextRequest) {

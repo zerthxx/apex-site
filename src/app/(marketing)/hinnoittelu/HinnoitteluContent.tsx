@@ -13,6 +13,7 @@ import { fadeUp, staggerContainer } from "@/lib/animations";
 const SERVICES_PRICING = [
   {
     name: "Verkkosivut",
+    slug: "verkkosivut",
     price: "alkaen 3 000 €",
     description: "Moderni, nopea ja hakukoneoptimoitu yrityspresenssi verkossa.",
     features: [
@@ -28,6 +29,7 @@ const SERVICES_PRICING = [
   },
   {
     name: "AI-ratkaisut",
+    slug: "ai-ratkaisut",
     price: "alkaen 4 000 €",
     description: "Automaatiot, chatbotit ja AI-integraatiot liiketoimintaasi.",
     features: [
@@ -43,6 +45,7 @@ const SERVICES_PRICING = [
   },
   {
     name: "Verkkokauppa",
+    slug: "verkkokaupat",
     price: "alkaen 6 000 €",
     description: "Myyvä verkkokauppa Shopify, WooCommerce tai täysin räätälöitynä.",
     features: [
@@ -58,6 +61,7 @@ const SERVICES_PRICING = [
   },
   {
     name: "Mobiilisovellus",
+    slug: "mobiilisovellukset",
     price: "alkaen 15 000 €",
     description: "Native iOS ja Android tai cross-platform React Native.",
     features: [
@@ -201,7 +205,7 @@ export function HinnoitteluContent() {
           <div className="md:hidden">
             <CardCarousel defaultIndex={1}>
               {STARTER_PACKAGES.map((pkg) => (
-                <div key={pkg.name} className={`p-6 rounded-xl border flex flex-col h-full ${pkg.name === "Pro" ? "gradient-border-violet bg-elevated" : pkg.name === "Startti" ? "gradient-border-white bg-elevated" : "gradient-border bg-elevated shadow-glow"}`}>
+                <Link key={pkg.name} href={`/yhteystiedot?palvelu=${pkg.slug}`} className={`p-6 rounded-xl border flex flex-col h-full hover:opacity-90 transition-opacity ${pkg.name === "Pro" ? "gradient-border-violet bg-elevated" : pkg.name === "Startti" ? "gradient-border-white bg-elevated" : "gradient-border bg-elevated shadow-glow"}`}>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-display font-bold text-ink text-xl">{pkg.name}</h3>
                     {pkg.highlight && <Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge>}
@@ -209,23 +213,25 @@ export function HinnoitteluContent() {
                   <div className="mb-3"><span className="text-copper font-bold text-2xl">{pkg.setup}</span><span className="text-ink-dim text-sm ml-1">aloitus</span><span className="text-ink-ghost mx-2">+</span><span className="text-copper font-semibold">{pkg.monthly}</span></div>
                   <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
                   <ul className="space-y-2 flex-1 mb-6">{pkg.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
-                  <Link href={`/yhteystiedot?palvelu=${pkg.slug}`} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Pyydä tarjous <ArrowRight size={14} /></Link>
-                </div>
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-copper">Pyydä tarjous <ArrowRight size={14} /></span>
+                </Link>
               ))}
             </CardCarousel>
           </div>
           {/* Desktop grid */}
           <motion.div ref={starterRef} variants={staggerContainer} initial="hidden" animate={starterInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {STARTER_PACKAGES.map((pkg) => (
-              <motion.div key={pkg.name} variants={fadeUp} className={`p-6 rounded-xl border flex flex-col ${pkg.name === "Pro" ? "gradient-border-violet bg-elevated" : pkg.name === "Startti" ? "gradient-border-white bg-elevated" : "gradient-border bg-elevated"}`}>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-display font-bold text-ink text-xl">{pkg.name}</h3>
-                  {pkg.highlight && <Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge>}
-                </div>
-                <div className="mb-3"><span className="text-copper font-bold text-2xl">{pkg.setup}</span><span className="text-ink-dim text-sm ml-1">aloitus</span><span className="text-ink-ghost mx-2">+</span><span className="text-copper font-semibold">{pkg.monthly}</span></div>
-                <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
-                <ul className="space-y-2 flex-1 mb-6">{pkg.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
-                <Link href="/yhteystiedot" className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Pyydä tarjous <ArrowRight size={14} /></Link>
+              <motion.div key={pkg.name} variants={fadeUp}>
+                <Link href={`/yhteystiedot?palvelu=${pkg.slug}`} className={`p-6 rounded-xl border flex flex-col h-full hover:opacity-90 transition-opacity ${pkg.name === "Pro" ? "gradient-border-violet bg-elevated" : pkg.name === "Startti" ? "gradient-border-white bg-elevated" : "gradient-border bg-elevated"}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-display font-bold text-ink text-xl">{pkg.name}</h3>
+                    {pkg.highlight && <Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge>}
+                  </div>
+                  <div className="mb-3"><span className="text-copper font-bold text-2xl">{pkg.setup}</span><span className="text-ink-dim text-sm ml-1">aloitus</span><span className="text-ink-ghost mx-2">+</span><span className="text-copper font-semibold">{pkg.monthly}</span></div>
+                  <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
+                  <ul className="space-y-2 flex-1 mb-6">{pkg.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-copper">Pyydä tarjous <ArrowRight size={14} /></span>
+                </Link>
               </motion.div>
             ))}
           </motion.div>
@@ -241,21 +247,23 @@ export function HinnoitteluContent() {
           <div className="md:hidden">
             <CardCarousel defaultIndex={2}>
               {SERVICES_PRICING.map((svc) => (
-                <div key={svc.name} className={`p-6 rounded-xl border flex flex-col h-full ${svc.name === "Verkkosivut" ? "gradient-border-white bg-elevated" : svc.name === "AI-ratkaisut" ? "gradient-border-teal bg-elevated" : svc.name === "Verkkokauppa" ? "gradient-border bg-elevated" : "gradient-border-violet bg-elevated"}`}>
-                    <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
+                <Link key={svc.name} href={`/yhteystiedot?palvelu=${svc.slug}`} className={`p-6 rounded-xl border flex flex-col h-full hover:opacity-90 transition-opacity ${svc.name === "Verkkosivut" ? "gradient-border-white bg-elevated" : svc.name === "AI-ratkaisut" ? "gradient-border-teal bg-elevated" : svc.name === "Verkkokauppa" ? "gradient-border bg-elevated" : "gradient-border-violet bg-elevated"}`}>
+                  <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
                   <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
-                  <Link href={svc.href} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Lue lisää <ArrowRight size={14} /></Link>
-                </div>
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-copper">Pyydä tarjous <ArrowRight size={14} /></span>
+                </Link>
               ))}
             </CardCarousel>
           </div>
           {/* Desktop grid */}
           <motion.div ref={servicesRef} variants={staggerContainer} initial="hidden" animate={servicesInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {SERVICES_PRICING.map((svc) => (
-              <motion.div key={svc.name} variants={fadeUp} className={`p-6 rounded-xl border flex flex-col ${svc.name === "Verkkosivut" ? "gradient-border-white bg-elevated" : svc.name === "AI-ratkaisut" ? "gradient-border-teal bg-elevated" : svc.name === "Verkkokauppa" ? "gradient-border bg-elevated" : "gradient-border-violet bg-elevated"}`}>
-                <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
-                <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
-                <Link href={svc.href} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Lue lisää <ArrowRight size={14} /></Link>
+              <motion.div key={svc.name} variants={fadeUp}>
+                <Link href={`/yhteystiedot?palvelu=${svc.slug}`} className={`p-6 rounded-xl border flex flex-col h-full hover:opacity-90 transition-opacity ${svc.name === "Verkkosivut" ? "gradient-border-white bg-elevated" : svc.name === "AI-ratkaisut" ? "gradient-border-teal bg-elevated" : svc.name === "Verkkokauppa" ? "gradient-border bg-elevated" : "gradient-border-violet bg-elevated"}`}>
+                  <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
+                  <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-copper">Pyydä tarjous <ArrowRight size={14} /></span>
+                </Link>
               </motion.div>
             ))}
           </motion.div>
