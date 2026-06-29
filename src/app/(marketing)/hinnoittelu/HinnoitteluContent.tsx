@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
@@ -156,6 +157,7 @@ const FAQ = [
 ];
 
 export function HinnoitteluContent() {
+  const router = useRouter();
   const starterRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLDivElement>(null);
   const addOnsRef = useRef<HTMLDivElement>(null);
@@ -247,11 +249,14 @@ export function HinnoitteluContent() {
           <div className="md:hidden">
             <CardCarousel defaultIndex={2}>
               {SERVICES_PRICING.map((svc) => (
-                <Link key={svc.name} href={`/yhteystiedot?palvelu=${svc.slug}`} className={`p-6 rounded-xl border flex flex-col h-full hover:opacity-90 transition-opacity ${svc.name === "Verkkosivut" ? "gradient-border-white bg-elevated" : svc.name === "AI-ratkaisut" ? "gradient-border-teal bg-elevated" : svc.name === "Verkkokauppa" ? "gradient-border bg-elevated" : "gradient-border-violet bg-elevated"}`}>
+                <div key={svc.name} onClick={() => router.push(`/yhteystiedot?palvelu=${svc.slug}`)} className={`p-6 rounded-xl border flex flex-col h-full cursor-pointer hover:opacity-90 transition-opacity ${svc.name === "Verkkosivut" ? "gradient-border-white bg-elevated" : svc.name === "AI-ratkaisut" ? "gradient-border-teal bg-elevated" : svc.name === "Verkkokauppa" ? "gradient-border bg-elevated" : "gradient-border-violet bg-elevated"}`}>
                   <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
-                  <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
-                  <span className="flex items-center gap-1.5 text-sm font-medium text-copper">Pyydä tarjous <ArrowRight size={14} /></span>
-                </Link>
+                  <ul className="space-y-2 flex-1 mb-4">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <div className="flex items-center justify-between pt-3 border-t border-wire/40">
+                    <Link href={svc.href} onClick={e => e.stopPropagation()} className="flex items-center gap-1 text-sm text-ink-dim hover:text-ink transition-colors">Lue lisää <ArrowRight size={13} /></Link>
+                    <span className="flex items-center gap-1 text-sm font-medium text-copper">Pyydä tarjous <ArrowRight size={13} /></span>
+                  </div>
+                </div>
               ))}
             </CardCarousel>
           </div>
@@ -259,11 +264,14 @@ export function HinnoitteluContent() {
           <motion.div ref={servicesRef} variants={staggerContainer} initial="hidden" animate={servicesInView ? "visible" : "hidden"} className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {SERVICES_PRICING.map((svc) => (
               <motion.div key={svc.name} variants={fadeUp}>
-                <Link href={`/yhteystiedot?palvelu=${svc.slug}`} className={`p-6 rounded-xl border flex flex-col h-full hover:opacity-90 transition-opacity ${svc.name === "Verkkosivut" ? "gradient-border-white bg-elevated" : svc.name === "AI-ratkaisut" ? "gradient-border-teal bg-elevated" : svc.name === "Verkkokauppa" ? "gradient-border bg-elevated" : "gradient-border-violet bg-elevated"}`}>
+                <div onClick={() => router.push(`/yhteystiedot?palvelu=${svc.slug}`)} className={`p-6 rounded-xl border flex flex-col h-full cursor-pointer hover:opacity-90 transition-opacity ${svc.name === "Verkkosivut" ? "gradient-border-white bg-elevated" : svc.name === "AI-ratkaisut" ? "gradient-border-teal bg-elevated" : svc.name === "Verkkokauppa" ? "gradient-border bg-elevated" : "gradient-border-violet bg-elevated"}`}>
                   <div className="mb-4"><h3 className="font-display font-bold text-ink text-xl mb-1">{svc.name}</h3><p className="text-copper font-semibold text-lg">{svc.price}</p><p className="text-ink-dim text-sm mt-2 leading-relaxed">{svc.description}</p></div>
-                  <ul className="space-y-2 flex-1 mb-6">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
-                  <span className="flex items-center gap-1.5 text-sm font-medium text-copper">Pyydä tarjous <ArrowRight size={14} /></span>
-                </Link>
+                  <ul className="space-y-2 flex-1 mb-4">{svc.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <div className="flex items-center justify-between pt-3 border-t border-wire/40">
+                    <Link href={svc.href} onClick={e => e.stopPropagation()} className="flex items-center gap-1 text-sm text-ink-dim hover:text-ink transition-colors">Lue lisää <ArrowRight size={13} /></Link>
+                    <span className="flex items-center gap-1 text-sm font-medium text-copper">Pyydä tarjous <ArrowRight size={13} /></span>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </motion.div>
