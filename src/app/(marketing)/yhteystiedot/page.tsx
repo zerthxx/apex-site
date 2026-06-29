@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { MapPin, Mail, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/shared/PageHero";
 import { ContactForm } from "@/components/shared/ContactForm";
@@ -74,7 +75,9 @@ export default function YhteystiedotPage() {
             </div>
 
             <div className="lg:col-span-3">
-              <ContactForm />
+              <Suspense>
+                <ContactForm />
+              </Suspense>
             </div>
           </div>
         </div>

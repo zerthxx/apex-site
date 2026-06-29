@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
@@ -35,8 +36,13 @@ const SERVICE_OPTIONS = [
   { value: "muu", label: "Muu / En ole varma" },
 ];
 
+const VALID_PALVELU_VALUES = ["startti", "kasvu", "pro", "perus", "standardi", "premium", "verkkokaupat", "mobiilisovellukset", "ai-ratkaisut", "ohjelmistot", "muu"] as const;
+
 export function ContactForm() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const palveluParam = searchParams.get("palvelu") ?? "";
+  const defaultPalvelu = VALID_PALVELU_VALUES.includes(palveluParam as never) ? palveluParam : "";
 
   const {
     register,
@@ -45,7 +51,7 @@ export function ContactForm() {
     formState: { errors, isSubmitting },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { palvelu: "" as never, honeypot: "" },
+    defaultValues: { palvelu: defaultPalvelu as never, honeypot: "" },
   });
 
   const onSubmit = async (data: ContactFormData) => {

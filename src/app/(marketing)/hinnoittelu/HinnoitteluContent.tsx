@@ -76,6 +76,7 @@ const SERVICES_PRICING = [
 const STARTER_PACKAGES = [
   {
     name: "Startti",
+    slug: "startti",
     setup: "299 €",
     monthly: "49 €/kk",
     description: "Täydellinen pienelle yritykselle. Ravintola, parturi, kampaamo, paikallinen kauppa.",
@@ -91,6 +92,7 @@ const STARTER_PACKAGES = [
   },
   {
     name: "Kasvu",
+    slug: "kasvu",
     setup: "599 €",
     monthly: "79 €/kk",
     description: "Enemmän sivuja, SEO-optimointi ja Google Analytics. Kasvavalle yritykselle.",
@@ -106,6 +108,7 @@ const STARTER_PACKAGES = [
   },
   {
     name: "Pro",
+    slug: "pro",
     setup: "999 €",
     monthly: "99 €/kk",
     description: "Täysi paketti verkkokaupalla tai varausjärjestelmällä.",
@@ -137,9 +140,9 @@ const ADD_ONS = [
 ];
 
 const MAINTENANCE_TIERS = [
-  { name: "Perus", price: "150 €/kk", highlight: false, features: ["Tietoturvapäivitykset", "Varmuuskopiointi", "Sähköpostituki", "1 h muutostyöt/kk"] },
-  { name: "Standardi", price: "350 €/kk", highlight: false, features: ["Kaikki Perus-tason ominaisuudet", "Suorituskyvyn seuranta", "Puhelintuki", "4 h muutostyöt/kk", "Kuukausiraportti"] },
-  { name: "Premium", price: "750 €/kk", highlight: false, features: ["Kaikki Standardi-tason ominaisuudet", "Prioriteettituki (2h vasteaika)", "8 h muutostyöt/kk", "Kvartaalikatsaus", "CRO-suositukset"] },
+  { name: "Perus", slug: "perus", price: "150 €/kk", highlight: false, features: ["Tietoturvapäivitykset", "Varmuuskopiointi", "Sähköpostituki", "1 h muutostyöt/kk"] },
+  { name: "Standardi", slug: "standardi", price: "350 €/kk", highlight: false, features: ["Kaikki Perus-tason ominaisuudet", "Suorituskyvyn seuranta", "Puhelintuki", "4 h muutostyöt/kk", "Kuukausiraportti"] },
+  { name: "Premium", slug: "premium", price: "750 €/kk", highlight: false, features: ["Kaikki Standardi-tason ominaisuudet", "Prioriteettituki (2h vasteaika)", "8 h muutostyöt/kk", "Kvartaalikatsaus", "CRO-suositukset"] },
 ];
 
 const FAQ = [
@@ -206,7 +209,7 @@ export function HinnoitteluContent() {
                   <div className="mb-3"><span className="text-copper font-bold text-2xl">{pkg.setup}</span><span className="text-ink-dim text-sm ml-1">aloitus</span><span className="text-ink-ghost mx-2">+</span><span className="text-copper font-semibold">{pkg.monthly}</span></div>
                   <p className="text-ink-dim text-sm mb-4 leading-relaxed">{pkg.description}</p>
                   <ul className="space-y-2 flex-1 mb-6">{pkg.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
-                  <Link href="/yhteystiedot" className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Pyydä tarjous <ArrowRight size={14} /></Link>
+                  <Link href={`/yhteystiedot?palvelu=${pkg.slug}`} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Pyydä tarjous <ArrowRight size={14} /></Link>
                 </div>
               ))}
             </CardCarousel>
@@ -277,7 +280,8 @@ export function HinnoitteluContent() {
                   {tier.highlight && <div className="flex justify-center mb-4"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
                   <h3 className="font-heading font-bold text-ink mb-1">{tier.name}</h3>
                   <p className="text-copper font-semibold mb-4">{tier.price}</p>
-                  <ul className="space-y-2 flex-1">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <ul className="space-y-2 flex-1 mb-6">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                  <Link href={`/yhteystiedot?palvelu=${tier.slug}`} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Pyydä tarjous <ArrowRight size={14} /></Link>
                 </div>
               ))}
             </CardCarousel>
@@ -289,7 +293,8 @@ export function HinnoitteluContent() {
                 {tier.highlight && <div className="flex justify-center mb-4"><Badge variant="accent" className="ring-1 ring-copper/40">Suosituin</Badge></div>}
                 <h3 className="font-heading font-bold text-ink mb-1">{tier.name}</h3>
                 <p className="text-copper font-semibold mb-4">{tier.price}</p>
-                <ul className="space-y-2 flex-1">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                <ul className="space-y-2 flex-1 mb-6">{tier.features.map((f) => <li key={f} className="flex items-start gap-2 text-sm text-ink-dim"><CheckCircle2 size={14} className="text-copper shrink-0 mt-0.5" />{f}</li>)}</ul>
+                <Link href={`/yhteystiedot?palvelu=${tier.slug}`} className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors">Pyydä tarjous <ArrowRight size={14} /></Link>
               </motion.div>
             ))}
           </motion.div>
