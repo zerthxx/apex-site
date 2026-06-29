@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { logActivity } from "@/lib/supabase/activityLog";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -11,12 +12,14 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
+      await logActivity(supabase, data.user.id, "google_login", { provider: "google" });
       const meta = data.user.user_metadata ?? {};
       const profileComplete = meta.first_name && meta.phone && meta.address && meta.postal_code && meta.city;
       if (!profileComplete) {
         return NextResponse.redirect(`${origin}/?tiedot=1`);
       }
-      return NextResponse.redirect(`${origin}${next}`);
+      const destination = next === "/" ? "/dashboard" : next;
+      return NextResponse.redirect(`${origin}${destination}`);
     }
   }
 

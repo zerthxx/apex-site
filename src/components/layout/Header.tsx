@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, ChevronDown, LogIn, LogOut, User, Settings } from "lucide-react";
+import { Menu, ChevronDown, LogIn, LogOut, User, Settings, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { MobileMenu } from "./MobileMenu";
@@ -172,6 +172,13 @@ export function Header() {
                   </button>
                   {userMenuOpen && (
                     <div className="absolute right-0 top-full mt-1.5 w-48 bg-elevated border border-wire rounded-xl shadow-xl py-1 z-50">
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-dim hover:text-ink hover:bg-surface transition-colors"
+                      >
+                        <LayoutDashboard size={14} /> Dashboard
+                      </Link>
                       <Link
                         href="/asetukset"
                         onClick={() => setUserMenuOpen(false)}

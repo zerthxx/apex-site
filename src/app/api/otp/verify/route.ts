@@ -35,5 +35,6 @@ export async function POST(req: NextRequest) {
 
   await supabase.from("otp_codes").update({ used: true }).eq("id", data.id);
 
+  // Activity logging happens client-side via /api/activity after the user signs in
   return NextResponse.json({ success: true });
 }

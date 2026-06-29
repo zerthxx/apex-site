@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Eye, EyeOff, Mail, ArrowRight } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -36,6 +37,7 @@ function suomenna(msg: string): string {
 }
 
 export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalProps) {
+  const router = useRouter();
   const [tab, setTab] = useState<"signin" | "signup">(defaultTab);
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
@@ -136,7 +138,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
       sessionStorage.setItem("apex-session", "1");
     }
     setOtpLoading(false);
+    // Log login event now that the session is active
+    fetch("/api/activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event_type: "login", event_data: { method: "otp" } }),
+    }).catch(() => {});
     onClose();
+    router.push("/dashboard");
   }
 
   async function resendOtp() {
