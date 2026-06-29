@@ -7,6 +7,7 @@ type Message = { role: "user" | "assistant"; content: string };
 
 export function ChatBot() {
   const [open, setOpen] = useState(false);
+  const [crispOpen, setCrispOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Hei! 👋 Olen Apex Siten AI-assistentti. Miten voin auttaa sinua tänään?" },
   ]);
@@ -18,8 +19,19 @@ export function ChatBot() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const crisp = (window as any).$crisp;
+    if (!crisp) return;
+    crisp.push(["on", "chat:closed", () => {
+      setCrispOpen(false);
+      crisp.push(["do", "chat:hide"]);
+    }]);
+  }, []);
+
   function openCrisp() {
     setOpen(false);
+    setCrispOpen(true);
     if (typeof window !== "undefined" && (window as any).$crisp) {
       (window as any).$crisp.push(["do", "chat:show"]);
       (window as any).$crisp.push(["do", "chat:open"]);
@@ -48,13 +60,7 @@ export function ChatBot() {
           role: "assistant",
           content: displayText || "Yhdistän sinut nyt live-tukeen — odota hetki! 👋",
         }]);
-        setTimeout(() => {
-          setOpen(false);
-          if (typeof window !== "undefined" && (window as any).$crisp) {
-            (window as any).$crisp.push(["do", "chat:show"]);
-            (window as any).$crisp.push(["do", "chat:open"]);
-          }
-        }, 1500);
+        setTimeout(openCrisp, 1500);
       } else {
         setMessages(m => [...m, { role: "assistant", content: reply }]);
       }
@@ -138,14 +144,16 @@ export function ChatBot() {
         </div>
       )}
 
-      {/* Toggle button */}
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-copper hover:bg-copper-light shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
-        aria-label="Avaa chat"
-      >
-        {open ? <X size={22} className="text-[#0A0C10]" /> : <MessageCircle size={22} className="text-[#0A0C10]" />}
-      </button>
+      {/* Toggle button — hidden while Crisp is open */}
+      {!crispOpen && (
+        <button
+          onClick={() => setOpen(v => !v)}
+          className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-copper hover:bg-copper-light shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+          aria-label="Avaa chat"
+        >
+          {open ? <X size={22} className="text-[#0A0C10]" /> : <MessageCircle size={22} className="text-[#0A0C10]" />}
+        </button>
+      )}
     </>
   );
 }
