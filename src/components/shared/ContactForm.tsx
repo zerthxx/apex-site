@@ -131,6 +131,7 @@ export function ContactForm() {
       {/* Service select */}
       <Select
         {...register("palvelu")}
+        defaultValue={defaultPalvelu}
         label="Mikä palvelu kiinnostaa? *"
         options={SERVICE_OPTIONS}
         placeholder="Valitse palvelu"
