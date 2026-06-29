@@ -4,8 +4,6 @@ import { PageHero } from "@/components/shared/PageHero";
 import { ProcessSteps } from "@/components/shared/ProcessSteps";
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
-import { CaseStudyCard } from "@/components/shared/CaseStudyCard";
-import { MOCK_CASE_STUDIES } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Verkkosivut yritykselle — Modernit ja konvertoivat",
@@ -124,19 +122,6 @@ export default function VerkkosivutPage() {
         </div>
       </section>
 
-      {/* Case study preview */}
-      <section className="py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mb-8">
-            Referenssit
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
-            {MOCK_CASE_STUDIES.filter((s) => s.service === "Verkkosivut").map((study) => (
-              <CaseStudyCard key={study.slug} study={study} />
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* FAQ */}
       <section className="py-16 bg-surface/30">
