@@ -14,27 +14,25 @@ export function ChatBot() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const crispListenerRegistered = useRef(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const crisp = (window as any).$crisp;
-    if (!crisp) return;
-    crisp.push(["on", "chat:closed", () => {
-      setCrispOpen(false);
-      crisp.push(["do", "chat:hide"]);
-    }]);
-  }, []);
-
   function openCrisp() {
     setOpen(false);
     setCrispOpen(true);
-    if (typeof window !== "undefined" && (window as any).$crisp) {
-      (window as any).$crisp.push(["do", "chat:show"]);
-      (window as any).$crisp.push(["do", "chat:open"]);
+    if (typeof window === "undefined" || !(window as any).$crisp) return;
+    const crisp = (window as any).$crisp;
+    crisp.push(["do", "chat:show"]);
+    crisp.push(["do", "chat:open"]);
+    if (!crispListenerRegistered.current) {
+      crispListenerRegistered.current = true;
+      crisp.push(["on", "chat:closed", () => {
+        setCrispOpen(false);
+        crisp.push(["do", "chat:hide"]);
+      }]);
     }
   }
 
