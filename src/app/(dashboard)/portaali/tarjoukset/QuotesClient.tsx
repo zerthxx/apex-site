@@ -46,12 +46,14 @@ function NewQuoteModal({ onClose, onCreated }: { onClose: () => void; onCreated:
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(true);
 
   useEffect(() => {
     fetch("/api/crm/customers")
       .then((r) => r.json())
       .then((d) => setCustomers(d.customers ?? []))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoadingCustomers(false));
   }, []);
 
   function customerLabel(c: Customer) {
@@ -100,8 +102,9 @@ function NewQuoteModal({ onClose, onCreated }: { onClose: () => void; onCreated:
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Asiakas</label>
             <select value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
-              <option value="">Ei asiakasta</option>
+              disabled={loadingCustomers}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors disabled:opacity-60">
+              <option value="">{loadingCustomers ? "Ladataan..." : "Ei asiakasta"}</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>{customerLabel(c)}</option>
               ))}
