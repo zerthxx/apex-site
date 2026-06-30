@@ -58,6 +58,7 @@ function ProjectModal({
     status: project?.status ?? "planning",
     deadline: project?.deadline ? project.deadline.slice(0, 10) : "",
     budget: project?.budget != null ? String(project.budget) : "",
+    progress_pct: project?.progress_pct ?? 0,
   });
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
@@ -83,6 +84,7 @@ function ProjectModal({
       status: form.status,
       budget: form.budget ? parseFloat(form.budget) : null,
       deadline: form.deadline || null,
+      progress_pct: form.progress_pct,
       ...(isEdit ? { id: project!.id } : {}),
     };
     const res = await fetch("/api/projects", {
@@ -138,6 +140,12 @@ function ProjectModal({
             <label className="block text-xs text-ink-ghost mb-1">Budjetti (€)</label>
             <input type="number" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })}
               className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+          </div>
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Edistyminen — {form.progress_pct}%</label>
+            <input type="range" min={0} max={100} value={form.progress_pct}
+              onChange={(e) => setForm({ ...form, progress_pct: parseInt(e.target.value) })}
+              className="w-full accent-copper" />
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 mt-1">
