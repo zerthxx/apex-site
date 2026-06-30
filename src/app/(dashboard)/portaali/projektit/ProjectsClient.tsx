@@ -95,7 +95,8 @@ function ProjectModal({
     const data = await res.json();
     setSaving(false);
     if (!res.ok) { setError(data.error ?? "Virhe"); return; }
-    onSaved(data.project);
+    const selectedCustomer = customers.find((c) => c.id === form.customer_id) ?? null;
+    onSaved({ ...data.project, customers: selectedCustomer });
     onClose();
   }
 
