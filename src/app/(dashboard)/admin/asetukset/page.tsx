@@ -13,7 +13,7 @@ export default async function AdminAsetuksetPage() {
 
   const { data: settings } = await supabase.from("system_settings").select("key, value, updated_at");
 
-  const defaultSettings = [
+  const defaultSettings: { key: string; label: string; type: "text" | "email" | "boolean" }[] = [
     { key: "company_name", label: "Yrityksen nimi", type: "text" },
     { key: "support_email", label: "Tukisähköposti", type: "email" },
     { key: "maintenance_mode", label: "Huoltotila", type: "boolean" },
