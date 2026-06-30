@@ -38,6 +38,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 interface Customer { id: string; first_name?: string | null; last_name?: string | null; email?: string | null; }
+interface StaffMember { id: string; first_name?: string | null; last_name?: string | null; role: string; }
 
 function customerLabel(c: Customer) {
   return [c.first_name, c.last_name].filter(Boolean).join(" ") || c.email || c.id;
@@ -56,6 +57,7 @@ function ProjectModal({
   const [form, setForm] = useState({
     name: project?.name ?? "",
     customer_id: project?.customers?.id ?? "",
+    assigned_to: (project as any)?.assigned_to ?? "",
     status: project?.status ?? "planning",
     deadline: project?.deadline ? project.deadline.slice(0, 10) : "",
     budget: project?.budget != null ? String(project.budget) : "",
@@ -63,6 +65,8 @@ function ProjectModal({
   });
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [loadingStaff, setLoadingStaff] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -72,6 +76,11 @@ function ProjectModal({
       .then((d) => setCustomers(d.customers ?? []))
       .catch(() => {})
       .finally(() => setLoadingCustomers(false));
+    fetch("/api/staff")
+      .then((r) => r.json())
+      .then((d) => setStaff(d.staff ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingStaff(false));
   }, []);
 
   async function submit(e: React.FormEvent) {
@@ -86,6 +95,7 @@ function ProjectModal({
       budget: form.budget ? parseFloat(form.budget) : null,
       deadline: form.deadline || null,
       progress_pct: form.progress_pct,
+      assigned_to: form.assigned_to || null,
       ...(isEdit ? { id: project!.id } : {}),
     };
     const res = await fetch("/api/projects", {
@@ -142,6 +152,19 @@ function ProjectModal({
             <label className="block text-xs text-ink-ghost mb-1">Budjetti (€)</label>
             <input type="number" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })}
               className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+          </div>
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Vastuuhenkilö</label>
+            <select value={form.assigned_to} onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
+              disabled={loadingStaff}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors disabled:opacity-60">
+              <option value="">{loadingStaff ? "Ladataan..." : "Ei vastuuhenkilöä"}</option>
+              {staff.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {[s.first_name, s.last_name].filter(Boolean).join(" ") || s.id}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Edistyminen — {form.progress_pct}%</label>
