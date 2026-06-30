@@ -14,9 +14,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
 
   const [projectRes, tasksRes, filesRes] = await Promise.all([
-    supabase.from("projects").select(`*, customers(id, first_name, last_name, email), quotes(id, title, status, amount)`).eq("id", id).single(),
-    supabase.from("tasks").select("id, title, status, priority, due_date").eq("project_id", id).order("created_at", { ascending: false }),
-    supabase.from("project_files").select("id, name, mime_type, size_bytes, version, created_at, uploaded_by").eq("project_id", id).order("created_at", { ascending: false }),
+    supabase.from("projects").select(`*, customers(id, first_name, last_name, email)`).eq("id", id).single(),
+    supabase.from("tasks").select("id, title, status, priority, due_date").eq("project_id", id).order("created_at", { ascending: false }).then((r) => ({ data: r.data ?? [], error: r.error })),
+    supabase.from("project_files").select("id, name, mime_type, size_bytes, version, created_at, uploaded_by").eq("project_id", id).order("created_at", { ascending: false }).then((r) => ({ data: r.data ?? [], error: r.error })),
   ]);
 
   if (projectRes.error || !projectRes.data) notFound();

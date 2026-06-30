@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Project {
@@ -43,12 +42,27 @@ function customerLabel(c: Customer) {
   return [c.first_name, c.last_name].filter(Boolean).join(" ") || c.email || c.id;
 }
 
-function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreated: (p: Project) => void }) {
-  const [form, setForm] = useState({ name: "", customer_id: "", status: "planning", deadline: "", budget: "" });
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+function ProjectModal({
+  project,
+  onClose,
+  onSaved,
+}: {
+  project?: Project;
+  onClose: () => void;
+  onSaved: (p: Project) => void;
+}) {
+  const isEdit = !!project;
+  const [form, setForm] = useState({
+    name: project?.name ?? "",
+    customer_id: project?.customers?.id ?? "",
+    status: project?.status ?? "planning",
+    deadline: project?.deadline ? project.deadline.slice(0, 10) : "",
+    budget: project?.budget != null ? String(project.budget) : "",
+  });
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/api/crm/customers")
@@ -63,21 +77,23 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
     if (!form.name) { setError("Nimi vaaditaan"); return; }
     setSaving(true);
     setError("");
+    const body = {
+      name: form.name,
+      customer_id: form.customer_id || null,
+      status: form.status,
+      budget: form.budget ? parseFloat(form.budget) : null,
+      deadline: form.deadline || null,
+      ...(isEdit ? { id: project!.id } : {}),
+    };
     const res = await fetch("/api/projects", {
-      method: "POST",
+      method: isEdit ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.name,
-        customer_id: form.customer_id || null,
-        status: form.status,
-        budget: form.budget ? parseFloat(form.budget) : null,
-        deadline: form.deadline || null,
-      }),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
     setSaving(false);
     if (!res.ok) { setError(data.error ?? "Virhe"); return; }
-    onCreated(data.project);
+    onSaved(data.project);
     onClose();
   }
 
@@ -86,7 +102,7 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-ink">Uusi projekti</h2>
+          <h2 className="text-base font-semibold text-ink">{isEdit ? "Muokkaa projektia" : "Uusi projekti"}</h2>
           <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
@@ -127,7 +143,7 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
           <div className="flex gap-2 mt-1">
             <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
             <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
-              {saving ? "Tallennetaan..." : "Luo projekti"}
+              {saving ? "Tallennetaan..." : isEdit ? "Tallenna" : "Luo projekti"}
             </button>
           </div>
         </form>
@@ -145,7 +161,8 @@ export function ProjectsClient({ initial, isStaff }: Props) {
   const [projects, setProjects] = useState(initial);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [showModal, setShowModal] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [editProject, setEditProject] = useState<Project | null>(null);
 
   const filtered = projects.filter((p) => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
@@ -156,6 +173,10 @@ export function ProjectsClient({ initial, isStaff }: Props) {
   function customerName(p: Project) {
     if (!p.customers) return "—";
     return [p.customers.first_name, p.customers.last_name].filter(Boolean).join(" ") || p.customers.email || "—";
+  }
+
+  function handleSaved(updated: Project) {
+    setProjects((prev) => prev.map((p) => p.id === updated.id ? { ...p, ...updated } : p));
   }
 
   return (
@@ -172,7 +193,7 @@ export function ProjectsClient({ initial, isStaff }: Props) {
           {Object.entries(STATUS_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
         {isStaff && (
-          <button onClick={() => setShowModal(true)}
+          <button onClick={() => setShowNew(true)}
             className="flex items-center gap-2 px-3 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors shrink-0">
             <Plus size={15} />Uusi projekti
           </button>
@@ -193,16 +214,13 @@ export function ProjectsClient({ initial, isStaff }: Props) {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Edistyminen</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Tila</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">Deadline</th>
+                {isStaff && <th className="px-4 py-3" />}
               </tr>
             </thead>
             <tbody className="divide-y divide-wire/50">
               {filtered.map((p) => (
                 <tr key={p.id} className="hover:bg-surface/50 transition-colors">
-                  <td className="px-4 py-3">
-                    <Link href={`/portaali/projektit/${p.id}`} className="font-medium text-ink hover:text-copper transition-colors">
-                      {p.name}
-                    </Link>
-                  </td>
+                  <td className="px-4 py-3 font-medium text-ink">{p.name}</td>
                   {isStaff && <td className="px-4 py-3 text-ink-dim hidden md:table-cell">{customerName(p)}</td>}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -216,6 +234,14 @@ export function ProjectsClient({ initial, isStaff }: Props) {
                   <td className="px-4 py-3 text-ink-ghost hidden lg:table-cell">
                     {p.deadline ? new Date(p.deadline).toLocaleDateString("fi-FI") : "—"}
                   </td>
+                  {isStaff && (
+                    <td className="px-4 py-3 text-right">
+                      <button onClick={() => setEditProject(p)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-wire text-xs text-ink-ghost hover:text-ink hover:border-copper transition-colors">
+                        <Pencil size={12} />Muokkaa
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -223,10 +249,18 @@ export function ProjectsClient({ initial, isStaff }: Props) {
         )}
       </div>
 
-      {showModal && (
-        <NewProjectModal
-          onClose={() => setShowModal(false)}
-          onCreated={(p) => setProjects((prev) => [p, ...prev])}
+      {showNew && (
+        <ProjectModal
+          onClose={() => setShowNew(false)}
+          onSaved={(p) => { setProjects((prev) => [p, ...prev]); setShowNew(false); }}
+        />
+      )}
+
+      {editProject && (
+        <ProjectModal
+          project={editProject}
+          onClose={() => setEditProject(null)}
+          onSaved={(updated) => { handleSaved(updated); setEditProject(null); }}
         />
       )}
     </div>
