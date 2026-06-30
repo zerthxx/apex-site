@@ -16,10 +16,19 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const [projectRes, tasksRes, filesRes] = await Promise.all([
     supabase.from("projects").select(`*, customers(id, first_name, last_name, email), quotes(id, title, status, amount)`).eq("id", id).single(),
     supabase.from("tasks").select("id, title, status, priority, due_date").eq("project_id", id).order("created_at", { ascending: false }),
-    supabase.from("project_files").select("id, name, mime_type, size_bytes, version, created_at").eq("project_id", id).order("created_at", { ascending: false }),
+    supabase.from("project_files").select("id, name, mime_type, size_bytes, version, created_at, uploaded_by").eq("project_id", id).order("created_at", { ascending: false }),
   ]);
 
   if (projectRes.error || !projectRes.data) notFound();
+
+  const project = projectRes.data as any;
+
+  // Fetch assignee profile separately (assigned_to → auth.users → public.profiles)
+  let assignedProfile: { id: string; first_name?: string | null; last_name?: string | null } | null = null;
+  if (project.assigned_to) {
+    const { data } = await supabase.from("profiles").select("id, first_name, last_name").eq("id", project.assigned_to).single();
+    assignedProfile = data;
+  }
 
   return (
     <div>
@@ -27,10 +36,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <ChevronLeft size={15} />Projektit
       </Link>
       <ProjectDetailClient
-        project={projectRes.data}
+        project={project}
         tasks={tasksRes.data ?? []}
         files={filesRes.data ?? []}
         isStaff={isStaff}
+        assignedProfile={assignedProfile}
       />
     </div>
   );

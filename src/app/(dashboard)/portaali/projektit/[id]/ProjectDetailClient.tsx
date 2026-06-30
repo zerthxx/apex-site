@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Link from "next/link";
+import { Upload, Download, Eye, File } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Project {
@@ -12,12 +14,17 @@ interface Project {
   budget?: number | null;
   description?: string | null;
   created_at: string;
+  assigned_to?: string | null;
   customers?: { id: string; first_name?: string | null; last_name?: string | null; email?: string | null } | null;
   quotes?: { id: string; title: string; status: string; amount?: number | null }[] | null;
 }
 
 interface Task { id: string; title: string; status: string; priority: string; due_date?: string | null; }
-interface ProjectFile { id: string; name: string; mime_type?: string | null; size_bytes?: number | null; version: number; created_at: string; }
+interface ProjectFile {
+  id: string; name: string; mime_type?: string | null; size_bytes?: number | null;
+  version: number; created_at: string; uploaded_by?: string | null;
+}
+interface AssignedProfile { id: string; first_name?: string | null; last_name?: string | null; }
 
 const STATUS_LABELS: Record<string, string> = {
   planning: "Suunnittelu", development: "Kehitys", testing: "Testaus",
@@ -58,13 +65,18 @@ interface Props {
   tasks: Task[];
   files: ProjectFile[];
   isStaff: boolean;
+  assignedProfile?: AssignedProfile | null;
 }
 
-export function ProjectDetailClient({ project: initial, tasks, files, isStaff }: Props) {
+export function ProjectDetailClient({ project: initial, tasks, files: initialFiles, isStaff, assignedProfile }: Props) {
   const [project, setProject] = useState(initial);
   const [progress, setProgress] = useState(initial.progress_pct);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<"tasks"|"files"|"info">("info");
+  const [files, setFiles] = useState(initialFiles);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function saveProgress() {
     setSaving(true);
@@ -80,8 +92,32 @@ export function ProjectDetailClient({ project: initial, tasks, files, isStaff }:
     }
   }
 
+  async function handleUpload(file: File) {
+    setUploadError("");
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("project_id", project.id);
+    const res = await fetch("/api/files/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    setUploading(false);
+    if (!res.ok) { setUploadError(data.error ?? "Lataus epäonnistui"); return; }
+    setFiles((prev) => [data.file, ...prev]);
+  }
+
+  async function downloadFile(fileId: string, fileName: string) {
+    const res = await fetch(`/api/files/download/${fileId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.url) window.open(data.url, "_blank");
+  }
+
   const customerName = project.customers
     ? [project.customers.first_name, project.customers.last_name].filter(Boolean).join(" ") || project.customers.email
+    : null;
+
+  const assigneeName = assignedProfile
+    ? [assignedProfile.first_name, assignedProfile.last_name].filter(Boolean).join(" ") || "—"
     : null;
 
   return (
@@ -91,9 +127,18 @@ export function ProjectDetailClient({ project: initial, tasks, files, isStaff }:
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl font-bold text-ink">{project.name}</h1>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               <Badge status={project.status} />
-              {customerName && <span className="text-sm text-ink-ghost">{customerName}</span>}
+              {customerName && (
+                isStaff && project.customers?.id
+                  ? <Link href={`/crm/asiakkaat/${project.customers.id}`} className="text-sm text-copper hover:underline">{customerName}</Link>
+                  : <span className="text-sm text-ink-ghost">{customerName}</span>
+              )}
+              {assigneeName && (
+                <span className="text-xs px-2 py-0.5 rounded-md border border-wire bg-surface text-ink-ghost">
+                  {assigneeName}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -107,10 +152,7 @@ export function ProjectDetailClient({ project: initial, tasks, files, isStaff }:
           {isStaff ? (
             <div className="flex items-center gap-3">
               <input
-                type="range"
-                min={0}
-                max={100}
-                value={progress}
+                type="range" min={0} max={100} value={progress}
                 onChange={(e) => setProgress(parseInt(e.target.value))}
                 className="flex-1 accent-copper"
               />
@@ -146,14 +188,25 @@ export function ProjectDetailClient({ project: initial, tasks, files, isStaff }:
         <div className="bg-elevated border border-wire rounded-xl p-5">
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
             {[
-              { label: "Asiakas", value: customerName },
-              { label: "Budjetti", value: project.budget != null ? `${project.budget.toLocaleString("fi-FI")} €` : null },
-              { label: "Deadline", value: project.deadline ? new Date(project.deadline).toLocaleDateString("fi-FI") : null },
-              { label: "Luotu", value: new Date(project.created_at).toLocaleDateString("fi-FI") },
-            ].map(({ label, value }) => (
+              {
+                label: "Asiakas",
+                value: customerName,
+                link: isStaff && project.customers?.id ? `/crm/asiakkaat/${project.customers.id}` : null,
+              },
+              { label: "Vastuuhenkilö", value: assigneeName, link: null },
+              { label: "Budjetti", value: project.budget != null ? `${project.budget.toLocaleString("fi-FI")} €` : null, link: null },
+              { label: "Deadline", value: project.deadline ? new Date(project.deadline).toLocaleDateString("fi-FI") : null, link: null },
+              { label: "Luotu", value: new Date(project.created_at).toLocaleDateString("fi-FI"), link: null },
+            ].map(({ label, value, link }) => (
               <div key={label}>
                 <dt className="text-xs text-ink-ghost">{label}</dt>
-                <dd className="text-ink mt-0.5">{value ?? "—"}</dd>
+                <dd className="text-ink mt-0.5">
+                  {value
+                    ? link
+                      ? <Link href={link} className="text-copper hover:underline">{value}</Link>
+                      : value
+                    : "—"}
+                </dd>
               </div>
             ))}
           </dl>
@@ -168,7 +221,7 @@ export function ProjectDetailClient({ project: initial, tasks, files, isStaff }:
               <p className="text-xs text-ink-ghost mb-2">Liitetty tarjous</p>
               {project.quotes.map((q) => (
                 <div key={q.id} className="flex items-center justify-between">
-                  <span className="text-sm text-ink">{q.title}</span>
+                  <Link href={`/portaali/tarjoukset/${q.id}`} className="text-sm text-copper hover:underline">{q.title}</Link>
                   {q.amount != null && <span className="text-sm text-ink-dim">{q.amount.toLocaleString("fi-FI")} €</span>}
                 </div>
               ))}
@@ -199,18 +252,74 @@ export function ProjectDetailClient({ project: initial, tasks, files, isStaff }:
       )}
 
       {tab === "files" && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
+          {/* Upload area — staff only */}
+          {isStaff && (
+            <div
+              className={cn(
+                "border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer",
+                uploading ? "border-copper/40 bg-copper/5" : "border-wire hover:border-copper/40 hover:bg-copper/5"
+              )}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const f = e.dataTransfer.files[0];
+                if (f) handleUpload(f);
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = ""; }}
+              />
+              <Upload size={20} className={cn("mx-auto mb-2", uploading ? "text-copper animate-pulse" : "text-ink-ghost")} />
+              <p className="text-sm font-medium text-ink">
+                {uploading ? "Ladataan..." : "Lataa tiedosto"}
+              </p>
+              <p className="text-xs text-ink-ghost mt-0.5">Klikkaa tai raahaa tiedosto tähän</p>
+              {uploadError && <p className="text-xs text-bad mt-2">{uploadError}</p>}
+            </div>
+          )}
+
           {files.length === 0 ? (
             <div className="bg-elevated border border-wire rounded-xl py-10 text-center text-sm text-ink-ghost">Ei tiedostoja</div>
-          ) : files.map((f) => (
-            <div key={f.id} className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-ink">{f.name}</p>
-                <p className="text-xs text-ink-ghost">{formatBytes(f.size_bytes)} · v{f.version} · {new Date(f.created_at).toLocaleDateString("fi-FI")}</p>
-              </div>
-              <span className="text-xs text-ink-ghost">{f.mime_type?.split("/")[1]?.toUpperCase() ?? "—"}</span>
+          ) : (
+            <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
+              {files.map((f, i) => {
+                const isImage = f.mime_type?.startsWith("image/");
+                const isPDF = f.mime_type === "application/pdf";
+                return (
+                  <div key={f.id} className={cn("flex items-center gap-3 px-4 py-3 hover:bg-surface/30 transition-colors", i > 0 && "border-t border-wire/50")}>
+                    <div className="w-8 h-8 rounded-lg bg-surface border border-wire flex items-center justify-center shrink-0">
+                      <File size={14} className="text-ink-ghost" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-ink truncate">{f.name}</p>
+                      <p className="text-xs text-ink-ghost">
+                        {formatBytes(f.size_bytes)} · v{f.version} · {new Date(f.created_at).toLocaleDateString("fi-FI")}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {(isImage || isPDF) && (
+                        <button onClick={() => downloadFile(f.id, f.name)}
+                          className="p-1.5 rounded-lg hover:bg-surface border border-transparent hover:border-wire text-ink-ghost hover:text-ink transition-colors"
+                          title="Esikatsele">
+                          <Eye size={13} />
+                        </button>
+                      )}
+                      <button onClick={() => downloadFile(f.id, f.name)}
+                        className="p-1.5 rounded-lg hover:bg-surface border border-transparent hover:border-wire text-ink-ghost hover:text-ink transition-colors"
+                        title="Lataa">
+                        <Download size={13} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
