@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Check, Receipt, Trash2 } from "lucide-react";
+import { Plus, X, Check, Receipt, Trash2, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Invoice {
@@ -20,7 +20,7 @@ interface Customer { id: string; first_name?: string | null; last_name?: string 
 interface Project { id: string; name: string; customer_id?: string | null; }
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Odottaa", sent: "Lähetetty", paid: "Maksettu", overdue: "Myöhässä", cancelled: "Peruttu",
+  pending: "Odottaa", sent: "Lähetetty", paid: "Maksettu", overdue: "Myöhässä", cancelled: "Peruttu", refunded: "Palautettu",
 };
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-surface text-ink-ghost border-wire",
@@ -28,6 +28,7 @@ const STATUS_COLORS: Record<string, string> = {
   paid: "bg-ok/10 text-ok border-ok/20",
   overdue: "bg-bad/10 text-bad border-bad/20",
   cancelled: "bg-surface text-ink-ghost border-wire",
+  refunded: "bg-surface text-ink-ghost border-wire",
 };
 
 function Badge({ status }: { status: string }) {
@@ -156,6 +157,7 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
   const [showNew, setShowNew] = useState(false);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [checkingOut, setCheckingOut] = useState<string | null>(null);
 
   const filtered = statusFilter === "all" ? invoices : invoices.filter((i) => i.status === statusFilter);
 
@@ -169,6 +171,24 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
     const data = await res.json();
     setMarkingPaid(null);
     if (res.ok) setInvoices((prev) => prev.map((i) => i.id === id ? { ...i, ...data.invoice } : i));
+  }
+
+  async function payInvoice(invoiceId: string) {
+    setCheckingOut(invoiceId);
+    try {
+      const res = await fetch("/api/payments/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoice_id: invoiceId }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error ?? "Maksun aloitus epäonnistui"); return; }
+      window.location.href = data.url;
+    } catch {
+      alert("Verkkovirhe. Yritä uudelleen.");
+    } finally {
+      setCheckingOut(null);
+    }
   }
 
   async function deleteInvoice(id: string) {
@@ -239,7 +259,7 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
                 <th className="text-left px-4 py-3 font-medium">Summa</th>
                 <th className="text-left px-4 py-3 font-medium">Eräpäivä</th>
                 <th className="text-left px-4 py-3 font-medium">Tila</th>
-                {isStaff && <th className="text-left px-4 py-3 font-medium">Toiminnot</th>}
+                <th className="text-left px-4 py-3 font-medium">Toiminnot</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-wire/50">
@@ -262,30 +282,43 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
                       {inv.due_date ? new Date(inv.due_date).toLocaleDateString("fi-FI") : "—"}
                     </td>
                     <td className="px-4 py-3"><Badge status={inv.status} /></td>
-                    {isStaff && (
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5">
-                          {["pending","sent"].includes(inv.status) && (
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5">
+                        {isStaff ? (
+                          <>
+                            {["pending","sent"].includes(inv.status) && (
+                              <button
+                                onClick={() => markPaid(inv.id)}
+                                disabled={markingPaid === inv.id}
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ok/10 text-ok text-xs font-medium hover:bg-ok/20 border border-ok/20 transition-colors disabled:opacity-50"
+                              >
+                                <Check size={12} />{markingPaid === inv.id ? "..." : "Maksettu"}
+                              </button>
+                            )}
+                            {isAdmin && (
+                              <button
+                                onClick={() => setDeletingId(inv.id)}
+                                className="p-1.5 rounded-lg text-ink-ghost hover:text-bad hover:bg-bad/5 border border-transparent hover:border-bad/10 transition-colors"
+                                title="Poista"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          ["sent","overdue"].includes(inv.status) && (
                             <button
-                              onClick={() => markPaid(inv.id)}
-                              disabled={markingPaid === inv.id}
-                              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ok/10 text-ok text-xs font-medium hover:bg-ok/20 border border-ok/20 transition-colors disabled:opacity-50"
+                              onClick={() => payInvoice(inv.id)}
+                              disabled={checkingOut === inv.id}
+                              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-copper text-white text-xs font-medium hover:bg-copper/90 transition-colors disabled:opacity-50"
                             >
-                              <Check size={12} />{markingPaid === inv.id ? "..." : "Maksettu"}
+                              <CreditCard size={12} />
+                              {checkingOut === inv.id ? "Ohjataan..." : "Maksa"}
                             </button>
-                          )}
-                          {isAdmin && (
-                            <button
-                              onClick={() => setDeletingId(inv.id)}
-                              className="p-1.5 rounded-lg text-ink-ghost hover:text-bad hover:bg-bad/5 border border-transparent hover:border-bad/10 transition-colors"
-                              title="Poista"
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    )}
+                          )
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}

@@ -78,6 +78,7 @@ export function Sidebar({
         <SidebarLink href="/portaali/tarjoukset" label="Tarjoukset" icon={<FileText size={16} />} onClick={onMobileClose} />
         <SidebarLink href="/portaali/projektit" label="Projektit" icon={<FolderOpen size={16} />} onClick={onMobileClose} />
         <SidebarLink href="/portaali/laskut" label="Laskut" icon={<Receipt size={16} />} onClick={onMobileClose} />
+        <SidebarLink href="/portaali/maksut" label="Maksut" icon={<CreditCard size={16} />} onClick={onMobileClose} />
         <SidebarLink href="/portaali/tiedostot" label="Tiedostot" icon={<Paperclip size={16} />} onClick={onMobileClose} />
 
         {isStaff && (
@@ -99,7 +100,8 @@ export function Sidebar({
             <SidebarLink href="/admin/kayttajat" label="Käyttäjät" icon={<Users size={16} />} onClick={onMobileClose} />
             <SidebarLink href="/admin/logi" label="Aktiviteettiloki" icon={<ShieldCheck size={16} />} onClick={onMobileClose} />
             <SidebarLink href="/admin/analytiikka" label="Analytiikka" icon={<BarChart2 size={16} />} onClick={onMobileClose} />
-            <SidebarLink href="/admin/laskutus" label="Laskutus" icon={<CreditCard size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/admin/laskutus" label="Laskutus" icon={<Receipt size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/admin/maksut" label="Maksut" icon={<CreditCard size={16} />} onClick={onMobileClose} />
             <SidebarLink href="/admin/sahkopostipohjat" label="Sähköpostipohjat" icon={<Mail size={16} />} onClick={onMobileClose} />
             <SidebarLink href="/admin/asetukset" label="Järjestelmä" icon={<Wrench size={16} />} onClick={onMobileClose} />
           </>
