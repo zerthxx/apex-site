@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
       },
     },
     success_url: `${baseUrl}/portaali/maksut/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}/portaali/maksut/cancel`,
+    cancel_url: `${baseUrl}/portaali/maksut/cancel?payment_id=${paymentId}`,
     locale: "fi",
   });
 

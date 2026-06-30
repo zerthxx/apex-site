@@ -1,9 +1,25 @@
 import Link from "next/link";
 import { XCircle, RefreshCw } from "lucide-react";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = { title: "Maksu peruutettu — Apex Site" };
 
-export default function PaymentCancelPage() {
+export default async function PaymentCancelPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ payment_id?: string }>;
+}) {
+  const { payment_id } = await searchParams;
+
+  if (payment_id) {
+    const adminSupabase = createAdminClient();
+    await adminSupabase
+      .from("payments")
+      .update({ status: "failed" })
+      .eq("id", payment_id)
+      .eq("status", "pending");
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] py-16 px-4">
       <div className="w-full max-w-md text-center">
@@ -13,7 +29,7 @@ export default function PaymentCancelPage() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-ink mb-2">Maksu peruutettu</h1>
+        <h1 className="text-2xl font-bold text-ink mb-2">Maksu epäonnistui</h1>
         <p className="text-ink-ghost text-sm mb-8">
           Maksu keskeytettiin eikä veloitusta tehty. Voit yrittää uudelleen milloin tahansa.
         </p>
