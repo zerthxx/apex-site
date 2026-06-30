@@ -39,6 +39,10 @@ function StatusBadge({ status }: { status: string }) {
 
 interface Customer { id: string; first_name?: string | null; last_name?: string | null; email?: string | null; }
 
+function customerLabel(c: Customer) {
+  return [c.first_name, c.last_name].filter(Boolean).join(" ") || c.email || c.id;
+}
+
 function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreated: (p: Project) => void }) {
   const [form, setForm] = useState({ name: "", customer_id: "", status: "planning", deadline: "", budget: "" });
   const [saving, setSaving] = useState(false);
