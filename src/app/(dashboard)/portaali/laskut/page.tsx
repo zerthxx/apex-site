@@ -23,7 +23,6 @@ export default async function LaskutPage() {
       supabase
         .from("customers")
         .select("id, first_name, last_name, email")
-        .eq("status", "active")
         .order("first_name")
         .limit(200),
       supabase
