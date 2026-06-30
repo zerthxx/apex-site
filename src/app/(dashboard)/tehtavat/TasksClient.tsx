@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, X, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Task {
@@ -14,6 +14,8 @@ interface Task {
   assigned_to?: string | null;
   projects?: { id: string; name: string } | null;
 }
+
+interface StaffMember { id: string; first_name?: string | null; last_name?: string | null; role: string; }
 
 const COLUMNS = [
   { id: "todo", label: "Tekemättä" },
@@ -30,8 +32,21 @@ const PRIORITY_COLORS: Record<string, string> = {
   urgent: "text-bad border-bad/30 bg-bad/5",
 };
 
-function NewTaskModal({ onClose, onCreated }: { onClose: () => void; onCreated: (t: Task) => void }) {
-  const [form, setForm] = useState({ title: "", description: "", due_date: "", priority: "medium", status: "todo" });
+function staffName(staff: StaffMember[], id?: string | null) {
+  if (!id) return null;
+  const s = staff.find((m) => m.id === id);
+  if (!s) return null;
+  return [s.first_name, s.last_name].filter(Boolean).join(" ") || null;
+}
+
+function NewTaskModal({ staff, onClose, onCreated }: {
+  staff: StaffMember[];
+  onClose: () => void;
+  onCreated: (t: Task) => void;
+}) {
+  const [form, setForm] = useState({
+    title: "", description: "", due_date: "", priority: "medium", status: "todo", assigned_to: "",
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,7 +57,11 @@ function NewTaskModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     const res = await fetch("/api/tasks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, due_date: form.due_date || null }),
+      body: JSON.stringify({
+        ...form,
+        due_date: form.due_date || null,
+        assigned_to: form.assigned_to || null,
+      }),
     });
     const data = await res.json();
     setSaving(false);
@@ -94,6 +113,18 @@ function NewTaskModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
               {COLUMNS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
             </select>
           </div>
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Vastuuhenkilö</label>
+            <select value={form.assigned_to} onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+              <option value="">Ei vastuuhenkilöä</option>
+              {staff.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {[s.first_name, s.last_name].filter(Boolean).join(" ") || s.id}
+                </option>
+              ))}
+            </select>
+          </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 mt-1">
             <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
@@ -107,8 +138,9 @@ function NewTaskModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
   );
 }
 
-function TaskCard({ task, onMove }: { task: Task; onMove: (id: string, status: string) => void }) {
+function TaskCard({ task, staff, onMove }: { task: Task; staff: StaffMember[]; onMove: (id: string, status: string) => void }) {
   const nextStatus = COLUMNS[COLUMNS.findIndex((c) => c.id === task.status) + 1]?.id;
+  const assignee = staffName(staff, task.assigned_to);
   return (
     <div className="bg-surface border border-wire rounded-lg p-3 flex flex-col gap-2">
       <p className="text-sm font-medium text-ink leading-snug">{task.title}</p>
@@ -121,6 +153,12 @@ function TaskCard({ task, onMove }: { task: Task; onMove: (id: string, status: s
           <span className="text-[10px] text-ink-ghost">{new Date(task.due_date).toLocaleDateString("fi-FI")}</span>
         )}
       </div>
+      {assignee && (
+        <div className="flex items-center gap-1 text-[10px] text-ink-ghost">
+          <User size={10} />
+          {assignee}
+        </div>
+      )}
       {nextStatus && (
         <button
           onClick={() => onMove(task.id, nextStatus)}
@@ -137,6 +175,14 @@ export function TasksClient({ initial }: { initial: Task[] }) {
   const [tasks, setTasks] = useState(initial);
   const [showModal, setShowModal] = useState(false);
   const [filterMine, setFilterMine] = useState(false);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+
+  useEffect(() => {
+    fetch("/api/staff")
+      .then((r) => r.json())
+      .then((d) => setStaff(d.staff ?? []))
+      .catch(() => {});
+  }, []);
 
   async function moveTask(id: string, status: string) {
     setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status } : t));
@@ -177,7 +223,7 @@ export function TasksClient({ initial }: { initial: Task[] }) {
               </div>
               <div className="flex flex-col gap-2">
                 {colTasks.map((t) => (
-                  <TaskCard key={t.id} task={t} onMove={moveTask} />
+                  <TaskCard key={t.id} task={t} staff={staff} onMove={moveTask} />
                 ))}
                 {colTasks.length === 0 && (
                   <div className="text-xs text-ink-ghost text-center py-4 border border-dashed border-wire rounded-lg">
@@ -192,6 +238,7 @@ export function TasksClient({ initial }: { initial: Task[] }) {
 
       {showModal && (
         <NewTaskModal
+          staff={staff}
           onClose={() => setShowModal(false)}
           onCreated={(t) => setTasks((prev) => [t, ...prev])}
         />
