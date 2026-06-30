@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Plus, Search, X, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -229,7 +230,11 @@ export function ProjectsClient({ initial, isStaff }: Props) {
             <tbody className="divide-y divide-wire/50">
               {filtered.map((p) => (
                 <tr key={p.id} className="hover:bg-surface/50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-ink">{p.name}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/portaali/projektit/${p.id}`} className="font-medium text-ink hover:text-copper transition-colors">
+                      {p.name}
+                    </Link>
+                  </td>
                   {isStaff && <td className="px-4 py-3 text-ink-dim hidden md:table-cell">{customerName(p)}</td>}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
