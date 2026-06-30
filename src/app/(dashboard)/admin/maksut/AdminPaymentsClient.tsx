@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Download, RefreshCcw, Receipt, ExternalLink, X, AlertTriangle } from "lucide-react";
+import { Search, Download, RefreshCcw, Receipt, ExternalLink, X, AlertTriangle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Payment {
@@ -118,6 +118,75 @@ function RefundModal({ payment, onClose, onRefunded }: {
   );
 }
 
+function DeleteModal({ payment, onClose, onDeleted }: {
+  payment: Payment;
+  onClose: () => void;
+  onDeleted: (id: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleDelete() {
+    setLoading(true);
+    setError("");
+    const res = await fetch("/api/payments", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: payment.id }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    onDeleted(payment.id);
+    onClose();
+  }
+
+  const inv = payment.invoices as any;
+  const cus = payment.customers as any;
+  const cusName = [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") || cus?.email || "Tuntematon";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-ink">Poista maksutapahtuma</h2>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
+        </div>
+        <div className="flex items-start gap-3 mb-4 p-3 bg-bad/10 border border-bad/20 rounded-lg">
+          <AlertTriangle size={16} className="text-bad mt-0.5 shrink-0" />
+          <p className="text-xs text-bad">
+            Tämä poistaa maksutapahtuman pysyvästi tietokannasta.
+          </p>
+        </div>
+        <div className="space-y-2 mb-5 text-sm">
+          <div className="flex justify-between">
+            <span className="text-ink-ghost">Asiakas</span>
+            <span className="text-ink font-medium">{cusName}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-ink-ghost">Lasku</span>
+            <span className="text-ink">{inv?.invoice_number ? `#${inv.invoice_number}` : "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-ink-ghost">Summa</span>
+            <span className="text-ink font-bold">{payment.amount?.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €</span>
+          </div>
+        </div>
+        {error && <p className="text-xs text-bad mb-3">{error}</p>}
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+            Peruuta
+          </button>
+          <button onClick={handleDelete} disabled={loading} className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors">
+            {loading ? "Poistetaan..." : "Poista"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   payments: Payment[];
   stats: Stats;
@@ -128,6 +197,7 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [refundTarget, setRefundTarget] = useState<Payment | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
   const [exporting, setExporting] = useState(false);
 
   const filtered = payments.filter((p) => {
@@ -155,6 +225,10 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
     setPayments((prev) =>
       prev.map((p) => p.id === paymentId ? { ...p, status: "refunded" } : p)
     );
+  }
+
+  function handleDeleted(paymentId: string) {
+    setPayments((prev) => prev.filter((p) => p.id !== paymentId));
   }
 
   async function handleExport() {
@@ -287,6 +361,13 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
                             <RefreshCcw size={13} />
                           </button>
                         )}
+                        <button
+                          onClick={() => setDeleteTarget(p)}
+                          className="inline-flex items-center gap-1 text-xs text-ink-ghost hover:text-bad transition-colors"
+                          title="Poista"
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -302,6 +383,14 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
           payment={refundTarget}
           onClose={() => setRefundTarget(null)}
           onRefunded={handleRefunded}
+        />
+      )}
+
+      {deleteTarget && (
+        <DeleteModal
+          payment={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={handleDeleted}
         />
       )}
     </div>
