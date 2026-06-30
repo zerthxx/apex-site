@@ -24,7 +24,7 @@ export default async function CustomersPage() {
         <h1 className="text-xl font-bold text-ink">Asiakkaat</h1>
         <p className="text-sm text-ink-ghost mt-1">Hallitse asiakkaitasi ja yhteystietoja</p>
       </div>
-      <CustomersClient initial={customers ?? []} />
+      <CustomersClient initial={(customers ?? []) as any} />
     </div>
   );
 }

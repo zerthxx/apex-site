@@ -46,7 +46,7 @@ export default async function QuotesPage() {
           {isStaff ? "Hallitse asiakkaiden tarjouksia" : "Sinulle lähetetyt tarjoukset"}
         </p>
       </div>
-      <QuotesClient initial={quotes ?? []} isStaff={isStaff} />
+      <QuotesClient initial={(quotes ?? []) as any} isStaff={isStaff} />
     </div>
   );
 }

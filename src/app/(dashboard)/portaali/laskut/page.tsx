@@ -40,9 +40,9 @@ export default async function LaskutPage() {
           <p className="text-sm text-ink-ghost mt-1">Hallinnoi laskutusta ja seuraa maksuja</p>
         </div>
         <InvoicesClient
-          invoices={invoices ?? []}
-          customers={customers ?? []}
-          projects={projects ?? []}
+          invoices={(invoices ?? []) as any}
+          customers={(customers ?? []) as any}
+          projects={(projects ?? []) as any}
           isStaff
         />
       </div>
@@ -83,7 +83,7 @@ export default async function LaskutPage() {
         <p className="text-sm text-ink-ghost mt-1">Omat laskusi ja maksutila</p>
       </div>
       <InvoicesClient
-        invoices={invoices ?? []}
+        invoices={(invoices ?? []) as any}
         customers={[]}
         projects={[]}
         isStaff={false}

@@ -24,7 +24,7 @@ export default async function TasksPage() {
         <h1 className="text-xl font-bold text-ink">Tehtävät</h1>
         <p className="text-sm text-ink-ghost mt-1">Hallitse ja seuraa tehtäviä</p>
       </div>
-      <TasksClient initial={tasks ?? []} />
+      <TasksClient initial={(tasks ?? []) as any} />
     </div>
   );
 }

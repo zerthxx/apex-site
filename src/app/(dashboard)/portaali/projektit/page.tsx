@@ -46,7 +46,7 @@ export default async function ProjectsPage() {
           {isStaff ? "Hallitse kaikkia projekteja" : "Omat projektisi"}
         </p>
       </div>
-      <ProjectsClient initial={projects ?? []} isStaff={isStaff} />
+      <ProjectsClient initial={(projects ?? []) as any} isStaff={isStaff} />
     </div>
   );
 }
