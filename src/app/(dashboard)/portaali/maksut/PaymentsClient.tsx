@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Receipt, ExternalLink, Search } from "lucide-react";
+import { Receipt, ExternalLink, Search, Trash2, AlertTriangle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Payment {
@@ -42,16 +42,89 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function DeleteModal({ payment, onClose, onDeleted }: {
+  payment: Payment;
+  onClose: () => void;
+  onDeleted: (id: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleDelete() {
+    setLoading(true);
+    setError("");
+    const res = await fetch("/api/payments", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: payment.id }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    onDeleted(payment.id);
+    onClose();
+  }
+
+  const inv = payment.invoices as any;
+  const cus = payment.customers as any;
+  const cusName = [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") || cus?.email || "Tuntematon";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-ink">Poista maksutapahtuma</h2>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
+        </div>
+        <div className="flex items-start gap-3 mb-4 p-3 bg-bad/10 border border-bad/20 rounded-lg">
+          <AlertTriangle size={16} className="text-bad mt-0.5 shrink-0" />
+          <p className="text-xs text-bad">Tämä poistaa maksutapahtuman pysyvästi tietokannasta.</p>
+        </div>
+        <div className="space-y-2 mb-5 text-sm">
+          <div className="flex justify-between">
+            <span className="text-ink-ghost">Asiakas</span>
+            <span className="text-ink font-medium">{cusName}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-ink-ghost">Lasku</span>
+            <span className="text-ink">{inv?.invoice_number ? `#${inv.invoice_number}` : "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-ink-ghost">Summa</span>
+            <span className="text-ink font-bold">{payment.amount?.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €</span>
+          </div>
+        </div>
+        {error && <p className="text-xs text-bad mb-3">{error}</p>}
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+            Peruuta
+          </button>
+          <button onClick={handleDelete} disabled={loading} className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors">
+            {loading ? "Poistetaan..." : "Poista"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   payments: Payment[];
   isStaff: boolean;
 }
 
 export function PaymentsClient({ payments: initial, isStaff }: Props) {
+  const [payments, setPayments] = useState(initial);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
 
-  const filtered = initial.filter((p) => {
+  function handleDeleted(id: string) {
+    setPayments((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  const filtered = payments.filter((p) => {
     const inv = p.invoices as any;
     const cus = p.customers as any;
     const text = [
@@ -71,7 +144,7 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
     return [cus.first_name, cus.last_name].filter(Boolean).join(" ") || cus.email || "—";
   }
 
-  const totalPaid = initial
+  const totalPaid = payments
     .filter((p) => p.status === "completed")
     .reduce((sum, p) => sum + (p.amount ?? 0), 0);
 
@@ -81,9 +154,9 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Yhteensä maksettu", value: `${totalPaid.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`, highlight: true },
-          { label: "Maksuja", value: initial.length },
-          { label: "Maksettu", value: initial.filter((p) => p.status === "completed").length },
-          { label: "Palautettu", value: initial.filter((p) => p.status === "refunded").length },
+          { label: "Maksuja", value: payments.length },
+          { label: "Maksettu", value: payments.filter((p) => p.status === "completed").length },
+          { label: "Palautettu", value: payments.filter((p) => p.status === "refunded").length },
         ].map((s) => (
           <div key={s.label} className="bg-elevated border border-wire rounded-xl px-4 py-3">
             <p className="text-xs text-ink-ghost mb-1">{s.label}</p>
@@ -164,18 +237,29 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
                         : new Date(p.created_at).toLocaleDateString("fi-FI")}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {p.receipt_url && (
-                        <a
-                          href={p.receipt_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-copper hover:text-copper/80 transition-colors"
-                        >
-                          <Receipt size={13} />
-                          Kuitti
-                          <ExternalLink size={11} />
-                        </a>
-                      )}
+                      <div className="flex items-center justify-end gap-2">
+                        {p.receipt_url && (
+                          <a
+                            href={p.receipt_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-copper hover:text-copper/80 transition-colors"
+                          >
+                            <Receipt size={13} />
+                            Kuitti
+                            <ExternalLink size={11} />
+                          </a>
+                        )}
+                        {isStaff && (
+                          <button
+                            onClick={() => setDeleteTarget(p)}
+                            className="inline-flex items-center gap-1 text-xs text-ink-ghost hover:text-bad transition-colors"
+                            title="Poista"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -184,6 +268,14 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
           </table>
         )}
       </div>
+
+      {deleteTarget && (
+        <DeleteModal
+          payment={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={handleDeleted}
+        />
+      )}
     </div>
   );
 }
