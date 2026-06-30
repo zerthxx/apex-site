@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/lib/activity";
 
 async function getUser() {
   const supabase = await createClient();
@@ -64,6 +65,8 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  await logActivity(supabase, user.id, "quote_created", { quote_id: quote.id, title: quote.title });
+
   // If status is 'sent', notify the customer
   if (quote.status === "sent" && quote.customer_id) {
     const { data: customer } = await supabase
@@ -113,6 +116,12 @@ export async function PATCH(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  if (updates.status) {
+    const eventMap: Record<string, string> = { sent: "quote_sent", accepted: "quote_accepted", rejected: "quote_rejected" };
+    const eventType = eventMap[updates.status];
+    if (eventType) await logActivity(supabase, user.id, eventType, { quote_id: quote.id, title: quote.title });
+  }
 
   // When quote is sent → notify customer
   if (updates.status === "sent" && quote.customer_id) {

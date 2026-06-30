@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/lib/activity";
 
 async function getUser() {
   const supabase = await createClient();
@@ -76,6 +77,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  await logActivity(supabase, user.id, "invoice_created", { invoice_id: data.id, invoice_number: data.invoice_number });
   return NextResponse.json({ invoice: data }, { status: 201 });
 }
 
@@ -98,6 +100,9 @@ export async function PATCH(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (updates.status === "paid") {
+    await logActivity(supabase, user.id, "invoice_paid", { invoice_id: id });
+  }
   return NextResponse.json({ invoice: data });
 }
 

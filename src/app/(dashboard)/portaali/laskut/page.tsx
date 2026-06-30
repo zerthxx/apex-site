@@ -11,6 +11,7 @@ export default async function LaskutPage() {
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
+  const isAdmin = ["owner","admin"].includes(profile?.role ?? "");
 
   if (isStaff) {
     const [{ data: invoices }, { data: customers }, { data: projects }] = await Promise.all([
@@ -44,6 +45,7 @@ export default async function LaskutPage() {
           customers={(customers ?? []) as any}
           projects={(projects ?? []) as any}
           isStaff
+          isAdmin={isAdmin}
         />
       </div>
     );

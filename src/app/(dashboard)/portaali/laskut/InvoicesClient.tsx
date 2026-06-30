@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Check, Receipt } from "lucide-react";
+import { Plus, X, Check, Receipt, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Invoice {
@@ -150,11 +150,12 @@ interface Props {
   isStaff: boolean;
 }
 
-export function InvoicesClient({ invoices: initial, customers, projects, isStaff }: Props) {
+export function InvoicesClient({ invoices: initial, customers, projects, isStaff, isAdmin }: Props & { isAdmin?: boolean }) {
   const [invoices, setInvoices] = useState(initial);
   const [statusFilter, setStatusFilter] = useState("all");
   const [showNew, setShowNew] = useState(false);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const filtered = statusFilter === "all" ? invoices : invoices.filter((i) => i.status === statusFilter);
 
@@ -168,6 +169,18 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
     const data = await res.json();
     setMarkingPaid(null);
     if (res.ok) setInvoices((prev) => prev.map((i) => i.id === id ? { ...i, ...data.invoice } : i));
+  }
+
+  async function deleteInvoice(id: string) {
+    const res = await fetch("/api/invoices", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (res.ok) {
+      setInvoices((prev) => prev.filter((i) => i.id !== id));
+      setDeletingId(null);
+    }
   }
 
   const totalRevenue = invoices.filter((i) => i.status === "paid").reduce((sum, i) => sum + (i.amount ?? 0), 0);
@@ -251,15 +264,26 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
                     <td className="px-4 py-3"><Badge status={inv.status} /></td>
                     {isStaff && (
                       <td className="px-4 py-3">
-                        {["pending","sent"].includes(inv.status) && (
-                          <button
-                            onClick={() => markPaid(inv.id)}
-                            disabled={markingPaid === inv.id}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ok/10 text-ok text-xs font-medium hover:bg-ok/20 border border-ok/20 transition-colors disabled:opacity-50"
-                          >
-                            <Check size={12} />{markingPaid === inv.id ? "..." : "Maksettu"}
-                          </button>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          {["pending","sent"].includes(inv.status) && (
+                            <button
+                              onClick={() => markPaid(inv.id)}
+                              disabled={markingPaid === inv.id}
+                              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ok/10 text-ok text-xs font-medium hover:bg-ok/20 border border-ok/20 transition-colors disabled:opacity-50"
+                            >
+                              <Check size={12} />{markingPaid === inv.id ? "..." : "Maksettu"}
+                            </button>
+                          )}
+                          {isAdmin && (
+                            <button
+                              onClick={() => setDeletingId(inv.id)}
+                              className="p-1.5 rounded-lg text-ink-ghost hover:text-bad hover:bg-bad/5 border border-transparent hover:border-bad/10 transition-colors"
+                              title="Poista"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     )}
                   </tr>
@@ -277,6 +301,27 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
           onClose={() => setShowNew(false)}
           onCreated={(inv) => setInvoices((prev) => [inv, ...prev])}
         />
+      )}
+
+      {deletingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeletingId(null)} />
+          <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
+            <h2 className="text-base font-semibold text-ink mb-2">Poista lasku</h2>
+            <p className="text-sm text-ink-dim mb-5">Poistetaanko lasku? Toimintoa ei voi kumota.</p>
+            <div className="flex gap-2">
+              <button onClick={() => setDeletingId(null)} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+                Peruuta
+              </button>
+              <button
+                onClick={() => deleteInvoice(deletingId)}
+                className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 transition-colors"
+              >
+                Poista
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Edit2, Trash2, Check } from "lucide-react";
 
 interface Company {
   id: string;
@@ -15,8 +15,20 @@ interface Company {
   contact_count?: number;
 }
 
-function NewCompanyModal({ onClose, onCreated }: { onClose: () => void; onCreated: (c: Company) => void }) {
-  const [form, setForm] = useState({ name: "", business_id: "", email: "", phone: "", address: "", city: "" });
+type CompanyForm = { name: string; business_id: string; email: string; phone: string; address: string; city: string };
+
+function CompanyModal({
+  title,
+  initial,
+  onClose,
+  onSave,
+}: {
+  title: string;
+  initial?: CompanyForm;
+  onClose: () => void;
+  onSave: (form: CompanyForm) => Promise<void>;
+}) {
+  const [form, setForm] = useState<CompanyForm>(initial ?? { name: "", business_id: "", email: "", phone: "", address: "", city: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -25,16 +37,14 @@ function NewCompanyModal({ onClose, onCreated }: { onClose: () => void; onCreate
     if (!form.name) { setError("Yrityksen nimi vaaditaan"); return; }
     setSaving(true);
     setError("");
-    const res = await fetch("/api/crm/companies", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
-    onCreated({ ...data.company, contact_count: 0 });
-    onClose();
+    try {
+      await onSave(form);
+      onClose();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Virhe");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -42,7 +52,7 @@ function NewCompanyModal({ onClose, onCreated }: { onClose: () => void; onCreate
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-ink">Uusi yritys</h2>
+          <h2 className="text-base font-semibold text-ink">{title}</h2>
           <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
@@ -79,7 +89,7 @@ function NewCompanyModal({ onClose, onCreated }: { onClose: () => void; onCreate
               Peruuta
             </button>
             <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
-              {saving ? "Tallennetaan..." : "Lisää yritys"}
+              {saving ? "Tallennetaan..." : "Tallenna"}
             </button>
           </div>
         </form>
@@ -91,11 +101,55 @@ function NewCompanyModal({ onClose, onCreated }: { onClose: () => void; onCreate
 export function CompaniesClient({ initial }: { initial: Company[] }) {
   const [companies, setCompanies] = useState(initial);
   const [search, setSearch] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState("");
 
   const filtered = companies.filter((c) =>
     !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.email ?? "").toLowerCase().includes(search.toLowerCase())
   );
+
+  async function createCompany(form: CompanyForm) {
+    const res = await fetch("/api/crm/companies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Virhe");
+    setCompanies((prev) => [{ ...data.company, contact_count: 0 }, ...prev]);
+  }
+
+  async function updateCompany(id: string, form: CompanyForm) {
+    const res = await fetch("/api/crm/companies", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...form }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Virhe");
+    setCompanies((prev) => prev.map((c) => c.id === id ? { ...c, ...data.company } : c));
+  }
+
+  async function deleteCompany(id: string) {
+    setDeleting(true);
+    const res = await fetch("/api/crm/companies", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setDeleting(false);
+    if (res.ok) {
+      setCompanies((prev) => prev.filter((c) => c.id !== id));
+      setDeleteConfirm(null);
+      setDeleteSuccess("Yritys poistettu");
+      setTimeout(() => setDeleteSuccess(""), 3000);
+    }
+  }
+
+  const editingCompany = companies.find((c) => c.id === editingId);
 
   return (
     <div>
@@ -109,8 +163,11 @@ export function CompaniesClient({ initial }: { initial: Company[] }) {
             className="w-full bg-surface border border-wire rounded-lg pl-9 pr-3 py-2 text-sm text-ink placeholder:text-ink-ghost outline-none focus:border-copper transition-colors"
           />
         </div>
+        {deleteSuccess && (
+          <span className="flex items-center gap-1 text-xs text-ok"><Check size={12} />{deleteSuccess}</span>
+        )}
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowNew(true)}
           className="flex items-center gap-2 px-3 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors shrink-0"
         >
           <Plus size={15} />Uusi yritys
@@ -131,6 +188,7 @@ export function CompaniesClient({ initial }: { initial: Company[] }) {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">Sähköposti</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">Kaupunki</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Kontaktit</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Toiminnot</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-wire/50">
@@ -145,6 +203,24 @@ export function CompaniesClient({ initial }: { initial: Company[] }) {
                   <td className="px-4 py-3 text-ink-dim hidden lg:table-cell">{c.email ?? "—"}</td>
                   <td className="px-4 py-3 text-ink-dim hidden lg:table-cell">{c.city ?? "—"}</td>
                   <td className="px-4 py-3 text-ink-dim">{c.contact_count ?? 0}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditingId(c.id)}
+                        className="p-1.5 rounded-md text-ink-ghost hover:text-ink hover:bg-surface transition-colors"
+                        title="Muokkaa"
+                      >
+                        <Edit2 size={13} />
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirm(c.id)}
+                        className="p-1.5 rounded-md text-ink-ghost hover:text-bad hover:bg-bad/5 transition-colors"
+                        title="Poista"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -152,11 +228,52 @@ export function CompaniesClient({ initial }: { initial: Company[] }) {
         )}
       </div>
 
-      {showModal && (
-        <NewCompanyModal
-          onClose={() => setShowModal(false)}
-          onCreated={(c) => setCompanies((prev) => [c, ...prev])}
+      {showNew && (
+        <CompanyModal
+          title="Uusi yritys"
+          onClose={() => setShowNew(false)}
+          onSave={createCompany}
         />
+      )}
+
+      {editingId && editingCompany && (
+        <CompanyModal
+          title="Muokkaa yritystä"
+          initial={{
+            name: editingCompany.name,
+            business_id: editingCompany.business_id ?? "",
+            email: editingCompany.email ?? "",
+            phone: editingCompany.phone ?? "",
+            address: "",
+            city: editingCompany.city ?? "",
+          }}
+          onClose={() => setEditingId(null)}
+          onSave={(form) => updateCompany(editingId, form)}
+        />
+      )}
+
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
+          <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
+            <h2 className="text-base font-semibold text-ink mb-2">Poista yritys</h2>
+            <p className="text-sm text-ink-dim mb-5">
+              Poistetaanko yritys <strong>{companies.find((c) => c.id === deleteConfirm)?.name}</strong>? Toimintoa ei voi kumota.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+                Peruuta
+              </button>
+              <button
+                onClick={() => deleteCompany(deleteConfirm)}
+                disabled={deleting}
+                className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors"
+              >
+                {deleting ? "Poistetaan..." : "Poista"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

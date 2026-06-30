@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,13 @@ interface Quote {
   created_at: string;
   customers?: { id: string; first_name?: string | null; last_name?: string | null; email?: string | null } | null;
   companies?: { id: string; name: string } | null;
+}
+
+interface Customer {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -35,9 +42,22 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function NewQuoteModal({ onClose, onCreated }: { onClose: () => void; onCreated: (q: Quote) => void }) {
-  const [form, setForm] = useState({ title: "", amount: "", valid_until: "", notes: "", status: "draft" });
+  const [form, setForm] = useState({ title: "", customer_id: "", amount: "", valid_until: "", notes: "", status: "draft" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [customers, setCustomers] = useState<Customer[]>([]);
+
+  useEffect(() => {
+    fetch("/api/crm/customers")
+      .then((r) => r.json())
+      .then((d) => setCustomers(d.customers ?? []))
+      .catch(() => {});
+  }, []);
+
+  function customerLabel(c: Customer) {
+    const name = [c.first_name, c.last_name].filter(Boolean).join(" ");
+    return name || c.email || c.id;
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,9 +68,12 @@ function NewQuoteModal({ onClose, onCreated }: { onClose: () => void; onCreated:
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...form,
+        title: form.title,
+        customer_id: form.customer_id || null,
+        status: form.status,
         amount: form.amount ? parseFloat(form.amount) : null,
         valid_until: form.valid_until || null,
+        notes: form.notes || null,
       }),
     });
     const data = await res.json();
@@ -73,6 +96,16 @@ function NewQuoteModal({ onClose, onCreated }: { onClose: () => void; onCreated:
             <label className="block text-xs text-ink-ghost mb-1">Otsikko *</label>
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
               className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+          </div>
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Asiakas</label>
+            <select value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+              <option value="">Ei asiakasta</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>{customerLabel(c)}</option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

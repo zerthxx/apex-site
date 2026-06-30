@@ -18,7 +18,7 @@ async function getStats() {
     supabase.from("quotes").select("*", { count: "exact", head: true }),
     supabase.from("tasks").select("*", { count: "exact", head: true }),
     supabase.from("projects").select("name, status, progress_pct, created_at").order("created_at", { ascending: false }).limit(5),
-    supabase.from("customers").select("full_name, email, status, created_at").order("created_at", { ascending: false }).limit(5),
+    supabase.from("customers").select("first_name, last_name, email, status, created_at").order("created_at", { ascending: false }).limit(5),
   ]);
   return { customers: customers ?? 0, projects: projects ?? 0, quotes: quotes ?? 0, tasks: tasks ?? 0, recentProjects: recentProjects ?? [], recentCustomers: recentCustomers ?? [] };
 }
@@ -127,10 +127,10 @@ export default async function AnalytiikkaPage() {
           {stats.recentCustomers.map((c: any) => (
             <div key={c.email} className="flex items-center gap-3 py-2.5">
               <div className="w-8 h-8 rounded-full bg-copper/20 border border-copper/30 flex items-center justify-center shrink-0">
-                <span className="text-copper text-xs font-bold leading-none">{c.full_name?.[0]?.toUpperCase() ?? "?"}</span>
+                <span className="text-copper text-xs font-bold leading-none">{(c.first_name?.[0] ?? c.last_name?.[0] ?? "?").toUpperCase()}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-ink truncate">{c.full_name}</p>
+                <p className="text-sm font-medium text-ink truncate">{[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email || "Asiakas"}</p>
                 <p className="text-xs text-ink-ghost">{c.email}</p>
               </div>
               <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[c.status] === "bg-ok" ? "bg-ok/15 text-ok" : STATUS_COLORS[c.status] === "bg-copper" ? "bg-copper/15 text-copper" : "bg-wire text-ink-ghost"}`}>

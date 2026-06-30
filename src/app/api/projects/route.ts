@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/lib/activity";
 
 async function getUser() {
   const supabase = await createClient();
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logActivity(supabase, user.id, "project_created", { project_id: data.id, name: data.name });
   return NextResponse.json({ project: data }, { status: 201 });
 }
 
@@ -68,6 +70,7 @@ export async function PATCH(req: NextRequest) {
 
   const { data, error } = await supabase.from("projects").update(updates).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logActivity(supabase, user.id, "project_updated", { project_id: id });
   return NextResponse.json({ project: data });
 }
 
@@ -82,5 +85,6 @@ export async function DELETE(req: NextRequest) {
 
   const { error } = await supabase.from("projects").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logActivity(supabase, user.id, "project_deleted", { project_id: id });
   return NextResponse.json({ success: true });
 }

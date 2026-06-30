@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  LayoutDashboard, FileText, FolderOpen, Receipt, MessageSquare, Paperclip,
+  LayoutDashboard, FileText, FolderOpen, Receipt, Paperclip,
   Bell, Monitor, Settings, Users, LogOut, X, ShieldCheck,
   Building2, Briefcase, CheckSquare, Calendar, BarChart2, CreditCard, Mail, Wrench,
 } from "lucide-react";
@@ -78,7 +78,6 @@ export function Sidebar({
         <SidebarLink href="/portaali/tarjoukset" label="Tarjoukset" icon={<FileText size={16} />} onClick={onMobileClose} />
         <SidebarLink href="/portaali/projektit" label="Projektit" icon={<FolderOpen size={16} />} onClick={onMobileClose} />
         <SidebarLink href="/portaali/laskut" label="Laskut" icon={<Receipt size={16} />} onClick={onMobileClose} />
-        <SidebarLink href="/portaali/viestit" label="Viestit" icon={<MessageSquare size={16} />} onClick={onMobileClose} />
         <SidebarLink href="/portaali/tiedostot" label="Tiedostot" icon={<Paperclip size={16} />} onClick={onMobileClose} />
 
         {isStaff && (

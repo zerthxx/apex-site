@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logActivity } from "@/lib/activity";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -65,11 +66,13 @@ export async function PATCH(req: NextRequest) {
     await supabase.from("profiles").update({ is_suspended: true }).eq("id", userId);
     const admin = createAdminClient();
     await admin.auth.admin.signOut(userId, "global");
+    await logActivity(supabase, user.id, "user_suspended", { target_user_id: userId });
     return NextResponse.json({ success: true });
   }
 
   if (action === "unsuspend") {
     await supabase.from("profiles").update({ is_suspended: false }).eq("id", userId);
+    await logActivity(supabase, user.id, "user_unsuspended", { target_user_id: userId });
     return NextResponse.json({ success: true });
   }
 
@@ -79,6 +82,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Virheellinen rooli" }, { status: 400 });
     }
     await supabase.from("profiles").update({ role }).eq("id", userId);
+    await logActivity(supabase, user.id, "role_changed", { target_user_id: userId, new_role: role });
     return NextResponse.json({ success: true });
   }
 

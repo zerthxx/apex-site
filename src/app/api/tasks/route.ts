@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/lib/activity";
 
 async function getStaff() {
   const supabase = await createClient();
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logActivity(supabase, user.id, "task_created", { task_id: data.id, title: data.title });
   return NextResponse.json({ task: data }, { status: 201 });
 }
 
@@ -63,6 +65,7 @@ export async function PATCH(req: NextRequest) {
 
   const { data, error } = await supabase.from("tasks").update({ ...updates, updated_at: new Date().toISOString() }).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logActivity(supabase, user.id, "task_updated", { task_id: id });
   return NextResponse.json({ task: data });
 }
 
