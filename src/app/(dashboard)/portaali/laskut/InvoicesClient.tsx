@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Check, Receipt, Trash2, CreditCard } from "lucide-react";
+import { Plus, X, Check, Receipt, Trash2, CreditCard, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Invoice {
@@ -144,6 +144,97 @@ function NewInvoiceModal({ customers, projects, onClose, onCreated }: {
   );
 }
 
+function EditInvoiceModal({ inv, projects, onClose, onSaved }: {
+  inv: Invoice;
+  projects: Project[];
+  onClose: () => void;
+  onSaved: (updated: Invoice) => void;
+}) {
+  const [form, setForm] = useState({
+    project_id: inv.projects?.id ?? "",
+    amount: inv.amount != null ? String(inv.amount) : "",
+    due_date: inv.due_date ? inv.due_date.slice(0, 10) : "",
+    status: inv.status,
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    const res = await fetch("/api/invoices", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: inv.id,
+        project_id: form.project_id || null,
+        amount: form.amount ? parseFloat(form.amount) : null,
+        due_date: form.due_date || null,
+        status: form.status,
+      }),
+    });
+    const data = await res.json();
+    setSaving(false);
+    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    onSaved({ ...inv, ...data.invoice, projects: form.project_id ? (projects.find((p) => p.id === form.project_id) ?? inv.projects) : null });
+    onClose();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-semibold text-ink">Muokkaa laskua</h2>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={16} /></button>
+        </div>
+        <form onSubmit={submit} className="flex flex-col gap-3">
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Projekti (valinnainen)</label>
+            <select value={form.project_id} onChange={(e) => setForm({ ...form, project_id: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+              <option value="">Ei projektia</option>
+              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-ink-ghost mb-1">Summa (€)</label>
+              <input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                min="0" step="0.01"
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+            </div>
+            <div>
+              <label className="block text-xs text-ink-ghost mb-1">Eräpäivä</label>
+              <input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Tila</label>
+            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+              <option value="pending">Odottaa</option>
+              <option value="sent">Lähetetty</option>
+              <option value="paid">Maksettu</option>
+              <option value="overdue">Myöhässä</option>
+              <option value="cancelled">Peruttu</option>
+            </select>
+          </div>
+          {error && <p className="text-xs text-bad">{error}</p>}
+          <div className="flex gap-2 mt-1">
+            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
+            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+              {saving ? "Tallennetaan..." : "Tallenna"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   invoices: Invoice[];
   customers: Customer[];
@@ -158,6 +249,7 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
+  const [editInvoice, setEditInvoice] = useState<Invoice | null>(null);
 
   const filtered = statusFilter === "all" ? invoices : invoices.filter((i) => i.status === statusFilter);
 
@@ -286,6 +378,13 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
                       <div className="flex items-center gap-1.5">
                         {isStaff ? (
                           <>
+                            <button
+                              onClick={() => setEditInvoice(inv)}
+                              className="p-1.5 rounded-lg text-ink-ghost hover:text-copper hover:bg-copper/5 border border-transparent hover:border-copper/20 transition-colors"
+                              title="Muokkaa"
+                            >
+                              <Pencil size={12} />
+                            </button>
                             {["pending","sent"].includes(inv.status) && (
                               <button
                                 onClick={() => markPaid(inv.id)}
@@ -333,6 +432,18 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
           projects={projects}
           onClose={() => setShowNew(false)}
           onCreated={(inv) => setInvoices((prev) => [inv, ...prev])}
+        />
+      )}
+
+      {editInvoice && (
+        <EditInvoiceModal
+          inv={editInvoice}
+          projects={projects}
+          onClose={() => setEditInvoice(null)}
+          onSaved={(updated) => {
+            setInvoices((prev) => prev.map((i) => i.id === updated.id ? updated : i));
+            setEditInvoice(null);
+          }}
         />
       )}
 
