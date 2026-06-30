@@ -311,12 +311,13 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
                 label: "Asiakas",
                 value: customerName,
                 link: isStaff && project.customers?.id ? `/crm/asiakkaat/${project.customers.id}` : null,
+                alwaysShow: true,
               },
-              { label: "Vastuuhenkilö", value: assigneeName, link: null },
-              { label: "Budjetti", value: project.budget != null ? `${project.budget.toLocaleString("fi-FI")} €` : null, link: null },
-              { label: "Deadline", value: project.deadline ? new Date(project.deadline).toLocaleDateString("fi-FI") : null, link: null },
-              { label: "Luotu", value: new Date(project.created_at).toLocaleDateString("fi-FI"), link: null },
-            ].map(({ label, value, link }) => (
+              { label: "Vastuuhenkilö", value: assigneeName, link: null, alwaysShow: isStaff },
+              { label: "Budjetti", value: project.budget != null ? `${project.budget.toLocaleString("fi-FI")} €` : null, link: null, alwaysShow: true },
+              { label: "Deadline", value: project.deadline ? new Date(project.deadline).toLocaleDateString("fi-FI") : null, link: null, alwaysShow: true },
+              { label: "Luotu", value: new Date(project.created_at).toLocaleDateString("fi-FI"), link: null, alwaysShow: true },
+            ].filter(({ value, alwaysShow }) => alwaysShow || value).map(({ label, value, link }) => (
               <div key={label}>
                 <dt className="text-xs text-ink-ghost">{label}</dt>
                 <dd className="text-ink mt-0.5">
