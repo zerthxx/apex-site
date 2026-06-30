@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Upload, Download, Eye, File } from "lucide-react";
+import { Upload, Download, Eye, File, Pencil, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Project {
@@ -60,6 +60,115 @@ function formatBytes(bytes: number | null | undefined): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+interface Customer { id: string; first_name?: string | null; last_name?: string | null; email?: string | null; }
+
+const STATUS_LABELS_PROJ: Record<string, string> = {
+  planning: "Suunnittelu", development: "Kehitys", testing: "Testaus",
+  review: "Katselmus", completed: "Valmis", cancelled: "Peruttu",
+};
+
+function EditProjectModal({ project, onClose, onSaved }: { project: Project; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState({
+    name: project.name,
+    customer_id: project.customers?.id ?? "",
+    status: project.status,
+    deadline: project.deadline ? project.deadline.slice(0, 10) : "",
+    budget: project.budget != null ? String(project.budget) : "",
+  });
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/crm/customers")
+      .then((r) => r.json())
+      .then((d) => setCustomers(d.customers ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingCustomers(false));
+  }, []);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    const res = await fetch("/api/projects", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: project.id,
+        name: form.name,
+        customer_id: form.customer_id || null,
+        status: form.status,
+        deadline: form.deadline || null,
+        budget: form.budget ? parseFloat(form.budget) : null,
+      }),
+    });
+    const data = await res.json();
+    setSaving(false);
+    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    onSaved();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-semibold text-ink">Muokkaa projektia</h2>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
+        </div>
+        <form onSubmit={submit} className="flex flex-col gap-3">
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Projektin nimi *</label>
+            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+          </div>
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Asiakas</label>
+            <select value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value })}
+              disabled={loadingCustomers}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors disabled:opacity-60">
+              <option value="">{loadingCustomers ? "Ladataan..." : "Ei asiakasta"}</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email || c.id}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-ink-ghost mb-1">Tila</label>
+              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+                {Object.entries(STATUS_LABELS_PROJ).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-ink-ghost mb-1">Deadline</label>
+              <input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Budjetti (€)</label>
+            <input type="number" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+          </div>
+          {error && <p className="text-xs text-bad">{error}</p>}
+          <div className="flex gap-2 mt-1">
+            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
+            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+              {saving ? "Tallennetaan..." : "Tallenna"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   project: Project;
   tasks: Task[];
@@ -76,6 +185,7 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
   const [files, setFiles] = useState(initialFiles);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [showEdit, setShowEdit] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function saveProgress() {
@@ -134,6 +244,9 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
                   ? <Link href={`/crm/asiakkaat/${project.customers.id}`} className="text-sm text-copper hover:underline">{customerName}</Link>
                   : <span className="text-sm text-ink-ghost">{customerName}</span>
               )}
+              {!customerName && isStaff && (
+                <span className="text-sm text-ink-ghost">Ei asiakasta</span>
+              )}
               {assigneeName && (
                 <span className="text-xs px-2 py-0.5 rounded-md border border-wire bg-surface text-ink-ghost">
                   {assigneeName}
@@ -141,6 +254,12 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
               )}
             </div>
           </div>
+          {isStaff && (
+            <button onClick={() => setShowEdit(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-wire text-xs text-ink-ghost hover:text-ink hover:border-copper transition-colors shrink-0">
+              <Pencil size={13} />Muokkaa
+            </button>
+          )}
         </div>
 
         {/* Progress */}
@@ -321,6 +440,14 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
             </div>
           )}
         </div>
+      )}
+
+      {showEdit && (
+        <EditProjectModal
+          project={project}
+          onClose={() => setShowEdit(false)}
+          onSaved={() => window.location.reload()}
+        />
       )}
     </div>
   );

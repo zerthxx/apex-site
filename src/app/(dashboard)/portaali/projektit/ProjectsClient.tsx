@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,10 +37,22 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+interface Customer { id: string; first_name?: string | null; last_name?: string | null; email?: string | null; }
+
 function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreated: (p: Project) => void }) {
-  const [form, setForm] = useState({ name: "", status: "planning", deadline: "", budget: "" });
+  const [form, setForm] = useState({ name: "", customer_id: "", status: "planning", deadline: "", budget: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/crm/customers")
+      .then((r) => r.json())
+      .then((d) => setCustomers(d.customers ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingCustomers(false));
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,7 +63,9 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...form,
+        name: form.name,
+        customer_id: form.customer_id || null,
+        status: form.status,
         budget: form.budget ? parseFloat(form.budget) : null,
         deadline: form.deadline || null,
       }),
@@ -76,6 +90,15 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
             <label className="block text-xs text-ink-ghost mb-1">Projektin nimi *</label>
             <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+          </div>
+          <div>
+            <label className="block text-xs text-ink-ghost mb-1">Asiakas</label>
+            <select value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value })}
+              disabled={loadingCustomers}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors disabled:opacity-60">
+              <option value="">{loadingCustomers ? "Ladataan..." : "Ei asiakasta"}</option>
+              {customers.map((c) => <option key={c.id} value={c.id}>{customerLabel(c)}</option>)}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
