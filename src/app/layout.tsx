@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { IntroOverlay } from "@/components/ui/IntroOverlay";
 import { SessionGuard } from "@/components/ui/SessionGuard";
 import { ChatBot } from "@/components/ui/ChatBot";
@@ -123,6 +124,7 @@ export default function RootLayout({
         {children}
         <ChatBot />
         <CrispChat />
+        <SpeedInsights />
       </body>
     </html>
   );
