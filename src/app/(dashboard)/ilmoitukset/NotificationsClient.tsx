@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FileText, FolderOpen, Receipt, MessageSquare, Bell, ArrowRight, Check, CheckCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +47,7 @@ interface NotificationsClientProps {
 }
 
 export function NotificationsClient({ notifications: initial }: NotificationsClientProps) {
+  const router = useRouter();
   const [items, setItems] = useState(initial);
   const [markingAll, setMarkingAll] = useState(false);
 
@@ -56,6 +58,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
+    router.refresh();
   }
 
   async function markAllRead() {
@@ -67,6 +70,7 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
       body: JSON.stringify({ all: true }),
     });
     setMarkingAll(false);
+    router.refresh();
   }
 
   const unread = items.filter((n) => !n.is_read).length;
