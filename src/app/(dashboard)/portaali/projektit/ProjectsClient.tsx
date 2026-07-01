@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, X, Pencil } from "lucide-react";
+import { Plus, Search, X, Pencil, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Project {
@@ -247,16 +247,14 @@ export function ProjectsClient({ initial, isStaff }: Props) {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Edistyminen</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Tila</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">Deadline</th>
-                {isStaff && <th className="px-4 py-3" />}
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-wire/50">
               {filtered.map((p) => (
                 <tr key={p.id} className="hover:bg-surface/50 transition-colors">
                   <td className="px-4 py-3">
-                    <Link href={`/portaali/projektit/${p.id}`} className="font-medium text-ink hover:text-copper transition-colors">
-                      {p.name}
-                    </Link>
+                    <span className="font-medium text-ink">{p.name}</span>
                   </td>
                   {isStaff && <td className="px-4 py-3 text-ink-dim hidden md:table-cell">{customerName(p)}</td>}
                   <td className="px-4 py-3">
@@ -271,14 +269,20 @@ export function ProjectsClient({ initial, isStaff }: Props) {
                   <td className="px-4 py-3 text-ink-ghost hidden lg:table-cell">
                     {p.deadline ? new Date(p.deadline).toLocaleDateString("fi-FI") : "—"}
                   </td>
-                  {isStaff && (
-                    <td className="px-4 py-3 text-right">
-                      <button onClick={() => setEditProject(p)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-wire text-xs text-ink-ghost hover:text-ink hover:border-copper transition-colors">
-                        <Pencil size={12} />Muokkaa
-                      </button>
-                    </td>
-                  )}
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {isStaff && (
+                        <button onClick={() => setEditProject(p)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-wire text-xs text-ink-ghost hover:text-ink hover:border-copper transition-colors">
+                          <Pencil size={12} />Muokkaa
+                        </button>
+                      )}
+                      <Link href={`/portaali/projektit/${p.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-copper/10 border border-copper/20 text-xs font-medium text-copper hover:bg-copper/20 transition-colors">
+                        Avaa <ArrowRight size={12} />
+                      </Link>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
