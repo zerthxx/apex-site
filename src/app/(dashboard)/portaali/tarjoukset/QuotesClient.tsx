@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Quote {
@@ -212,15 +212,14 @@ export function QuotesClient({ initial, isStaff }: Props) {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Tila</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">Voimassa asti</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">Luotu</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-wire/50">
               {filtered.map((q) => (
                 <tr key={q.id} className="hover:bg-surface/50 transition-colors">
                   <td className="px-4 py-3">
-                    <Link href={`/portaali/tarjoukset/${q.id}`} className="font-medium text-ink hover:text-copper transition-colors">
-                      {q.title}
-                    </Link>
+                    <span className="font-medium text-ink">{q.title}</span>
                   </td>
                   {isStaff && <td className="px-4 py-3 text-ink-dim hidden md:table-cell">{customerName(q)}</td>}
                   {isStaff && <td className="px-4 py-3 text-ink-dim hidden lg:table-cell">{q.companies?.name ?? "—"}</td>}
@@ -233,6 +232,12 @@ export function QuotesClient({ initial, isStaff }: Props) {
                   </td>
                   <td className="px-4 py-3 text-ink-ghost hidden md:table-cell">
                     {new Date(q.created_at).toLocaleDateString("fi-FI")}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/portaali/tarjoukset/${q.id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-copper/10 border border-copper/20 text-xs font-medium text-copper hover:bg-copper/20 transition-colors">
+                      Avaa <ArrowRight size={12} />
+                    </Link>
                   </td>
                 </tr>
               ))}
