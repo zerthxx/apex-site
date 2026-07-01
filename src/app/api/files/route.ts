@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/lib/activity";
 
 async function getStaff() {
   const supabase = await createClient();
@@ -74,5 +75,6 @@ export async function DELETE(req: NextRequest) {
 
   const { error } = await supabase.from("project_files").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logActivity(supabase, user.id, "file_deleted", { file_id: id });
   return NextResponse.json({ success: true });
 }

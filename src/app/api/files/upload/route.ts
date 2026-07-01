@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/lib/activity";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -72,6 +73,8 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 });
+
+  await logActivity(supabase, user.id, "file_uploaded", { file_id: fileRecord.id, name: file.name, project_id: projectId });
 
   return NextResponse.json({ file: fileRecord }, { status: 201 });
 }
