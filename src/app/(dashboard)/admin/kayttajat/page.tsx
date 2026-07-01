@@ -26,8 +26,8 @@ export default async function AdminKayttajatPage() {
     );
   }
 
-  // Fetch profiles for role/suspension
-  const { data: profiles } = await supabase.from("profiles").select("id, role, is_suspended, avatar_url");
+  // Fetch profiles via admin client so RLS doesn't filter out other users
+  const { data: profiles } = await admin.from("profiles").select("id, role, is_suspended, avatar_url");
   const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
   const tableUsers = users.map((u) => {
@@ -47,6 +47,8 @@ export default async function AdminKayttajatPage() {
     };
   });
 
+  const callerRole = myProfile?.role ?? "admin";
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="mb-6">
@@ -55,7 +57,7 @@ export default async function AdminKayttajatPage() {
           {users.length} rekisteröitynyttä käyttäjää.
         </p>
       </div>
-      <UserTable users={tableUsers} />
+      <UserTable users={tableUsers} currentUserId={user.id} callerRole={callerRole} />
     </div>
   );
 }

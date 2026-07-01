@@ -6,13 +6,13 @@ import { logActivity } from "@/lib/activity";
 async function requireAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { user: null, supabase, error: "Ei kirjautunut" };
+  if (!user) return { user: null, supabase, profile: null, error: "Ei kirjautunut" };
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (!["owner", "admin"].includes(profile?.role ?? "")) {
-    return { user: null, supabase, error: "Ei admin-oikeuksia" };
+    return { user: null, supabase, profile: null, error: "Ei admin-oikeuksia" };
   }
-  return { user, supabase, error: null };
+  return { user, supabase, profile, error: null };
 }
 
 export async function GET() {
@@ -25,9 +25,8 @@ export async function GET() {
   const { data: { users }, error: listErr } = await admin.auth.admin.listUsers({ perPage: 1000 });
   if (listErr) return NextResponse.json({ error: listErr.message }, { status: 500 });
 
-  // Fetch all profiles for role/suspension data
-  const supabase = await createClient();
-  const { data: profiles } = await supabase.from("profiles").select("id, role, is_suspended, avatar_url");
+  // Use admin client so RLS doesn't filter out other users' profiles
+  const { data: profiles } = await admin.from("profiles").select("id, role, is_suspended, avatar_url");
 
   const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
@@ -52,7 +51,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { user, error } = await requireAdmin();
+  const { user, supabase, profile: callerProfile, error } = await requireAdmin();
   if (!user) return NextResponse.json({ error }, { status: error === "Ei kirjautunut" ? 401 : 403 });
 
   const body = await req.json().catch(() => ({}));
@@ -60,9 +59,10 @@ export async function PATCH(req: NextRequest) {
 
   if (!userId || !action) return NextResponse.json({ error: "userId ja action vaaditaan" }, { status: 400 });
 
-  const supabase = await createClient();
   // Use admin client for profile updates — RLS only allows self-update
   const adminDb = createAdminClient();
+  const callerRole = callerProfile?.role ?? "admin";
+  const isOwner = callerRole === "owner";
 
   if (action === "suspend") {
     const { error: suspendErr } = await adminDb.from("profiles").update({ is_suspended: true }).eq("id", userId);
@@ -84,6 +84,19 @@ export async function PATCH(req: NextRequest) {
     if (!role || !validRoles.includes(role)) {
       return NextResponse.json({ error: "Virheellinen rooli" }, { status: 400 });
     }
+
+    // Security guards
+    if (userId === user.id) {
+      return NextResponse.json({ error: "Et voi muuttaa omaa rooliasi" }, { status: 403 });
+    }
+    if (role === "owner" && !isOwner) {
+      return NextResponse.json({ error: "Vain owner voi asettaa owner-roolin" }, { status: 403 });
+    }
+    const { data: targetProfile } = await adminDb.from("profiles").select("role").eq("id", userId).single();
+    if (targetProfile?.role === "owner" && !isOwner) {
+      return NextResponse.json({ error: "Et voi muuttaa ownerin roolia" }, { status: 403 });
+    }
+
     const { error: roleErr } = await adminDb.from("profiles").update({ role }).eq("id", userId);
     if (roleErr) return NextResponse.json({ error: roleErr.message }, { status: 500 });
     await logActivity(supabase, user.id, "role_changed", { target_user_id: userId, new_role: role });

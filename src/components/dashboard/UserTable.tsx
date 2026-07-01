@@ -18,18 +18,25 @@ interface AdminUser {
   provider: string;
 }
 
-const ROLE_OPTIONS = ["customer", "employee", "admin", "owner"];
+const ROLE_OPTIONS_OWNER = ["customer", "employee", "admin", "owner"];
+const ROLE_OPTIONS_ADMIN = ["customer", "employee", "admin"];
 
 interface UserTableProps {
   users: AdminUser[];
+  currentUserId: string;
+  callerRole: string;
 }
 
-export function UserTable({ users: initial }: UserTableProps) {
+export function UserTable({ users: initial, currentUserId, callerRole }: UserTableProps) {
   const [users, setUsers] = useState(initial);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<"created_at" | "email" | "role">("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [pending, setPending] = useState<string | null>(null);
+  const [roleError, setRoleError] = useState<{ id: string; msg: string } | null>(null);
+
+  const isOwner = callerRole === "owner";
+  const roleOptions = isOwner ? ROLE_OPTIONS_OWNER : ROLE_OPTIONS_ADMIN;
 
   function toggleSort(key: typeof sortKey) {
     if (sortKey === key) {
@@ -63,6 +70,7 @@ export function UserTable({ users: initial }: UserTableProps) {
   }, [users, search, sortKey, sortDir]);
 
   async function patchUser(userId: string, action: string, role?: string) {
+    setRoleError(null);
     setPending(userId + action);
     const res = await fetch("/api/admin/users", {
       method: "PATCH",
@@ -79,8 +87,17 @@ export function UserTable({ users: initial }: UserTableProps) {
           return u;
         })
       );
+    } else if (action === "role") {
+      const body = await res.json().catch(() => ({}));
+      setRoleError({ id: userId, msg: body?.error ?? "Virhe" });
     }
     setPending(null);
+  }
+
+  function isRoleChangeable(u: AdminUser) {
+    if (u.id === currentUserId) return false;
+    if (!isOwner && u.role === "owner") return false;
+    return true;
   }
 
   function SortIcon({ k }: { k: typeof sortKey }) {
@@ -158,16 +175,32 @@ export function UserTable({ users: initial }: UserTableProps) {
 
                   {/* Role */}
                   <td className="px-4 py-3">
-                    <select
-                      value={u.role}
-                      onChange={(e) => patchUser(u.id, "role", e.target.value)}
-                      disabled={pending === u.id + "role"}
-                      className="text-xs bg-elevated border border-wire rounded-lg px-2 py-1 text-ink focus:outline-none focus:border-copper/50 transition-colors disabled:opacity-50"
-                    >
-                      {ROLE_OPTIONS.map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
+                    <div className="flex flex-col gap-1">
+                      <select
+                        value={u.role}
+                        onChange={(e) => patchUser(u.id, "role", e.target.value)}
+                        disabled={!isRoleChangeable(u) || pending === u.id + "role"}
+                        className="text-xs bg-elevated border border-wire rounded-lg px-2 py-1 text-ink focus:outline-none focus:border-copper/50 transition-colors disabled:opacity-50"
+                        title={
+                          u.id === currentUserId
+                            ? "Et voi muuttaa omaa rooliasi"
+                            : !isOwner && u.role === "owner"
+                            ? "Vain owner voi muuttaa ownerin roolia"
+                            : undefined
+                        }
+                      >
+                        {roleOptions.map((r) => (
+                          <option key={r} value={r}>{r}</option>
+                        ))}
+                        {/* Show current role even if not in roleOptions (e.g. admin sees an owner) */}
+                        {!roleOptions.includes(u.role) && (
+                          <option value={u.role}>{u.role}</option>
+                        )}
+                      </select>
+                      {roleError?.id === u.id && (
+                        <p className="text-[10px] text-bad">{roleError.msg}</p>
+                      )}
+                    </div>
                   </td>
 
                   {/* Status */}
