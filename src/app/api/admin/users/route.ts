@@ -61,17 +61,20 @@ export async function PATCH(req: NextRequest) {
   if (!userId || !action) return NextResponse.json({ error: "userId ja action vaaditaan" }, { status: 400 });
 
   const supabase = await createClient();
+  // Use admin client for profile updates — RLS only allows self-update
+  const adminDb = createAdminClient();
 
   if (action === "suspend") {
-    await supabase.from("profiles").update({ is_suspended: true }).eq("id", userId);
-    const admin = createAdminClient();
-    await admin.auth.admin.signOut(userId, "global");
+    const { error: suspendErr } = await adminDb.from("profiles").update({ is_suspended: true }).eq("id", userId);
+    if (suspendErr) return NextResponse.json({ error: suspendErr.message }, { status: 500 });
+    await adminDb.auth.admin.signOut(userId, "global");
     await logActivity(supabase, user.id, "user_suspended", { target_user_id: userId });
     return NextResponse.json({ success: true });
   }
 
   if (action === "unsuspend") {
-    await supabase.from("profiles").update({ is_suspended: false }).eq("id", userId);
+    const { error: unsuspendErr } = await adminDb.from("profiles").update({ is_suspended: false }).eq("id", userId);
+    if (unsuspendErr) return NextResponse.json({ error: unsuspendErr.message }, { status: 500 });
     await logActivity(supabase, user.id, "user_unsuspended", { target_user_id: userId });
     return NextResponse.json({ success: true });
   }
@@ -81,7 +84,8 @@ export async function PATCH(req: NextRequest) {
     if (!role || !validRoles.includes(role)) {
       return NextResponse.json({ error: "Virheellinen rooli" }, { status: 400 });
     }
-    await supabase.from("profiles").update({ role }).eq("id", userId);
+    const { error: roleErr } = await adminDb.from("profiles").update({ role }).eq("id", userId);
+    if (roleErr) return NextResponse.json({ error: roleErr.message }, { status: 500 });
     await logActivity(supabase, user.id, "role_changed", { target_user_id: userId, new_role: role });
     return NextResponse.json({ success: true });
   }

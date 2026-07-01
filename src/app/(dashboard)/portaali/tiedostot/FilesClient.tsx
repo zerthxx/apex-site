@@ -130,6 +130,7 @@ function UploadModal({
     if (!files || files.length === 0) return;
     setUploading(true);
     setError("");
+    let hasError = false;
 
     for (const file of Array.from(files)) {
       setProgress(`Ladataan "${file.name}"...`);
@@ -139,13 +140,13 @@ function UploadModal({
 
       const res = await fetch("/api/files/upload", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Lataus epäonnistui"); break; }
+      if (!res.ok) { setError(data.error ?? "Lataus epäonnistui"); hasError = true; break; }
       onUploaded(data.file);
     }
 
     setUploading(false);
     setProgress(null);
-    onClose();
+    if (!hasError) onClose();
   }
 
   return (

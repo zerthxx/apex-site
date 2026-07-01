@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity";
 
 export async function POST(req: NextRequest) {
@@ -41,7 +42,9 @@ export async function POST(req: NextRequest) {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  const { error: uploadError } = await supabase.storage
+  // Use admin client for storage to bypass bucket RLS
+  const adminClient = createAdminClient();
+  const { error: uploadError } = await adminClient.storage
     .from("project-files")
     .upload(storagePath, buffer, { contentType: file.type, upsert: false });
 
