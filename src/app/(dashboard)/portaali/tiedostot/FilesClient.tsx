@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import {
   ChevronDown, ChevronRight, Upload, Download, Trash2, Eye, X,
   File, FileImage, FileText, FileCode, FolderOpen, Folder,
+  Bell, CheckCircle, Clock,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface ProjectFile {
   id: string;
@@ -22,11 +22,24 @@ interface ProjectFile {
 interface Project {
   id: string;
   name: string;
+  customer_id: string | null;
+}
+
+interface FileRequest {
+  id: string;
+  project_id: string;
+  customer_id: string;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  status: "pending" | "fulfilled" | "cancelled";
+  created_at: string;
 }
 
 interface FilesClientProps {
   projects: Project[];
   files: ProjectFile[];
+  fileRequests: FileRequest[];
   isStaff: boolean;
 }
 
@@ -167,6 +180,152 @@ function UploadModal({
   );
 }
 
+function RequestModal({
+  project,
+  onClose,
+  onCreated,
+}: {
+  project: Project;
+  onClose: () => void;
+  onCreated: (req: FileRequest) => void;
+}) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!title.trim()) { setError("Otsikko vaaditaan"); return; }
+    if (!project.customer_id) { setError("Projektilla ei ole asiakasta"); return; }
+    setSaving(true);
+    setError("");
+
+    const res = await fetch("/api/files/requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        project_id: project.id,
+        customer_id: project.customer_id,
+        title: title.trim(),
+        description: description.trim() || null,
+        due_date: dueDate || null,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setError(data.error ?? "Virhe"); setSaving(false); return; }
+    onCreated(data.request);
+    onClose();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-semibold text-ink">Pyydä tiedostoja</h2>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={16} /></button>
+        </div>
+
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <div>
+            <label className="block text-xs font-medium text-ink-ghost mb-1">Mitä tarvitset? *</label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="esim. Yrityksen logo PNG-muodossa"
+              className="w-full px-3 py-2 rounded-lg bg-surface border border-wire text-sm text-ink placeholder:text-ink-ghost focus:outline-none focus:border-copper/60"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-ink-ghost mb-1">Lisätiedot</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              placeholder="Tarkemmat ohjeet tai vaatimukset..."
+              className="w-full px-3 py-2 rounded-lg bg-surface border border-wire text-sm text-ink placeholder:text-ink-ghost focus:outline-none focus:border-copper/60 resize-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-ink-ghost mb-1">Määräpäivä</label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg bg-surface border border-wire text-sm text-ink focus:outline-none focus:border-copper/60"
+            />
+          </div>
+          {error && <p className="text-xs text-bad">{error}</p>}
+          <div className="flex gap-2 pt-1">
+            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+              Peruuta
+            </button>
+            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 transition-colors disabled:opacity-50">
+              {saving ? "Lähetetään..." : "Lähetä pyyntö"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function FileRequestCard({
+  request,
+  onFulfill,
+  onUpload,
+}: {
+  request: FileRequest;
+  onFulfill: (id: string) => void;
+  onUpload: () => void;
+}) {
+  const [fulfilling, setFulfilling] = useState(false);
+
+  async function markFulfilled() {
+    setFulfilling(true);
+    const res = await fetch("/api/files/requests", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: request.id, status: "fulfilled" }),
+    });
+    if (res.ok) onFulfill(request.id);
+    setFulfilling(false);
+  }
+
+  return (
+    <div className="mx-4 my-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+      <Bell size={15} className="text-amber-400 shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-ink">{request.title}</p>
+        {request.description && <p className="text-xs text-ink-ghost mt-0.5">{request.description}</p>}
+        {request.due_date && (
+          <p className="text-xs text-ink-ghost mt-1 flex items-center gap-1">
+            <Clock size={11} /> Määräpäivä: {formatDate(request.due_date)}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={onUpload}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-copper text-white hover:bg-copper/90 transition-colors"
+        >
+          <Upload size={11} /> Lataa
+        </button>
+        <button
+          onClick={markFulfilled}
+          disabled={fulfilling}
+          title="Merkitse toimitetuksi"
+          className="p-1 rounded hover:bg-surface text-ink-ghost hover:text-ok transition-colors disabled:opacity-50"
+        >
+          <CheckCircle size={15} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function FileRow({
   file,
   onDelete,
@@ -237,20 +396,29 @@ function FileRow({
 function ProjectFolder({
   project,
   files,
+  requests,
   onUploaded,
   onDelete,
   onPreview,
+  onRequestCreated,
+  onRequestFulfilled,
   isStaff,
 }: {
   project: Project | null;
   files: ProjectFile[];
+  requests: FileRequest[];
   onUploaded: (f: ProjectFile) => void;
   onDelete: (id: string) => void;
   onPreview: (f: ProjectFile) => void;
+  onRequestCreated: (r: FileRequest) => void;
+  onRequestFulfilled: (id: string) => void;
   isStaff: boolean;
 }) {
   const [open, setOpen] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
+  const [showRequest, setShowRequest] = useState(false);
+
+  const pendingRequests = requests.filter((r) => r.status === "pending");
 
   return (
     <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
@@ -262,8 +430,21 @@ function ProjectFolder({
           {open ? <FolderOpen size={16} className="text-copper" /> : <Folder size={16} className="text-copper" />}
           <span className="text-sm font-medium text-ink">{project?.name ?? "Yleiset tiedostot"}</span>
           <span className="text-xs text-ink-ghost bg-surface border border-wire px-1.5 py-0.5 rounded-full">{files.length}</span>
+          {pendingRequests.length > 0 && (
+            <span className="text-xs font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded-full">
+              {pendingRequests.length} pyyntö
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
+          {isStaff && project?.customer_id && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowRequest(true); }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-wire text-ink-ghost hover:text-ink hover:border-ink/40 transition-colors"
+            >
+              <Bell size={12} /> Pyydä tiedostoja
+            </button>
+          )}
           <button
             onClick={(e) => { e.stopPropagation(); setShowUpload(true); }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-copper text-white hover:bg-copper/90 transition-colors"
@@ -276,11 +457,19 @@ function ProjectFolder({
 
       {open && (
         <div className="border-t border-wire">
-          {files.length === 0 ? (
+          {pendingRequests.map((req) => (
+            <FileRequestCard
+              key={req.id}
+              request={req}
+              onFulfill={onRequestFulfilled}
+              onUpload={() => setShowUpload(true)}
+            />
+          ))}
+          {files.length === 0 && pendingRequests.length === 0 ? (
             <div className="px-4 py-6 text-center text-sm text-ink-ghost">
               Ei tiedostoja. <button onClick={() => setShowUpload(true)} className="text-copper hover:underline">Lataa ensimmäinen.</button>
             </div>
-          ) : (
+          ) : files.length === 0 ? null : (
             <div className="divide-y divide-wire/50">
               {files.map((f) => (
                 <FileRow key={f.id} file={f} onDelete={onDelete} onPreview={onPreview} isStaff={isStaff} />
@@ -297,12 +486,21 @@ function ProjectFolder({
           onUploaded={(f) => { onUploaded(f); setOpen(true); }}
         />
       )}
+
+      {showRequest && project && (
+        <RequestModal
+          project={project}
+          onClose={() => setShowRequest(false)}
+          onCreated={onRequestCreated}
+        />
+      )}
     </div>
   );
 }
 
-export function FilesClient({ projects, files: initial, isStaff }: FilesClientProps) {
+export function FilesClient({ projects, files: initial, fileRequests: initialRequests, isStaff }: FilesClientProps) {
   const [files, setFiles] = useState(initial);
+  const [fileRequests, setFileRequests] = useState(initialRequests);
   const [preview, setPreview] = useState<ProjectFile | null>(null);
 
   function handleUploaded(f: ProjectFile) {
@@ -313,22 +511,34 @@ export function FilesClient({ projects, files: initial, isStaff }: FilesClientPr
     setFiles((prev) => prev.filter((f) => f.id !== id));
   }
 
+  function handleRequestCreated(r: FileRequest) {
+    setFileRequests((prev) => [r, ...prev]);
+  }
+
+  function handleRequestFulfilled(id: string) {
+    setFileRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: "fulfilled" as const } : r));
+  }
+
   const noProject = files.filter((f) => !f.project_id);
   const byProject = projects.map((p) => ({
     project: p,
     files: files.filter((f) => f.project_id === p.id),
+    requests: fileRequests.filter((r) => r.project_id === p.id),
   }));
 
   return (
     <div className="flex flex-col gap-3">
-      {byProject.map(({ project, files: pf }) => (
+      {byProject.map(({ project, files: pf, requests }) => (
         <ProjectFolder
           key={project.id}
           project={project}
           files={pf}
+          requests={requests}
           onUploaded={handleUploaded}
           onDelete={handleDelete}
           onPreview={setPreview}
+          onRequestCreated={handleRequestCreated}
+          onRequestFulfilled={handleRequestFulfilled}
           isStaff={isStaff}
         />
       ))}
@@ -337,9 +547,12 @@ export function FilesClient({ projects, files: initial, isStaff }: FilesClientPr
         <ProjectFolder
           project={null}
           files={noProject}
+          requests={[]}
           onUploaded={handleUploaded}
           onDelete={handleDelete}
           onPreview={setPreview}
+          onRequestCreated={handleRequestCreated}
+          onRequestFulfilled={handleRequestFulfilled}
           isStaff={isStaff}
         />
       )}
