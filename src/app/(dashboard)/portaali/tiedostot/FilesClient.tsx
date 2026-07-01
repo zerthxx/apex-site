@@ -27,6 +27,7 @@ interface Project {
 interface FilesClientProps {
   projects: Project[];
   files: ProjectFile[];
+  isStaff: boolean;
 }
 
 function formatBytes(bytes: number | null) {
@@ -170,10 +171,12 @@ function FileRow({
   file,
   onDelete,
   onPreview,
+  isStaff,
 }: {
   file: ProjectFile;
   onDelete: (id: string) => void;
   onPreview: (file: ProjectFile) => void;
+  isStaff: boolean;
 }) {
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -221,9 +224,11 @@ function FileRow({
         <button onClick={download} disabled={downloading} title="Lataa" className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-ink transition-colors disabled:opacity-50">
           <Download size={14} />
         </button>
-        <button onClick={remove} disabled={deleting} title="Poista" className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-bad transition-colors disabled:opacity-50">
-          <Trash2 size={14} />
-        </button>
+        {isStaff && (
+          <button onClick={remove} disabled={deleting} title="Poista" className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-bad transition-colors disabled:opacity-50">
+            <Trash2 size={14} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -235,12 +240,14 @@ function ProjectFolder({
   onUploaded,
   onDelete,
   onPreview,
+  isStaff,
 }: {
   project: Project | null;
   files: ProjectFile[];
   onUploaded: (f: ProjectFile) => void;
   onDelete: (id: string) => void;
   onPreview: (f: ProjectFile) => void;
+  isStaff: boolean;
 }) {
   const [open, setOpen] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
@@ -276,7 +283,7 @@ function ProjectFolder({
           ) : (
             <div className="divide-y divide-wire/50">
               {files.map((f) => (
-                <FileRow key={f.id} file={f} onDelete={onDelete} onPreview={onPreview} />
+                <FileRow key={f.id} file={f} onDelete={onDelete} onPreview={onPreview} isStaff={isStaff} />
               ))}
             </div>
           )}
@@ -294,7 +301,7 @@ function ProjectFolder({
   );
 }
 
-export function FilesClient({ projects, files: initial }: FilesClientProps) {
+export function FilesClient({ projects, files: initial, isStaff }: FilesClientProps) {
   const [files, setFiles] = useState(initial);
   const [preview, setPreview] = useState<ProjectFile | null>(null);
 
@@ -322,16 +329,20 @@ export function FilesClient({ projects, files: initial }: FilesClientProps) {
           onUploaded={handleUploaded}
           onDelete={handleDelete}
           onPreview={setPreview}
+          isStaff={isStaff}
         />
       ))}
 
-      <ProjectFolder
-        project={null}
-        files={noProject}
-        onUploaded={handleUploaded}
-        onDelete={handleDelete}
-        onPreview={setPreview}
-      />
+      {isStaff && (
+        <ProjectFolder
+          project={null}
+          files={noProject}
+          onUploaded={handleUploaded}
+          onDelete={handleDelete}
+          onPreview={setPreview}
+          isStaff={isStaff}
+        />
+      )}
 
       {preview && <PreviewModal file={preview} onClose={() => setPreview(null)} />}
     </div>

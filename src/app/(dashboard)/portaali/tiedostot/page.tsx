@@ -27,7 +27,7 @@ export default async function TiedostotPage() {
         <h1 className="text-xl font-bold text-ink">Tiedostot</h1>
         <p className="text-sm text-ink-ghost mt-1">Projektitiedostot ja jaetut dokumentit</p>
       </div>
-      <FilesClient projects={projects ?? []} files={files ?? []} />
+      <FilesClient projects={projects ?? []} files={files ?? []} isStaff={isStaff} />
     </div>
   );
 }

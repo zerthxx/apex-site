@@ -7,15 +7,31 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!["owner","admin","employee"].includes(profile?.role ?? "")) {
-    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
-  }
+  const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
   const projectId = formData.get("project_id") as string | null;
 
   if (!file) return NextResponse.json({ error: "Tiedosto puuttuu" }, { status: 400 });
+
+  // Customers can only upload to their own projects
+  if (!isStaff) {
+    if (!projectId) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+    if (!customer) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+    const { data: project } = await supabase
+      .from("projects")
+      .select("id")
+      .eq("id", projectId)
+      .eq("customer_id", customer.id)
+      .single();
+    if (!project) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+  }
 
   const storagePath = projectId
     ? `${projectId}/${Date.now()}_${file.name}`
