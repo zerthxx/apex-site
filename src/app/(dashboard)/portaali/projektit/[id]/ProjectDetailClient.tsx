@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Upload, Download, Eye, File, Pencil, X, Send } from "lucide-react";
+import { Upload, Download, Eye, File, Pencil, X, Send, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Project {
@@ -214,10 +214,11 @@ interface Props {
   tasks: Task[];
   files: ProjectFile[];
   isStaff: boolean;
+  canModerate: boolean;
   assignedProfile?: AssignedProfile | null;
 }
 
-export function ProjectDetailClient({ project: initial, tasks, files: initialFiles, isStaff, assignedProfile }: Props) {
+export function ProjectDetailClient({ project: initial, tasks, files: initialFiles, isStaff, canModerate, assignedProfile }: Props) {
   const [project, setProject] = useState(initial);
   const [progress, setProgress] = useState(initial.progress_pct);
   const [saving, setSaving] = useState(false);
@@ -248,6 +249,15 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
       commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [comments, tab]);
+
+  async function deleteComment(commentId: string) {
+    const res = await fetch(`/api/projects/${project.id}/comments`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commentId }),
+    });
+    if (res.ok) setComments((prev) => prev.filter((c) => c.id !== commentId));
+  }
 
   async function sendComment(e: React.FormEvent) {
     e.preventDefault();
@@ -532,7 +542,7 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
             ) : (
               <div className="divide-y divide-wire/50 max-h-[500px] overflow-y-auto">
                 {comments.map((c) => (
-                  <div key={c.id} className={cn("px-5 py-4 flex gap-3", c.is_own && "bg-copper/3")}>
+                  <div key={c.id} className={cn("px-5 py-4 flex gap-3 group", c.is_own && "bg-copper/3")}>
                     <div className="w-8 h-8 rounded-full bg-copper/10 border border-copper/20 flex items-center justify-center shrink-0 mt-0.5">
                       <span className="text-copper text-xs font-bold">{c.author_name[0]?.toUpperCase() ?? "?"}</span>
                     </div>
@@ -543,6 +553,15 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
                         <span className="text-[10px] text-ink-ghost ml-auto">
                           {new Date(c.created_at).toLocaleString("fi-FI", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                         </span>
+                        {canModerate && (
+                          <button
+                            onClick={() => deleteComment(c.id)}
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded text-ink-ghost hover:text-bad transition-all"
+                            title="Poista kommentti"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        )}
                       </div>
                       <p className="text-sm text-ink whitespace-pre-wrap break-words">{c.body}</p>
                     </div>

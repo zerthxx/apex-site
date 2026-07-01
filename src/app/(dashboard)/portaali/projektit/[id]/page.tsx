@@ -12,6 +12,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
+  const canModerate = ["owner","admin"].includes(profile?.role ?? "");
 
   const [projectRes, tasksRes, filesRes] = await Promise.all([
     supabase.from("projects").select(`*, customers(id, first_name, last_name, email)`).eq("id", id).single(),
@@ -40,6 +41,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         tasks={tasksRes.data ?? []}
         files={filesRes.data ?? []}
         isStaff={isStaff}
+        canModerate={canModerate}
         assignedProfile={assignedProfile}
       />
     </div>

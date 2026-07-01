@@ -118,3 +118,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   return NextResponse.json({ comment: { ...comment, author_name, is_own: true } }, { status: 201 });
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { supabase, user } = await getAuthedUser();
+  if (!user) return NextResponse.json({ error: "Ei kirjautunut" }, { status: 401 });
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!["owner", "admin"].includes(profile?.role ?? "")) {
+    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+  }
+
+  const { commentId } = await req.json().catch(() => ({})) as { commentId?: string };
+  if (!commentId) return NextResponse.json({ error: "commentId vaaditaan" }, { status: 400 });
+
+  const adminDb = createAdminClient();
+  const { error } = await adminDb.from("project_comments").delete().eq("id", commentId);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ success: true });
+}
