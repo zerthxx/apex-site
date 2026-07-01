@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
 export const metadata: Metadata = {
@@ -18,6 +19,27 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .eq("id", user.id)
     .single();
 
+  const role = profile?.role ?? "customer";
+
+  // Self-heal: link this account to a CRM customer record with a matching email
+  // that was created (e.g. via CRM) before the customer ever signed up.
+  if (role === "customer" && user.email) {
+    const { data: linkedCustomer } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!linkedCustomer) {
+      const adminDb = createAdminClient();
+      await adminDb
+        .from("customers")
+        .update({ user_id: user.id })
+        .is("user_id", null)
+        .ilike("email", user.email);
+    }
+  }
+
   const { count: unread } = await supabase
     .from("notifications")
     .select("*", { count: "exact", head: true })
@@ -32,7 +54,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       firstName={firstName}
       lastName={lastName}
       email={user.email}
-      role={profile?.role ?? "customer"}
+      role={role}
       unreadNotifications={unread ?? 0}
     >
       {children}
