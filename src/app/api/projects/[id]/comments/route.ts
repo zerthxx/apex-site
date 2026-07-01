@@ -62,6 +62,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   const adminDb = createAdminClient();
+
+  // Fetch project name for notification
+  const { data: projectRow } = await adminDb
+    .from("projects")
+    .select("name, customers(user_id)")
+    .eq("id", projectId)
+    .single();
+
   const { data: comment, error } = await adminDb
     .from("project_comments")
     .insert({ project_id: projectId, user_id: user.id, body: body.trim() })
@@ -72,6 +80,41 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const meta = (await adminDb.auth.admin.getUserById(user.id)).data.user?.user_metadata ?? {};
   const author_name = [meta.first_name, meta.last_name].filter(Boolean).join(" ") || user.email || "Sinä";
+
+  const preview = body.trim().slice(0, 80) + (body.trim().length > 80 ? "..." : "");
+  const href = `/portaali/projektit/${projectId}`;
+
+  if (isStaff) {
+    // Staff commented → notify the customer if project has one
+    const customerUserId = (projectRow?.customers as any)?.user_id;
+    if (customerUserId) {
+      await adminDb.from("notifications").insert({
+        user_id: customerUserId,
+        type: "message",
+        title: `Uusi kommentti — ${projectRow?.name ?? "projekti"}`,
+        body: `${author_name}: ${preview}`,
+        href,
+      });
+    }
+  } else {
+    // Customer commented → notify all staff (owner, admin, employee)
+    const { data: staffProfiles } = await adminDb
+      .from("profiles")
+      .select("id")
+      .in("role", ["owner", "admin", "employee"]);
+
+    if (staffProfiles && staffProfiles.length > 0) {
+      await adminDb.from("notifications").insert(
+        staffProfiles.map((p) => ({
+          user_id: p.id,
+          type: "message",
+          title: `Uusi kommentti — ${projectRow?.name ?? "projekti"}`,
+          body: `${author_name}: ${preview}`,
+          href,
+        }))
+      );
+    }
+  }
 
   return NextResponse.json({ comment: { ...comment, author_name, is_own: true } }, { status: 201 });
 }
