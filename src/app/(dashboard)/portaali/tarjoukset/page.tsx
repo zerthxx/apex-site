@@ -11,6 +11,7 @@ export default async function QuotesPage() {
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
+  const canModerate = ["owner","admin"].includes(profile?.role ?? "");
 
   let quotes = null;
 
@@ -46,7 +47,7 @@ export default async function QuotesPage() {
           {isStaff ? "Hallitse asiakkaiden tarjouksia" : "Sinulle lähetetyt tarjoukset"}
         </p>
       </div>
-      <QuotesClient initial={(quotes ?? []) as any} isStaff={isStaff} />
+      <QuotesClient initial={(quotes ?? []) as any} isStaff={isStaff} canModerate={canModerate} />
     </div>
   );
 }

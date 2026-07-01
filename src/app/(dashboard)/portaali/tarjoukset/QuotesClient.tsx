@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, X, ArrowRight } from "lucide-react";
+import { Plus, Search, X, ArrowRight, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Quote {
@@ -151,13 +151,27 @@ function NewQuoteModal({ onClose, onCreated }: { onClose: () => void; onCreated:
 interface Props {
   initial: Quote[];
   isStaff: boolean;
+  canModerate?: boolean;
 }
 
-export function QuotesClient({ initial, isStaff }: Props) {
+export function QuotesClient({ initial, isStaff, canModerate }: Props) {
   const [quotes, setQuotes] = useState(initial);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  async function deleteQuote(q: Quote) {
+    if (!confirm(`Poistetaanko tarjous "${q.title}" pysyvästi?`)) return;
+    setDeleting(q.id);
+    const res = await fetch("/api/quotes", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: q.id }),
+    });
+    setDeleting(null);
+    if (res.ok) setQuotes((prev) => prev.filter((x) => x.id !== q.id));
+  }
 
   const filtered = quotes.filter((q) => {
     const text = `${q.title} ${q.customers?.email ?? ""} ${q.companies?.name ?? ""}`.toLowerCase();
@@ -234,10 +248,18 @@ export function QuotesClient({ initial, isStaff }: Props) {
                     {new Date(q.created_at).toLocaleDateString("fi-FI")}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/portaali/tarjoukset/${q.id}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-copper/10 border border-copper/20 text-xs font-medium text-copper hover:bg-copper/20 transition-colors">
-                      Avaa <ArrowRight size={12} />
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      {canModerate && (
+                        <button onClick={() => deleteQuote(q)} disabled={deleting === q.id}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-wire text-xs text-ink-ghost hover:text-bad hover:border-bad/30 disabled:opacity-50 transition-colors">
+                          <Trash2 size={12} />Poista
+                        </button>
+                      )}
+                      <Link href={`/portaali/tarjoukset/${q.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-copper/10 border border-copper/20 text-xs font-medium text-copper hover:bg-copper/20 transition-colors">
+                        Avaa <ArrowRight size={12} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

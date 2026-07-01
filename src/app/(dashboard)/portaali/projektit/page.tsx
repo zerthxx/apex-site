@@ -11,6 +11,7 @@ export default async function ProjectsPage() {
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
+  const canModerate = ["owner","admin"].includes(profile?.role ?? "");
 
   let projects = null;
 
@@ -46,7 +47,7 @@ export default async function ProjectsPage() {
           {isStaff ? "Hallitse kaikkia projekteja" : "Omat projektisi"}
         </p>
       </div>
-      <ProjectsClient initial={(projects ?? []) as any} isStaff={isStaff} />
+      <ProjectsClient initial={(projects ?? []) as any} isStaff={isStaff} canModerate={canModerate} />
     </div>
   );
 }

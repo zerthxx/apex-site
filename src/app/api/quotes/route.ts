@@ -203,3 +203,21 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({ quote });
 }
+
+export async function DELETE(req: NextRequest) {
+  const { supabase, user, profile } = await getUser();
+  if (!user || !["owner","admin"].includes(profile?.role ?? "")) {
+    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
+  }
+
+  const { id } = await req.json();
+  if (!id) return NextResponse.json({ error: "id vaaditaan" }, { status: 400 });
+
+  const { data: quote } = await supabase.from("quotes").select("title").eq("id", id).single();
+
+  const { error } = await supabase.from("quotes").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logActivity(supabase, user.id, "quote_deleted", { quote_id: id, title: quote?.title });
+  return NextResponse.json({ success: true });
+}

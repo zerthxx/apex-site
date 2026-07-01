@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, X, Pencil, ArrowRight } from "lucide-react";
+import { Plus, Search, X, Pencil, ArrowRight, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Project {
@@ -188,14 +188,28 @@ function ProjectModal({
 interface Props {
   initial: Project[];
   isStaff: boolean;
+  canModerate?: boolean;
 }
 
-export function ProjectsClient({ initial, isStaff }: Props) {
+export function ProjectsClient({ initial, isStaff, canModerate }: Props) {
   const [projects, setProjects] = useState(initial);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showNew, setShowNew] = useState(false);
   const [editProject, setEditProject] = useState<Project | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  async function deleteProject(p: Project) {
+    if (!confirm(`Poistetaanko projekti "${p.name}" pysyvästi?`)) return;
+    setDeleting(p.id);
+    const res = await fetch("/api/projects", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: p.id }),
+    });
+    setDeleting(null);
+    if (res.ok) setProjects((prev) => prev.filter((x) => x.id !== p.id));
+  }
 
   const filtered = projects.filter((p) => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
@@ -275,6 +289,12 @@ export function ProjectsClient({ initial, isStaff }: Props) {
                         <button onClick={() => setEditProject(p)}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-wire text-xs text-ink-ghost hover:text-ink hover:border-copper transition-colors">
                           <Pencil size={12} />Muokkaa
+                        </button>
+                      )}
+                      {canModerate && (
+                        <button onClick={() => deleteProject(p)} disabled={deleting === p.id}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-wire text-xs text-ink-ghost hover:text-bad hover:border-bad/30 disabled:opacity-50 transition-colors">
+                          <Trash2 size={12} />Poista
                         </button>
                       )}
                       <Link href={`/portaali/projektit/${p.id}`}
