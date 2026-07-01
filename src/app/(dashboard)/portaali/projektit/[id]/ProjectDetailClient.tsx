@@ -556,7 +556,7 @@ export function ProjectDetailClient({ project: initial, tasks, files: initialFil
                         {canModerate && (
                           <button
                             onClick={() => deleteComment(c.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded text-ink-ghost hover:text-bad transition-all"
+                            className="opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1 rounded text-ink-ghost hover:text-bad transition-all"
                             title="Poista kommentti"
                           >
                             <Trash2 size={12} />
