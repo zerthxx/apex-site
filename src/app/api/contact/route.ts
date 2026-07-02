@@ -94,19 +94,27 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Check if customer already exists with this email
-    const { data: existingCustomer } = await serviceSupabase
+    // Check if customer already exists with this email.
+    // Use limit(1) instead of single() — repeated test submissions can leave
+    // duplicate rows for the same email, and single() errors (rather than
+    // returning null) when more than one row matches, which used to be
+    // silently misread as "no existing customer".
+    const { data: existingCustomers, error: lookupError } = await serviceSupabase
       .from("customers")
       .select("id, status")
       .eq("email", sahkoposti)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (lookupError) console.error("[api/contact] customer lookup failed:", lookupError.message);
+    const existingCustomer = existingCustomers?.[0] ?? null;
 
     let customerId: string | null = null;
     let isNewLead = false;
 
     if (!existingCustomer) {
       // Create new lead
-      const { data: newCustomer } = await serviceSupabase
+      const { data: newCustomer, error: insertError } = await serviceSupabase
         .from("customers")
         .insert({
           first_name: firstName,
@@ -118,8 +126,10 @@ export async function POST(request: NextRequest) {
         })
         .select("id")
         .single();
+
+      if (insertError) console.error("[api/contact] lead insert failed:", insertError.message);
       customerId = newCustomer?.id ?? null;
-      isNewLead = true;
+      isNewLead = customerId !== null;
 
       // If company name provided, check/create company
       if (yritys && customerId) {
@@ -148,11 +158,12 @@ export async function POST(request: NextRequest) {
       customerId = existingCustomer.id;
       // Upgrade to lead if they were inactive
       if (existingCustomer.status === "inactive") {
-        await serviceSupabase
+        const { error: updateError } = await serviceSupabase
           .from("customers")
           .update({ status: "lead" })
           .eq("id", existingCustomer.id);
-        isNewLead = true;
+        if (updateError) console.error("[api/contact] lead status update failed:", updateError.message);
+        isNewLead = !updateError;
       }
     }
 
