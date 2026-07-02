@@ -13,11 +13,12 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (!["owner","admin","employee"].includes(profile?.role ?? "")) redirect("/dashboard");
 
-  const [customerRes, quotesRes, projectsRes, invoicesRes] = await Promise.all([
-    supabase.from("customers").select("*, companies(id, name)").eq("id", id).single(),
+  const [customerRes, quotesRes, projectsRes, invoicesRes, paymentsRes] = await Promise.all([
+    supabase.from("customers").select("*, companies(id, name, business_id, email, phone, address, city)").eq("id", id).single(),
     supabase.from("quotes").select("id, title, status, amount, created_at").eq("customer_id", id).order("created_at", { ascending: false }),
     supabase.from("projects").select("id, name, status, progress_pct, deadline").eq("customer_id", id).order("created_at", { ascending: false }),
     supabase.from("invoices").select("id, invoice_number, status, amount, due_date").eq("customer_id", id).order("created_at", { ascending: false }),
+    supabase.from("payments").select("id, amount, currency, status, payment_method, receipt_url, created_at, paid_at").eq("customer_id", id).order("created_at", { ascending: false }),
   ]);
 
   if (customerRes.error || !customerRes.data) notFound();
@@ -32,6 +33,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
         quotes={quotesRes.data ?? []}
         projects={projectsRes.data ?? []}
         invoices={invoicesRes.data ?? []}
+        payments={paymentsRes.data ?? []}
       />
     </div>
   );

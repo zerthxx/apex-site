@@ -113,10 +113,17 @@ function NewCustomerModal({ onClose, onCreated }: { onClose: () => void; onCreat
   );
 }
 
-export function CustomersClient({ initial }: { initial: Customer[] }) {
+interface CustomersClientProps {
+  initial: Customer[];
+  initialStatusFilter?: string;
+  title?: string;
+  emptyText?: string;
+}
+
+export function CustomersClient({ initial, initialStatusFilter = "all", title = "Hae asiakkaita...", emptyText = "Ei asiakkaita vielä" }: CustomersClientProps) {
   const [customers, setCustomers] = useState(initial);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(initialStatusFilter);
   const [showModal, setShowModal] = useState(false);
 
   const filtered = customers.filter((c) => {
@@ -135,7 +142,7 @@ export function CustomersClient({ initial }: { initial: Customer[] }) {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Hae asiakkaita..."
+            placeholder={title}
             className="w-full bg-surface border border-wire rounded-lg pl-9 pr-3 py-2 text-sm text-ink placeholder:text-ink-ghost outline-none focus:border-copper transition-colors"
           />
         </div>
@@ -162,7 +169,7 @@ export function CustomersClient({ initial }: { initial: Customer[] }) {
       <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-ink-ghost text-sm">
-            {search || statusFilter !== "all" ? "Ei hakutuloksia" : "Ei asiakkaita vielä"}
+            {search || statusFilter !== "all" ? "Ei hakutuloksia" : emptyText}
           </div>
         ) : (
           <table className="w-full text-sm">

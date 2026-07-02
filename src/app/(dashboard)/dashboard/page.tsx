@@ -5,7 +5,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import {
   FolderOpen, FileText, Bell, Monitor, Settings, ArrowRight, Receipt,
-  Users, TrendingUp, AlertCircle, CheckSquare, Building2,
+  Users, TrendingUp, AlertCircle, CheckSquare, Building2, UserPlus,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +36,7 @@ export default async function DashboardPage() {
       revenueResult,
       overdueInvoices,
       openTasks,
+      recentCustomersResult,
     ] = await Promise.all([
       supabase.from("activity_logs").select("id, event_type, event_data, created_at").order("created_at", { ascending: false }).limit(10),
       supabase.from("notifications").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
@@ -48,6 +49,7 @@ export default async function DashboardPage() {
       supabase.from("invoices").select("amount").eq("status", "paid"),
       supabase.from("invoices").select("*", { count: "exact", head: true }).eq("status", "overdue"),
       supabase.from("tasks").select("*", { count: "exact", head: true }).not("status", "eq", "done"),
+      supabase.from("customers").select("id, first_name, last_name, email, status").order("created_at", { ascending: false }).limit(5),
     ]);
 
     const revenue = (revenueResult.data ?? []).reduce((sum, i) => sum + (i.amount ?? 0), 0);
@@ -82,16 +84,34 @@ export default async function DashboardPage() {
           </div>
           <div className="flex flex-col gap-4">
             <div className="rounded-xl bg-elevated border border-wire p-5">
-              <h2 className="text-sm font-semibold text-ink mb-4">Pika-toiminnot</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-ink">Viimeisimmät asiakkaat</h2>
+                <Link href="/crm/asiakkaat" className="text-xs text-ink-ghost hover:text-copper transition-colors">Kaikki</Link>
+              </div>
+              <div className="flex flex-col gap-1">
+                {(recentCustomersResult.data ?? []).length === 0 && (
+                  <p className="text-sm text-ink-ghost py-4 text-center">Ei asiakkaita vielä</p>
+                )}
+                {(recentCustomersResult.data ?? []).map((c: any) => (
+                  <Link key={c.id} href={`/crm/asiakkaat/${c.id}`}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-transparent hover:border-wire hover:bg-surface text-sm text-ink-dim hover:text-ink transition-all duration-150 group">
+                    <div className="w-7 h-7 rounded-full bg-copper/10 border border-copper/20 flex items-center justify-center shrink-0">
+                      <span className="text-copper text-xs font-bold">{(c.first_name?.[0] ?? c.email?.[0] ?? "?").toUpperCase()}</span>
+                    </div>
+                    <span className="flex-1 truncate">{[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email || "Asiakas"}</span>
+                    <ArrowRight size={13} className="text-ink-ghost group-hover:text-copper transition-colors shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl bg-elevated border border-wire p-5">
+              <h2 className="text-sm font-semibold text-ink mb-4">Pikalinkit</h2>
               <div className="flex flex-col gap-2">
                 {[
-                  { href: "/crm/asiakkaat", label: "CRM — Asiakkaat", icon: <Users size={15} /> },
-                  { href: "/portaali/tarjoukset", label: "Tarjoukset", icon: <FileText size={15} /> },
-                  { href: "/portaali/projektit", label: "Projektit", icon: <FolderOpen size={15} /> },
-                  { href: "/portaali/laskut", label: "Laskut", icon: <Receipt size={15} /> },
+                  { href: "/crm/liidit", label: "Liidit", icon: <UserPlus size={15} /> },
+                  { href: "/crm/asiakkaat", label: "Kaikki asiakkaat", icon: <Users size={15} /> },
                   { href: "/tehtavat", label: "Tehtävät", icon: <CheckSquare size={15} /> },
                   { href: "/ilmoitukset", label: "Ilmoitukset", icon: <Bell size={15} /> },
-                  { href: "/asetukset/profiili", label: "Tilin asetukset", icon: <Settings size={15} /> },
                 ].map(({ href, label, icon }) => (
                   <Link key={href} href={href}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-transparent hover:border-wire hover:bg-surface text-sm text-ink-dim hover:text-ink transition-all duration-150 group">

@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
 
   const mine = req.nextUrl.searchParams.get("mine") === "1";
   const projectId = req.nextUrl.searchParams.get("project_id");
+  const customerId = req.nextUrl.searchParams.get("customer_id");
 
   let query = supabase
     .from("tasks")
@@ -26,6 +27,13 @@ export async function GET(req: NextRequest) {
 
   if (mine) query = query.eq("assigned_to", user.id);
   if (projectId) query = query.eq("project_id", projectId);
+
+  if (customerId) {
+    const { data: customerProjects } = await supabase.from("projects").select("id").eq("customer_id", customerId);
+    const projectIds = (customerProjects ?? []).map((p) => p.id);
+    if (projectIds.length === 0) return NextResponse.json({ tasks: [] });
+    query = query.in("project_id", projectIds);
+  }
 
   const { data, error } = await query.limit(200);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

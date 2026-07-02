@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   LayoutDashboard, FileText, FolderOpen, Receipt, Paperclip,
   Bell, Monitor, Settings, Users, LogOut, X, ShieldCheck,
-  Building2, Briefcase, CheckSquare, Calendar, BarChart2, CreditCard, Mail, Wrench,
+  Building2, Briefcase, CheckSquare, Calendar, BarChart2, CreditCard, Mail, Wrench, UserPlus,
 } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SidebarLink } from "./SidebarLink";
@@ -67,19 +67,24 @@ export function Sidebar({
 
         {isStaff && (
           <>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">Business</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">CRM</p>
+            <SidebarLink href="/crm/liidit" label="Liidit" icon={<UserPlus size={16} />} onClick={onMobileClose} />
             <SidebarLink href="/crm/asiakkaat" label="Asiakkaat" icon={<Building2 size={16} />} onClick={onMobileClose} />
             <SidebarLink href="/crm/yritykset" label="Yritykset" icon={<Briefcase size={16} />} onClick={onMobileClose} />
           </>
         )}
 
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">Asiakasportaali</p>
-        <SidebarLink href="/portaali" label="Yhteenveto" icon={<FolderOpen size={16} />} exact onClick={onMobileClose} />
-        <SidebarLink href="/portaali/tarjoukset" label="Tarjoukset" icon={<FileText size={16} />} onClick={onMobileClose} />
-        <SidebarLink href="/portaali/projektit" label="Projektit" icon={<FolderOpen size={16} />} onClick={onMobileClose} />
-        <SidebarLink href="/portaali/laskut" label="Laskut" icon={<Receipt size={16} />} onClick={onMobileClose} />
-        <SidebarLink href="/portaali/maksut" label="Maksut" icon={<CreditCard size={16} />} onClick={onMobileClose} />
-        <SidebarLink href="/portaali/tiedostot" label="Tiedostot" icon={<Paperclip size={16} />} onClick={onMobileClose} />
+        {!isStaff && (
+          <>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-ghost px-3 pt-4 pb-1">Asiakasportaali</p>
+            <SidebarLink href="/portaali" label="Yhteenveto" icon={<FolderOpen size={16} />} exact onClick={onMobileClose} />
+            <SidebarLink href="/portaali/tarjoukset" label="Tarjoukset" icon={<FileText size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/portaali/projektit" label="Projektit" icon={<FolderOpen size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/portaali/laskut" label="Laskut" icon={<Receipt size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/portaali/maksut" label="Maksut" icon={<CreditCard size={16} />} onClick={onMobileClose} />
+            <SidebarLink href="/portaali/tiedostot" label="Tiedostot" icon={<Paperclip size={16} />} onClick={onMobileClose} />
+          </>
+        )}
 
         {isStaff && (
           <>

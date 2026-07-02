@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
 
   const url = new URL(req.url);
   const status = url.searchParams.get("status");
+  const customerId = url.searchParams.get("customer_id");
   const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "100"), 500);
 
   if (isStaff) {
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
       .limit(limit);
 
     if (status) query = query.eq("status", status);
+    if (customerId) query = query.eq("customer_id", customerId);
 
     const { data, error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
   }
 
   const projectId = req.nextUrl.searchParams.get("project_id");
+  const customerId = req.nextUrl.searchParams.get("customer_id");
 
   let query = supabase
     .from("project_files")
@@ -24,6 +25,13 @@ export async function GET(req: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (projectId) query = query.eq("project_id", projectId);
+
+  if (customerId) {
+    const { data: customerProjects } = await supabase.from("projects").select("id").eq("customer_id", customerId);
+    const projectIds = (customerProjects ?? []).map((p) => p.id);
+    if (projectIds.length === 0) return NextResponse.json({ files: [] });
+    query = query.in("project_id", projectIds);
+  }
 
   const { data, error } = await query.limit(200);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
