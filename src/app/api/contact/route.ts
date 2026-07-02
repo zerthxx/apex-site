@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     let customerId: string | null = null;
+    let isNewLead = false;
 
     if (!existingCustomer) {
       // Create new lead
@@ -118,6 +119,7 @@ export async function POST(request: NextRequest) {
         .select("id")
         .single();
       customerId = newCustomer?.id ?? null;
+      isNewLead = true;
 
       // If company name provided, check/create company
       if (yritys && customerId) {
@@ -150,6 +152,7 @@ export async function POST(request: NextRequest) {
           .from("customers")
           .update({ status: "lead" })
           .eq("id", existingCustomer.id);
+        isNewLead = true;
       }
     }
 
@@ -164,7 +167,7 @@ export async function POST(request: NextRequest) {
         owners.map((o) => ({
           user_id: o.id,
           type: "system",
-          title: "Uusi liidi",
+          title: isNewLead ? "Uusi liidi" : "Yhteydenotto asiakkaalta",
           body: `${nimi} otti yhteyttä: ${serviceLabel}${yritys ? ` (${yritys})` : ""}`,
           href: customerId ? `/crm/asiakkaat/${customerId}` : "/crm/asiakkaat",
         }))
