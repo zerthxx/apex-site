@@ -1,7 +1,8 @@
 "use client";
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { AlertTriangle, Zap, TrendingUp } from "lucide-react";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 const PHASES = [
   {
@@ -74,7 +75,7 @@ const VARIANT_STYLES = {
 
 export function HowWeHelpSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useRevealInView(ref);
 
   return (
     <section ref={ref} className="py-20 bg-surface/30">
@@ -99,65 +100,74 @@ export function HowWeHelpSection() {
             <div className="h-full bg-gradient-to-r from-bad/30 via-copper/30 to-ok/30" />
           </div>
 
-          {PHASES.map(({ step, icon: Icon, label, title, points, variant }, i) => {
-            const s = VARIANT_STYLES[variant];
-            return (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, y: 24 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.45, delay: i * 0.12 }}
-                className={`relative rounded-xl border p-6 ${s.bg}`}
-              >
-                <div className="flex items-center gap-3 mb-5">
-                  <div
-                    className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${s.iconBg}`}
-                  >
-                    <Icon size={20} className={s.icon} />
-                  </div>
-                  <div>
-                    <p className={`text-xs font-semibold uppercase tracking-widest ${s.label}`}>
-                      {step} — {label}
-                    </p>
-                  </div>
-                </div>
-
-                <h3 className="font-heading font-semibold text-ink text-sm leading-snug mb-4">
-                  {title}
-                </h3>
-
-                <ul className="space-y-2">
-                  {points.map((point) => (
-                    <li key={point} className="flex items-start gap-2.5 text-xs text-ink-dim">
-                      <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${s.dot}`} />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Mobile arrow */}
-                {i < 2 && (
-                  <div className="md:hidden flex justify-center pt-5 pb-1">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="text-wire"
+          {PHASES.map(
+            ({ step, icon: Icon, label, title, points, variant }, i) => {
+              const s = VARIANT_STYLES[variant];
+              return (
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.45, delay: i * 0.12 }}
+                  className={`relative rounded-xl border p-6 ${s.bg}`}
+                >
+                  <div className="flex items-center gap-3 mb-5">
+                    <div
+                      className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${s.iconBg}`}
                     >
-                      <path
-                        d="M12 5v14M5 12l7 7 7-7"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                      <Icon size={20} className={s.icon} />
+                    </div>
+                    <div>
+                      <p
+                        className={`text-xs font-semibold uppercase tracking-widest ${s.label}`}
+                      >
+                        {step} — {label}
+                      </p>
+                    </div>
                   </div>
-                )}
-              </motion.div>
-            );
-          })}
+
+                  <h3 className="font-heading font-semibold text-ink text-sm leading-snug mb-4">
+                    {title}
+                  </h3>
+
+                  <ul className="space-y-2">
+                    {points.map((point) => (
+                      <li
+                        key={point}
+                        className="flex items-start gap-2.5 text-xs text-ink-dim"
+                      >
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${s.dot}`}
+                        />
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Mobile arrow */}
+                  {i < 2 && (
+                    <div className="md:hidden flex justify-center pt-5 pb-1">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="text-wire"
+                      >
+                        <path
+                          d="M12 5v14M5 12l7 7 7-7"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </motion.div>
+              );
+            },
+          )}
         </div>
       </div>
     </section>

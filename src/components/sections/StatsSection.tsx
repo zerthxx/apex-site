@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView, animate, useMotionValue, useTransform } from "framer-motion";
+import { motion, animate, useMotionValue, useTransform } from "framer-motion";
 import { useEffect } from "react";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 const STATS = [
   { value: 50, suffix: "+", label: "Toimitettua projektia", decimals: 0 },
@@ -11,7 +12,17 @@ const STATS = [
   { value: 3, suffix: "v+", label: "Kokemus alalta", decimals: 0 },
 ];
 
-function AnimatedNumber({ value, suffix, decimals, inView }: { value: number; suffix: string; decimals: number; inView: boolean }) {
+function AnimatedNumber({
+  value,
+  suffix,
+  decimals,
+  inView,
+}: {
+  value: number;
+  suffix: string;
+  decimals: number;
+  inView: boolean;
+}) {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (v) => v.toFixed(decimals) + suffix);
 
@@ -26,7 +37,7 @@ function AnimatedNumber({ value, suffix, decimals, inView }: { value: number; su
 
 export function StatsSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
+  const isInView = useRevealInView(ref, "-60px");
 
   return (
     <section className="bg-surface border-y border-wire py-10 md:py-14">
@@ -41,7 +52,12 @@ export function StatsSection() {
               className="flex flex-col items-center text-center gap-1"
             >
               <p className="font-display font-bold text-4xl md:text-5xl text-copper tabular-nums">
-                <AnimatedNumber value={stat.value} suffix={stat.suffix} decimals={stat.decimals} inView={isInView} />
+                <AnimatedNumber
+                  value={stat.value}
+                  suffix={stat.suffix}
+                  decimals={stat.decimals}
+                  inView={isInView}
+                />
               </p>
               <p className="text-ink-ghost text-sm">{stat.label}</p>
             </motion.div>

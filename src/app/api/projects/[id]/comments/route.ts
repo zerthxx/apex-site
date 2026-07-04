@@ -4,14 +4,46 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 async function getAuthedUser() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return { supabase, user };
 }
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id: projectId } = await params;
   const { supabase, user } = await getAuthedUser();
-  if (!user) return NextResponse.json({ error: "Ei kirjautunut" }, { status: 401 });
+  if (!user)
+    return NextResponse.json({ error: "Ei kirjautunut" }, { status: 401 });
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
+
+  if (!isStaff) {
+    // Verify customer owns this project
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+    if (!customer)
+      return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+    const { data: project } = await supabase
+      .from("projects")
+      .select("id")
+      .eq("id", projectId)
+      .eq("customer_id", customer.id)
+      .single();
+    if (!project)
+      return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+  }
 
   const adminDb = createAdminClient();
 
@@ -21,7 +53,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .eq("project_id", projectId)
     .order("created_at", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Fetch author names from auth metadata
   const userIds = [...new Set((comments ?? []).map((c) => c.user_id))];
@@ -29,7 +62,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   for (const uid of userIds) {
     const { data } = await adminDb.auth.admin.getUserById(uid);
     const m = data.user?.user_metadata ?? {};
-    const name = [m.first_name, m.last_name].filter(Boolean).join(" ") || data.user?.email || "Tuntematon";
+    const name =
+      [m.first_name, m.last_name].filter(Boolean).join(" ") ||
+      data.user?.email ||
+      "Tuntematon";
     authorMap[uid] = name;
   }
 
@@ -42,23 +78,46 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   return NextResponse.json({ comments: result });
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id: projectId } = await params;
   const { supabase, user } = await getAuthedUser();
-  if (!user) return NextResponse.json({ error: "Ei kirjautunut" }, { status: 401 });
+  if (!user)
+    return NextResponse.json({ error: "Ei kirjautunut" }, { status: 401 });
 
-  const { body } = await req.json().catch(() => ({})) as { body?: string };
-  if (!body?.trim()) return NextResponse.json({ error: "Viesti ei voi olla tyhjä" }, { status: 400 });
+  const { body } = (await req.json().catch(() => ({}))) as { body?: string };
+  if (!body?.trim())
+    return NextResponse.json(
+      { error: "Viesti ei voi olla tyhjä" },
+      { status: 400 },
+    );
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
 
   if (!isStaff) {
     // Verify customer owns this project
-    const { data: customer } = await supabase.from("customers").select("id").eq("user_id", user.id).single();
-    if (!customer) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
-    const { data: project } = await supabase.from("projects").select("id").eq("id", projectId).eq("customer_id", customer.id).single();
-    if (!project) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+    if (!customer)
+      return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+    const { data: project } = await supabase
+      .from("projects")
+      .select("id")
+      .eq("id", projectId)
+      .eq("customer_id", customer.id)
+      .single();
+    if (!project)
+      return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
   }
 
   const adminDb = createAdminClient();
@@ -76,17 +135,30 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .select("id, body, created_at, user_id")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const meta = (await adminDb.auth.admin.getUserById(user.id)).data.user?.user_metadata ?? {};
-  const author_name = [meta.first_name, meta.last_name].filter(Boolean).join(" ") || user.email || "Sinä";
+  const meta =
+    (await adminDb.auth.admin.getUserById(user.id)).data.user?.user_metadata ??
+    {};
+  const author_name =
+    [meta.first_name, meta.last_name].filter(Boolean).join(" ") ||
+    user.email ||
+    "Sinä";
 
-  const preview = body.trim().slice(0, 80) + (body.trim().length > 80 ? "..." : "");
+  const preview =
+    body.trim().slice(0, 80) + (body.trim().length > 80 ? "..." : "");
   const href = `/portaali/projektit/${projectId}`;
 
   if (isStaff) {
     // Staff commented → notify the customer if project has one
-    const customerUserId = (projectRow?.customers as any)?.user_id;
+    const customersRel = projectRow?.customers as
+      | { user_id: string | null }
+      | { user_id: string | null }[]
+      | null;
+    const customerUserId = Array.isArray(customersRel)
+      ? customersRel[0]?.user_id
+      : customersRel?.user_id;
     if (customerUserId) {
       await adminDb.from("notifications").insert({
         user_id: customerUserId,
@@ -111,29 +183,44 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           title: `Uusi kommentti — ${projectRow?.name ?? "projekti"}`,
           body: `${author_name}: ${preview}`,
           href,
-        }))
+        })),
       );
     }
   }
 
-  return NextResponse.json({ comment: { ...comment, author_name, is_own: true } }, { status: 201 });
+  return NextResponse.json(
+    { comment: { ...comment, author_name, is_own: true } },
+    { status: 201 },
+  );
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest) {
   const { supabase, user } = await getAuthedUser();
-  if (!user) return NextResponse.json({ error: "Ei kirjautunut" }, { status: 401 });
+  if (!user)
+    return NextResponse.json({ error: "Ei kirjautunut" }, { status: 401 });
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   if (!["owner", "admin"].includes(profile?.role ?? "")) {
     return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
   }
 
-  const { commentId } = await req.json().catch(() => ({})) as { commentId?: string };
-  if (!commentId) return NextResponse.json({ error: "commentId vaaditaan" }, { status: 400 });
+  const { commentId } = (await req.json().catch(() => ({}))) as {
+    commentId?: string;
+  };
+  if (!commentId)
+    return NextResponse.json({ error: "commentId vaaditaan" }, { status: 400 });
 
   const adminDb = createAdminClient();
-  const { error } = await adminDb.from("project_comments").delete().eq("id", commentId);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { error } = await adminDb
+    .from("project_comments")
+    .delete()
+    .eq("id", commentId);
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ success: true });
 }

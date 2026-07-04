@@ -1,15 +1,16 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { ServiceCard } from "@/components/shared/ServiceCard";
 import { SERVICES } from "@/lib/constants";
 import { fadeUp, staggerContainer } from "@/lib/animations";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 export function ServicesGridSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useRevealInView(ref);
 
   return (
     <section className="py-10 md:py-20">

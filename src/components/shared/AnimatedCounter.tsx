@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useInView, useMotionValue, useTransform, animate, motion } from "framer-motion";
+import { useMotionValue, useTransform, animate, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 interface AnimatedCounterProps {
   from?: number;
@@ -22,7 +23,7 @@ export function AnimatedCounter({
   className,
 }: AnimatedCounterProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-40px" });
+  const isInView = useRevealInView(ref, "-40px");
   const motionValue = useMotionValue(from);
   const rounded = useTransform(motionValue, (v) => Math.round(v));
 

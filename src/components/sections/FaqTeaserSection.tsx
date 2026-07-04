@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { FAQ_HOME } from "@/lib/constants";
 import { slideInLeft, fadeUp } from "@/lib/animations";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 export function FaqTeaserSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useRevealInView(ref);
 
   return (
     <section className="py-10 md:py-20">
@@ -33,7 +34,8 @@ export function FaqTeaserSection() {
               Usein kysytyt kysymykset
             </h2>
             <p className="text-ink-dim leading-relaxed">
-              Löydät vastaukset yleisimpiin kysymyksiin alta. Jos et löydä vastausta, ota yhteyttä suoraan.
+              Löydät vastaukset yleisimpiin kysymyksiin alta. Jos et löydä
+              vastausta, ota yhteyttä suoraan.
             </p>
             <Link
               href="/ukk"
@@ -56,4 +58,3 @@ export function FaqTeaserSection() {
     </section>
   );
 }
-

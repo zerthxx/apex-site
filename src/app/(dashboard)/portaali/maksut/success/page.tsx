@@ -13,38 +13,64 @@ interface Props {
 export default async function PaymentSuccessPage({ searchParams }: Props) {
   const { session_id } = await searchParams;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
   let invoiceNumber: string | null = null;
   let amount: number | null = null;
   let receiptUrl: string | null = null;
+  let verifiedPaid = false;
 
   if (session_id) {
     try {
       const session = await stripe.checkout.sessions.retrieve(session_id);
       if (session.payment_status === "paid") {
-        amount = session.amount_total ? session.amount_total / 100 : null;
-        // Get invoice number from our DB
         const invoiceId = session.metadata?.invoice_id;
         if (invoiceId) {
           const { data: invoice } = await supabase
             .from("invoices")
-            .select("invoice_number")
+            .select("invoice_number, customer_id, customers(user_id)")
             .eq("id", invoiceId)
             .single();
-          invoiceNumber = invoice?.invoice_number ?? null;
+
+          const customersRel = invoice?.customers as
+            | { user_id: string | null }
+            | { user_id: string | null }[]
+            | null;
+          const ownerUserId = Array.isArray(customersRel)
+            ? customersRel[0]?.user_id
+            : customersRel?.user_id;
+
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+          const isStaff = ["owner", "admin", "employee"].includes(
+            profile?.role ?? "",
+          );
+
+          // Only reveal invoice/receipt details if this session actually belongs
+          // to the logged-in user (or they're staff) — session_id is unguessable,
+          // but never trust it alone for authorization.
+          if (invoice && (isStaff || ownerUserId === user.id)) {
+            verifiedPaid = true;
+            invoiceNumber = invoice.invoice_number ?? null;
+            amount = session.amount_total ? session.amount_total / 100 : null;
+
+            const { data: payment } = await supabase
+              .from("payments")
+              .select("receipt_url")
+              .eq("stripe_checkout_session", session_id)
+              .single();
+            receiptUrl = payment?.receipt_url ?? null;
+          }
         }
-        // Get receipt URL from payment record
-        const { data: payment } = await supabase
-          .from("payments")
-          .select("receipt_url")
-          .eq("stripe_checkout_session", session_id)
-          .single();
-        receiptUrl = payment?.receipt_url ?? null;
       }
     } catch {
-      // Session not found or invalid — still show success page
+      // Session not found or invalid — fall through to the generic message
     }
   }
 
@@ -57,13 +83,24 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-ink mb-2">Maksu onnistui!</h1>
+        <h1 className="text-2xl font-bold text-ink mb-2">
+          {verifiedPaid ? "Maksu onnistui!" : "Kiitos!"}
+        </h1>
         <p className="text-ink-ghost text-sm mb-6">
-          {invoiceNumber
-            ? `Lasku #${invoiceNumber} on nyt maksettu.`
-            : "Laskusi on nyt maksettu onnistuneesti."}
+          {!verifiedPaid
+            ? "Maksun tila päivittyy hetken kuluttua. Voit tarkistaa laskujesi tilan maksuhistoriasta."
+            : invoiceNumber
+              ? `Lasku #${invoiceNumber} on nyt maksettu.`
+              : "Laskusi on nyt maksettu onnistuneesti."}
           {amount != null && (
-            <> Veloitettu summa: <span className="font-semibold text-ink">{amount.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €</span>.</>
+            <>
+              {" "}
+              Veloitettu summa:{" "}
+              <span className="font-semibold text-ink">
+                {amount.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €
+              </span>
+              .
+            </>
           )}
         </p>
 

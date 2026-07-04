@@ -1,34 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity";
 
 async function getUser() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { supabase, user: null, profile: null };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   return { supabase, user, profile };
 }
 
 export async function GET(req: NextRequest) {
   const { supabase, user, profile } = await getUser();
-  if (!user) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
+  if (!user)
+    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
 
-  const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
+  const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
   const status = req.nextUrl.searchParams.get("status");
   const customerId = req.nextUrl.searchParams.get("customer_id");
 
   let query = supabase
     .from("invoices")
-    .select(`
+    .select(
+      `
       id, invoice_number, amount, status, due_date, paid_at, created_at,
       customers(id, first_name, last_name, email),
       projects(id, name)
-    `)
+    `,
+    )
     .order("created_at", { ascending: false });
 
   if (!isStaff) {
-    const { data: customer } = await supabase.from("customers").select("id").eq("user_id", user.id).single();
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
     if (!customer) return NextResponse.json({ invoices: [] });
     query = query.eq("customer_id", customer.id);
   }
@@ -37,53 +51,75 @@ export async function GET(req: NextRequest) {
   if (customerId && isStaff) query = query.eq("customer_id", customerId);
 
   const { data, error } = await query.limit(200);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ invoices: data });
 }
 
 export async function POST(req: NextRequest) {
   const { supabase, user, profile } = await getUser();
-  if (!user || !["owner","admin","employee"].includes(profile?.role ?? "")) {
+  if (!user || !["owner", "admin", "employee"].includes(profile?.role ?? "")) {
     return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
   }
 
   const body = await req.json();
-  if (!body.customer_id) return NextResponse.json({ error: "Asiakas vaaditaan" }, { status: 400 });
+  if (!body.customer_id)
+    return NextResponse.json({ error: "Asiakas vaaditaan" }, { status: 400 });
 
   // Auto-generate invoice number: INV-YYYYMM-NNN
-  const { count } = await supabase.from("invoices").select("*", { count: "exact", head: true });
+  const { count } = await supabase
+    .from("invoices")
+    .select("*", { count: "exact", head: true });
   const month = new Date().toISOString().slice(0, 7).replace("-", "");
   const invoiceNumber = `INV-${month}-${String((count ?? 0) + 1).padStart(3, "0")}`;
 
   const { data, error } = await supabase
     .from("invoices")
-    .insert({ ...body, invoice_number: body.invoice_number ?? invoiceNumber, status: body.status ?? "pending" })
+    .insert({
+      ...body,
+      invoice_number: body.invoice_number ?? invoiceNumber,
+      status: body.status ?? "pending",
+    })
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Notify customer when invoice is sent
+  // Notify customer when invoice is sent (admin client: staff is not the recipient,
+  // so RLS's own_notifications policy would otherwise silently block this insert)
   if (data.status === "sent" && data.customer_id) {
-    const { data: customer } = await supabase.from("customers").select("user_id").eq("id", data.customer_id).single();
+    const notifyAdminDb = createAdminClient();
+    const { data: customer } = await notifyAdminDb
+      .from("customers")
+      .select("user_id")
+      .eq("id", data.customer_id)
+      .single();
     if (customer?.user_id) {
-      await supabase.from("notifications").insert({
-        user_id: customer.user_id,
-        type: "invoice",
-        title: "Uusi lasku",
-        body: `Lasku ${data.invoice_number}${data.amount ? ` — ${data.amount.toLocaleString("fi-FI")} €` : ""}`,
-        href: `/portaali/laskut`,
-      });
+      const { error: notifyError } = await notifyAdminDb
+        .from("notifications")
+        .insert({
+          user_id: customer.user_id,
+          type: "invoice",
+          title: "Uusi lasku",
+          body: `Lasku ${data.invoice_number}${data.amount ? ` — ${data.amount.toLocaleString("fi-FI")} €` : ""}`,
+          href: `/portaali/laskut`,
+        });
+      if (notifyError)
+        console.error("Failed to notify customer of new invoice:", notifyError);
     }
   }
 
-  await logActivity(supabase, user.id, "invoice_created", { invoice_id: data.id, invoice_number: data.invoice_number });
+  await logActivity(supabase, user.id, "invoice_created", {
+    invoice_id: data.id,
+    invoice_number: data.invoice_number,
+  });
   return NextResponse.json({ invoice: data }, { status: 201 });
 }
 
 export async function PATCH(req: NextRequest) {
   const { supabase, user, profile } = await getUser();
-  if (!user || !["owner","admin","employee"].includes(profile?.role ?? "")) {
+  if (!user || !["owner", "admin", "employee"].includes(profile?.role ?? "")) {
     return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
   }
 
@@ -99,7 +135,8 @@ export async function PATCH(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
   if (updates.status === "paid") {
     await logActivity(supabase, user.id, "invoice_paid", { invoice_id: id });
   }
@@ -108,12 +145,13 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const { supabase, user, profile } = await getUser();
-  if (!user || !["owner","admin"].includes(profile?.role ?? "")) {
+  if (!user || !["owner", "admin"].includes(profile?.role ?? "")) {
     return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
   }
 
   const { id } = await req.json();
   const { error } = await supabase.from("invoices").delete().eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

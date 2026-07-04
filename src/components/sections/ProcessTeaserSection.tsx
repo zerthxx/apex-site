@@ -2,10 +2,18 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { ArrowRight, Phone, FileText, Code2, Rocket, HeartHandshake } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Phone,
+  FileText,
+  Code2,
+  Rocket,
+  HeartHandshake,
+} from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { fadeUp } from "@/lib/animations";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 const QUICK_STEPS = [
   { num: "01", title: "Maksuton kartoitus", icon: Phone },
@@ -17,7 +25,7 @@ const QUICK_STEPS = [
 
 export function ProcessTeaserSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useRevealInView(ref);
 
   return (
     <section className="py-10 md:py-20 bg-surface/30">
@@ -41,7 +49,10 @@ export function ProcessTeaserSection() {
             <div className="hidden md:block absolute top-5 left-[10%] right-[10%] h-px bg-gradient-to-r from-copper/10 via-copper/30 to-copper/10" />
 
             {QUICK_STEPS.map(({ num, title, icon: Icon }, i) => (
-              <div key={num} className="relative flex flex-col items-center flex-1 text-center px-2">
+              <div
+                key={num}
+                className="relative flex flex-col items-center flex-1 text-center px-2"
+              >
                 {/* Number circle */}
                 <div className="relative z-10 w-10 h-10 rounded-full border border-copper/40 bg-elevated flex items-center justify-center mb-3 shadow-glow">
                   <Icon size={16} className="text-copper" />

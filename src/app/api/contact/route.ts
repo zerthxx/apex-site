@@ -112,6 +112,12 @@ export async function POST(request: NextRequest) {
     let customerId: string | null = null;
     let isNewLead = false;
 
+    // Full structured summary of the submission — used both as the new-lead's
+    // notes field and as a customer_notes history entry, so the contact
+    // preference (yhteydenotto) and the full message are always visible
+    // somewhere that isn't a 3-row textarea.
+    const contactSummary = `Palvelu: ${serviceLabel}${budjetti ? `\nBudjetti: ${budjetti}` : ""}${aikataulu ? `\nAikataulu: ${aikataulu}` : ""}${yhteydenotto ? `\nToivottu yhteydenottotapa: ${yhteydenotto}` : ""}\n\nViesti:\n${viesti}`;
+
     if (!existingCustomer) {
       // Create new lead
       const { data: newCustomer, error: insertError } = await serviceSupabase
@@ -122,7 +128,7 @@ export async function POST(request: NextRequest) {
           email: sahkoposti,
           phone: puhelin ?? null,
           status: "lead",
-          notes: `Palvelu: ${serviceLabel}${budjetti ? `\nBudjetti: ${budjetti}` : ""}${aikataulu ? `\nAikataulu: ${aikataulu}` : ""}\n\nViesti:\n${viesti}`,
+          notes: contactSummary,
         })
         .select("id")
         .single();
@@ -130,6 +136,14 @@ export async function POST(request: NextRequest) {
       if (insertError) console.error("[api/contact] lead insert failed:", insertError.message);
       customerId = newCustomer?.id ?? null;
       isNewLead = customerId !== null;
+
+      if (customerId) {
+        const { error: noteError } = await serviceSupabase.from("customer_notes").insert({
+          customer_id: customerId,
+          body: `Uusi liidi lomakkeen kautta\n\n${contactSummary}`,
+        });
+        if (noteError) console.error("[api/contact] lead note insert failed:", noteError.message);
+      }
 
       // If company name provided, check/create company
       if (yritys && customerId) {
@@ -165,6 +179,17 @@ export async function POST(request: NextRequest) {
         if (updateError) console.error("[api/contact] lead status update failed:", updateError.message);
         isNewLead = !updateError;
       }
+
+      // Existing customers don't get their message written into `notes` (that only
+      // happens on first-time lead creation above) — without this, a request like
+      // "I'd like a second project" would leave no trace once the notification is
+      // marked read. Log it as a customer_notes entry so it shows up on the
+      // Customer 360 Muistiinpanot tab.
+      const { error: noteError } = await serviceSupabase.from("customer_notes").insert({
+        customer_id: existingCustomer.id,
+        body: `Uusi yhteydenotto lomakkeen kautta${yritys ? ` (${yritys})` : ""}\n\n${contactSummary}`,
+      });
+      if (noteError) console.error("[api/contact] customer note insert failed:", noteError.message);
     }
 
     // Notify owners about the new lead

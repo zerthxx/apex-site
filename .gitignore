@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code hook runtime state (see .claude/hooks/pre-commit.md)
+.claude/.precommit-clear

@@ -1,15 +1,16 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { TestimonialCard } from "@/components/shared/TestimonialCard";
 import { TESTIMONIALS } from "@/lib/constants";
 import { fadeUp, staggerContainer } from "@/lib/animations";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 export function TestimonialsSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useRevealInView(ref);
 
   return (
     <section className="py-10 md:py-20 bg-surface/30">
@@ -30,7 +31,11 @@ export function TestimonialsSection() {
         >
           {TESTIMONIALS.map((testimonial, i) => (
             <motion.div key={testimonial.id} variants={fadeUp}>
-              <TestimonialCard testimonial={testimonial} index={i} className="h-full" />
+              <TestimonialCard
+                testimonial={testimonial}
+                index={i}
+                className="h-full"
+              />
             </motion.div>
           ))}
         </motion.div>

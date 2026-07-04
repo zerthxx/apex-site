@@ -1,7 +1,8 @@
 "use client";
 import { useRef } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 export function RevealSection({
   children,
@@ -12,7 +13,7 @@ export function RevealSection({
 }) {
   const ref = useRef(null);
   const reduced = useReducedMotion();
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useRevealInView(ref);
 
   return (
     <motion.div

@@ -1,11 +1,19 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { Wand2, Code2, TrendingUp, Headphones, HeartHandshake, Timer } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Wand2,
+  Code2,
+  TrendingUp,
+  Headphones,
+  HeartHandshake,
+  Timer,
+} from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { TiltCard } from "@/components/ui/TiltCard";
 import { fadeUp, staggerContainer } from "@/lib/animations";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 const WHY_CARDS = [
   {
@@ -48,7 +56,7 @@ const WHY_CARDS = [
 
 export function WhyApexSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useRevealInView(ref);
 
   return (
     <section className="py-10 md:py-20 bg-surface/30">
@@ -80,9 +88,15 @@ export function WhyApexSection() {
                   <Icon size={20} strokeWidth={1.5} />
                 </div>
                 <div>
-                  <h3 className="font-heading font-semibold text-ink text-base mb-1">{title}</h3>
-                  <p className="text-copper text-sm font-semibold mb-2">{proof}</p>
-                  <p className="text-ink-ghost text-sm leading-relaxed">{text}</p>
+                  <h3 className="font-heading font-semibold text-ink text-base mb-1">
+                    {title}
+                  </h3>
+                  <p className="text-copper text-sm font-semibold mb-2">
+                    {proof}
+                  </p>
+                  <p className="text-ink-ghost text-sm leading-relaxed">
+                    {text}
+                  </p>
                 </div>
               </TiltCard>
             </motion.div>

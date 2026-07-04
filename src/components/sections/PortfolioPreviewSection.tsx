@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { CaseStudyCard } from "@/components/shared/CaseStudyCard";
 import { MOCK_CASE_STUDIES } from "@/lib/constants";
 import { fadeUp, staggerContainer } from "@/lib/animations";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 export function PortfolioPreviewSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useRevealInView(ref);
 
   return (
     <section className="py-20 md:py-28">

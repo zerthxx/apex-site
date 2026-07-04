@@ -1,0 +1,72 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/scripts/pre-edit-guardrails.js\"",
+            "timeout": 15,
+            "statusMessage": "Checking edit scope (pre-edit guardrails)..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/scripts/pre-commit-gate.js\"",
+            "if": "Bash(git commit*)",
+            "timeout": 15,
+            "statusMessage": "Checking pre-commit review gate..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/scripts/post-edit-format-lint.js\"",
+            "timeout": 30,
+            "statusMessage": "Formatting + linting edited file..."
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/scripts/post-edit-typecheck.js\"",
+            "timeout": 120,
+            "async": true,
+            "asyncRewake": true,
+            "statusMessage": "Typechecking in background..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/scripts/post-task-summary-gate.js\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/scripts/pre-feature-nudge.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

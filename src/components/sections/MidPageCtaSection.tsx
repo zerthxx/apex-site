@@ -1,15 +1,16 @@
 "use client";
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 const TRUST = ["Maksuton kartoitus", "Tarjous 48 h", "Ei sitoutumista"];
 
 export function MidPageCtaSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const inView = useRevealInView(ref, "-60px");
 
   return (
     <section ref={ref} className="py-16 px-4 sm:px-6 lg:px-8">
@@ -31,8 +32,8 @@ export function MidPageCtaSection() {
               Onko sinulla projekti mielessä?
             </h2>
             <p className="text-ink-dim leading-relaxed mb-8 max-w-xl mx-auto">
-              Varaa maksuton 30 minuutin kartoitus. Käymme ideasi läpi ja suosittelemme
-              yrityksellesi sopivan ratkaisun ilman sitoutumista.
+              Varaa maksuton 30 minuutin kartoitus. Käymme ideasi läpi ja
+              suosittelemme yrityksellesi sopivan ratkaisun ilman sitoutumista.
             </p>
             <div className="flex flex-wrap justify-center gap-3 mb-7">
               <Button asChild size="lg" className="group">
@@ -50,7 +51,10 @@ export function MidPageCtaSection() {
             </div>
             <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
               {TRUST.map((t) => (
-                <span key={t} className="text-sm text-ink-dim flex items-center gap-1.5">
+                <span
+                  key={t}
+                  className="text-sm text-ink-dim flex items-center gap-1.5"
+                >
                   <CheckCircle2 size={14} className="text-copper shrink-0" />
                   {t}
                 </span>
