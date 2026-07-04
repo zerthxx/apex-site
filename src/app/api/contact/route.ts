@@ -67,6 +67,61 @@ const SERVICE_LABELS: Record<string, string> = {
   muu: "Muu / En ole varma",
 };
 
+// Split out for the customer profile's Tarjouspyynnöt tab, which shows
+// service category and specific solution as two separate fields — kept apart
+// from SERVICE_LABELS above so the existing email/notification wording
+// (serviceLabel) is untouched.
+const PALVELU_CATEGORY: Record<string, string> = {
+  verkkosivut: "Verkkosivut",
+  startti: "Verkkosivut",
+  kasvu: "Verkkosivut",
+  pro: "Verkkosivut",
+  perus: "Ylläpito",
+  standardi: "Ylläpito",
+  premium: "Ylläpito",
+  verkkokaupat: "Verkkokauppa",
+  mobiilisovellukset: "Mobiilisovellus",
+  "ai-ratkaisut": "AI-ratkaisut",
+  ohjelmistot: "Ohjelmistot / SaaS",
+  muu: "Muu / En ole varma",
+};
+
+const PALVELU_SOLUTION: Record<string, string | null> = {
+  verkkosivut: "Räätälöity tarjous",
+  startti: "Startti (299 € + 49 €/kk)",
+  kasvu: "Kasvu (599 € + 79 €/kk)",
+  pro: "Pro (999 € + 99 €/kk)",
+  perus: "Perus (150 €/kk)",
+  standardi: "Standardi (350 €/kk)",
+  premium: "Premium (750 €/kk)",
+  verkkokaupat: null,
+  mobiilisovellukset: null,
+  "ai-ratkaisut": null,
+  ohjelmistot: null,
+  muu: null,
+};
+
+const BUDJETTI_LABELS: Record<string, string> = {
+  "alle-3000": "Alle 3 000 €",
+  "3000-6000": "3 000–6 000 €",
+  "6000-10000": "6 000–10 000 €",
+  "10000-plus": "10 000 €+",
+  "ei-osaa-sanoa": "En osaa sanoa",
+};
+
+const AIKATAULU_LABELS: Record<string, string> = {
+  heti: "Heti",
+  "1kk": "1 kuukauden sisällä",
+  "2-3kk": "2–3 kuukauden sisällä",
+  "ei-kiire": "Ei kiire",
+};
+
+const YHTEYDENOTTO_LABELS: Record<string, string> = {
+  sahkoposti: "Sähköposti",
+  puhelu: "Puhelu",
+  whatsapp: "WhatsApp",
+};
+
 export async function POST(request: NextRequest) {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -269,8 +324,14 @@ export async function POST(request: NextRequest) {
         email: sahkoposti,
         phone: puhelin ?? null,
         company: yritys ?? null,
-        service: serviceLabel,
-        message: contactSummary,
+        service: PALVELU_CATEGORY[palvelu] ?? serviceLabel,
+        solution: PALVELU_SOLUTION[palvelu] ?? null,
+        message: viesti,
+        budget: budjetti ? (BUDJETTI_LABELS[budjetti] ?? budjetti) : null,
+        timeline: aikataulu ? (AIKATAULU_LABELS[aikataulu] ?? aikataulu) : null,
+        contact_preference: yhteydenotto
+          ? (YHTEYDENOTTO_LABELS[yhteydenotto] ?? yhteydenotto)
+          : null,
       });
     if (requestLogError)
       console.error(

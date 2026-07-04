@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Edit2, Check, X, Trash2, Plus, ArrowRight, ExternalLink, Download } from "lucide-react";
+import {
+  Edit2,
+  Check,
+  X,
+  Trash2,
+  Plus,
+  ArrowRight,
+  ExternalLink,
+  Download,
+} from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/dashboard/Badge";
 
@@ -31,17 +40,86 @@ interface Customer {
   companies?: Company | null;
 }
 
-interface Quote { id: string; title: string; status: string; amount?: number | null; created_at: string; }
-interface Project { id: string; name: string; status: string; progress_pct: number; deadline?: string | null; }
-interface Invoice { id: string; invoice_number?: string | null; status: string; amount?: number | null; due_date?: string | null; }
-interface Payment { id: string; amount?: number | null; currency?: string | null; status: string; payment_method?: string | null; receipt_url?: string | null; created_at: string; paid_at?: string | null; }
-interface CustomerNote { id: string; body: string; created_at: string; }
-interface CustomerFile { id: string; name: string; mime_type?: string | null; size_bytes?: number | null; created_at: string; project_id: string; projects?: { id: string; name: string } | null; }
-interface CustomerTask { id: string; title: string; status: string; priority: string; due_date?: string | null; project_id: string; projects?: { id: string; name: string } | null; }
+interface Quote {
+  id: string;
+  title: string;
+  status: string;
+  amount?: number | null;
+  created_at: string;
+}
+interface Project {
+  id: string;
+  name: string;
+  status: string;
+  progress_pct: number;
+  deadline?: string | null;
+}
+interface Invoice {
+  id: string;
+  invoice_number?: string | null;
+  status: string;
+  amount?: number | null;
+  due_date?: string | null;
+}
+interface Payment {
+  id: string;
+  amount?: number | null;
+  currency?: string | null;
+  status: string;
+  payment_method?: string | null;
+  receipt_url?: string | null;
+  created_at: string;
+  paid_at?: string | null;
+}
+interface CustomerNote {
+  id: string;
+  body: string;
+  created_at: string;
+}
+interface LeadRequest {
+  id: string;
+  service?: string | null;
+  solution?: string | null;
+  message?: string | null;
+  budget?: string | null;
+  timeline?: string | null;
+  contact_preference?: string | null;
+  company?: string | null;
+  phone?: string | null;
+  created_at: string;
+}
+interface CustomerFile {
+  id: string;
+  name: string;
+  mime_type?: string | null;
+  size_bytes?: number | null;
+  created_at: string;
+  project_id: string;
+  projects?: { id: string; name: string } | null;
+}
+interface CustomerTask {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  due_date?: string | null;
+  project_id: string;
+  projects?: { id: string; name: string } | null;
+}
 
-const TASK_LABELS: Record<string, string> = { todo: "Tekemättä", in_progress: "Työn alla", review: "Katselmus", done: "Valmis" };
+const TASK_LABELS: Record<string, string> = {
+  todo: "Tekemättä",
+  in_progress: "Työn alla",
+  review: "Katselmus",
+  done: "Valmis",
+};
 
-function NewQuoteModal({ customerId, companyId, onClose, onCreated }: {
+function NewQuoteModal({
+  customerId,
+  companyId,
+  onClose,
+  onCreated,
+}: {
   customerId: string;
   companyId?: string | null;
   onClose: () => void;
@@ -59,7 +137,10 @@ function NewQuoteModal({ customerId, companyId, onClose, onCreated }: {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title.trim()) { setError("Otsikko vaaditaan"); return; }
+    if (!form.title.trim()) {
+      setError("Otsikko vaaditaan");
+      return;
+    }
     setSaving(true);
     const res = await fetch("/api/quotes", {
       method: "POST",
@@ -76,56 +157,106 @@ function NewQuoteModal({ customerId, companyId, onClose, onCreated }: {
     });
     const data = await res.json();
     setSaving(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
     onCreated(data.quote);
     onClose();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-ink">Uusi tarjous</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={16} /></button>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={16} />
+          </button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Otsikko *</label>
-            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+            <label className="block text-xs text-ink-ghost mb-1">
+              Otsikko *
+            </label>
+            <input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="esim. Verkkosivuprojekti 2025"
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Summa (€)</label>
-              <input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                placeholder="0.00" min="0" step="0.01"
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Summa (€)
+              </label>
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Voimassa asti</label>
-              <input type="date" value={form.valid_until} onChange={(e) => setForm({ ...form, valid_until: e.target.value })}
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Voimassa asti
+              </label>
+              <input
+                type="date"
+                value={form.valid_until}
+                onChange={(e) =>
+                  setForm({ ...form, valid_until: e.target.value })
+                }
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Muistiinpanot</label>
-            <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors resize-none" />
+            <label className="block text-xs text-ink-ghost mb-1">
+              Muistiinpanot
+            </label>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              rows={3}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors resize-none"
+            />
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Tila</label>
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as "draft" | "sent" })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <select
+              value={form.status}
+              onChange={(e) =>
+                setForm({ ...form, status: e.target.value as "draft" | "sent" })
+              }
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="draft">Luonnos</option>
               <option value="sent">Lähetä asiakkaalle</option>
             </select>
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 mt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+            >
+              Peruuta
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+            >
               {saving ? "..." : "Luo tarjous"}
             </button>
           </div>
@@ -135,13 +266,23 @@ function NewQuoteModal({ customerId, companyId, onClose, onCreated }: {
   );
 }
 
-function NewInvoiceModal({ customerId, projects, onClose, onCreated }: {
+function NewInvoiceModal({
+  customerId,
+  projects,
+  onClose,
+  onCreated,
+}: {
   customerId: string;
   projects: Project[];
   onClose: () => void;
   onCreated: (inv: Invoice) => void;
 }) {
-  const [form, setForm] = useState({ project_id: "", amount: "", due_date: "", status: "pending" });
+  const [form, setForm] = useState({
+    project_id: "",
+    amount: "",
+    due_date: "",
+    status: "pending",
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -161,53 +302,96 @@ function NewInvoiceModal({ customerId, projects, onClose, onCreated }: {
     });
     const data = await res.json();
     setSaving(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
     onCreated(data.invoice);
     onClose();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-ink">Uusi lasku</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={16} /></button>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={16} />
+          </button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Projekti</label>
-            <select value={form.project_id} onChange={(e) => setForm({ ...form, project_id: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <label className="block text-xs text-ink-ghost mb-1">
+              Projekti
+            </label>
+            <select
+              value={form.project_id}
+              onChange={(e) => setForm({ ...form, project_id: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="">Ei projektia</option>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Summa (€)</label>
-              <input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                min="0" step="0.01"
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Summa (€)
+              </label>
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                min="0"
+                step="0.01"
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Eräpäivä</label>
-              <input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Eräpäivä
+              </label>
+              <input
+                type="date"
+                value={form.due_date}
+                onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Tila</label>
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="pending">Odottaa</option>
               <option value="sent">Lähetetty</option>
             </select>
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 mt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+            >
+              Peruuta
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+            >
               {saving ? "..." : "Luo lasku"}
             </button>
           </div>
@@ -222,13 +406,14 @@ const TABS = [
   { key: "yritys", label: "Yrityksen tiedot" },
   { key: "muistiinpanot", label: "Muistiinpanot" },
   { key: "tarjoukset", label: "Tarjoukset" },
+  { key: "tarjouspyynnot", label: "Tarjouspyynnöt" },
   { key: "projektit", label: "Projektit" },
   { key: "laskut", label: "Laskut" },
   { key: "maksut", label: "Maksut" },
   { key: "tiedostot", label: "Tiedostot" },
   { key: "tehtavat", label: "Tehtävät" },
 ] as const;
-type TabKey = typeof TABS[number]["key"];
+type TabKey = (typeof TABS)[number]["key"];
 
 interface Props {
   customer: Customer;
@@ -236,9 +421,17 @@ interface Props {
   projects: Project[];
   invoices: Invoice[];
   payments: Payment[];
+  leadRequests: LeadRequest[];
 }
 
-export function CustomerDetailClient({ customer: initial, quotes: initialQuotes, projects, invoices: initialInvoices, payments }: Props) {
+export function CustomerDetailClient({
+  customer: initial,
+  quotes: initialQuotes,
+  projects,
+  invoices: initialInvoices,
+  payments,
+  leadRequests,
+}: Props) {
   const [customer, setCustomer] = useState(initial);
   const [quotes, setQuotes] = useState(initialQuotes);
   const [invoices, setInvoices] = useState(initialInvoices);
@@ -250,15 +443,20 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
   // Yhteystiedot edit state
   const [editingContact, setEditingContact] = useState(false);
   const [contactForm, setContactForm] = useState({
-    first_name: initial.first_name ?? "", last_name: initial.last_name ?? "",
-    email: initial.email ?? "", phone: initial.phone ?? "", status: initial.status,
+    first_name: initial.first_name ?? "",
+    last_name: initial.last_name ?? "",
+    email: initial.email ?? "",
+    phone: initial.phone ?? "",
+    status: initial.status,
   });
 
   // Yrityksen tiedot edit state
   const [editingCompany, setEditingCompany] = useState(false);
   const [companyForm, setCompanyForm] = useState({
-    company_name: initial.company_name ?? "", y_tunnus: initial.y_tunnus ?? "",
-    toimiala: initial.toimiala ?? "", lisatiedot: initial.lisatiedot ?? "",
+    company_name: initial.company_name ?? "",
+    y_tunnus: initial.y_tunnus ?? "",
+    toimiala: initial.toimiala ?? "",
+    lisatiedot: initial.lisatiedot ?? "",
   });
 
   // Muistiinpanot
@@ -279,13 +477,28 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
   function switchTab(t: TabKey) {
     setTab(t);
     if (t === "muistiinpanot" && !notesLoaded) {
-      fetch(`/api/crm/customers/${customer.id}/notes`).then((r) => r.json()).then((d) => { setNotes(d.notes ?? []); setNotesLoaded(true); });
+      fetch(`/api/crm/customers/${customer.id}/notes`)
+        .then((r) => r.json())
+        .then((d) => {
+          setNotes(d.notes ?? []);
+          setNotesLoaded(true);
+        });
     }
     if (t === "tiedostot" && !filesLoaded) {
-      fetch(`/api/files?customer_id=${customer.id}`).then((r) => r.json()).then((d) => { setFiles(d.files ?? []); setFilesLoaded(true); });
+      fetch(`/api/files?customer_id=${customer.id}`)
+        .then((r) => r.json())
+        .then((d) => {
+          setFiles(d.files ?? []);
+          setFilesLoaded(true);
+        });
     }
     if (t === "tehtavat" && !tasksLoaded) {
-      fetch(`/api/tasks?customer_id=${customer.id}`).then((r) => r.json()).then((d) => { setTasks(d.tasks ?? []); setTasksLoaded(true); });
+      fetch(`/api/tasks?customer_id=${customer.id}`)
+        .then((r) => r.json())
+        .then((d) => {
+          setTasks(d.tasks ?? []);
+          setTasksLoaded(true);
+        });
     }
   }
 
@@ -357,7 +570,9 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
     });
     if (res.ok) {
       const data = await res.json();
-      setInvoices((prev) => prev.map((i) => i.id === id ? { ...i, ...data.invoice } : i));
+      setInvoices((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, ...data.invoice } : i)),
+      );
     }
   }
 
@@ -367,7 +582,10 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
     router.push("/crm/asiakkaat");
   }
 
-  const name = [customer.first_name, customer.last_name].filter(Boolean).join(" ") || customer.email || "Asiakas";
+  const name =
+    [customer.first_name, customer.last_name].filter(Boolean).join(" ") ||
+    customer.email ||
+    "Asiakas";
 
   return (
     <div className="max-w-5xl">
@@ -377,15 +595,24 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
           <div className="flex items-center gap-2 mt-1">
             <Badge status={customer.status} />
             {(customer.company_name || customer.companies) && (
-              <span className="text-sm text-ink-ghost">{customer.company_name || customer.companies?.name}</span>
+              <span className="text-sm text-ink-ghost">
+                {customer.company_name || customer.companies?.name}
+              </span>
             )}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowNewQuote(true)} className="flex items-center gap-1.5 px-3 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors">
-            <Plus size={14} />Uusi tarjous
+          <button
+            onClick={() => setShowNewQuote(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors"
+          >
+            <Plus size={14} />
+            Uusi tarjous
           </button>
-          <button onClick={deleteCustomer} className="p-2 rounded-lg border border-wire text-ink-ghost hover:text-bad hover:border-bad/30 transition-colors">
+          <button
+            onClick={deleteCustomer}
+            className="p-2 rounded-lg border border-wire text-ink-ghost hover:text-bad hover:border-bad/30 transition-colors"
+          >
             <Trash2 size={15} />
           </button>
         </div>
@@ -394,17 +621,30 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
       {/* Tabs */}
       <div className="flex gap-1 mb-5 border-b border-wire overflow-x-auto">
         {TABS.map((t) => {
-          const count = t.key === "tarjoukset" ? quotes.length
-            : t.key === "projektit" ? projects.length
-            : t.key === "laskut" ? invoices.length
-            : t.key === "maksut" ? payments.length
-            : t.key === "tiedostot" && filesLoaded ? files.length
-            : t.key === "tehtavat" && tasksLoaded ? tasks.length
-            : null;
+          const count =
+            t.key === "tarjoukset"
+              ? quotes.length
+              : t.key === "tarjouspyynnot"
+                ? leadRequests.length
+                : t.key === "projektit"
+                  ? projects.length
+                  : t.key === "laskut"
+                    ? invoices.length
+                    : t.key === "maksut"
+                      ? payments.length
+                      : t.key === "tiedostot" && filesLoaded
+                        ? files.length
+                        : t.key === "tehtavat" && tasksLoaded
+                          ? tasks.length
+                          : null;
           return (
-            <button key={t.key} onClick={() => switchTab(t.key)}
-              className={`px-3.5 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px whitespace-nowrap ${tab === t.key ? "border-copper text-copper" : "border-transparent text-ink-ghost hover:text-ink"}`}>
-              {t.label}{count != null ? ` (${count})` : ""}
+            <button
+              key={t.key}
+              onClick={() => switchTab(t.key)}
+              className={`px-3.5 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px whitespace-nowrap ${tab === t.key ? "border-copper text-copper" : "border-transparent text-ink-ghost hover:text-ink"}`}
+            >
+              {t.label}
+              {count != null ? ` (${count})` : ""}
             </button>
           );
         })}
@@ -414,17 +654,33 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
       {tab === "yhteystiedot" && (
         <div className="bg-elevated border border-wire rounded-xl p-5 max-w-lg">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">Yhteystiedot</h2>
+            <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+              Yhteystiedot
+            </h2>
             {editingContact ? (
               <div className="flex gap-1.5">
-                <button onClick={() => setEditingContact(false)} className="p-1.5 rounded-lg border border-wire text-ink-ghost hover:text-ink transition-colors"><X size={13} /></button>
-                <button onClick={saveContact} disabled={saving} className="flex items-center gap-1 px-2.5 py-1.5 bg-copper text-white rounded-lg text-xs font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
-                  <Check size={12} />{saving ? "..." : "Tallenna"}
+                <button
+                  onClick={() => setEditingContact(false)}
+                  className="p-1.5 rounded-lg border border-wire text-ink-ghost hover:text-ink transition-colors"
+                >
+                  <X size={13} />
+                </button>
+                <button
+                  onClick={saveContact}
+                  disabled={saving}
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-copper text-white rounded-lg text-xs font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+                >
+                  <Check size={12} />
+                  {saving ? "..." : "Tallenna"}
                 </button>
               </div>
             ) : (
-              <button onClick={() => setEditingContact(true)} className="flex items-center gap-1 px-2.5 py-1.5 border border-wire rounded-lg text-xs text-ink-ghost hover:text-ink transition-colors">
-                <Edit2 size={12} />Muokkaa
+              <button
+                onClick={() => setEditingContact(true)}
+                className="flex items-center gap-1 px-2.5 py-1.5 border border-wire rounded-lg text-xs text-ink-ghost hover:text-ink transition-colors"
+              >
+                <Edit2 size={12} />
+                Muokkaa
               </button>
             )}
           </div>
@@ -437,18 +693,29 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
                 { key: "phone", label: "Puhelin" },
               ].map(({ key, label }) => (
                 <div key={key}>
-                  <label className="block text-xs text-ink-ghost mb-1">{label}</label>
+                  <label className="block text-xs text-ink-ghost mb-1">
+                    {label}
+                  </label>
                   <input
                     value={(contactForm as Record<string, string>)[key]}
-                    onChange={(e) => setContactForm({ ...contactForm, [key]: e.target.value })}
+                    onChange={(e) =>
+                      setContactForm({ ...contactForm, [key]: e.target.value })
+                    }
                     className="w-full bg-surface border border-wire rounded-lg px-3 py-1.5 text-sm text-ink outline-none focus:border-copper transition-colors"
                   />
                 </div>
               ))}
               <div>
-                <label className="block text-xs text-ink-ghost mb-1">Tila</label>
-                <select value={contactForm.status} onChange={(e) => setContactForm({ ...contactForm, status: e.target.value })}
-                  className="w-full bg-surface border border-wire rounded-lg px-3 py-1.5 text-sm text-ink outline-none focus:border-copper transition-colors">
+                <label className="block text-xs text-ink-ghost mb-1">
+                  Tila
+                </label>
+                <select
+                  value={contactForm.status}
+                  onChange={(e) =>
+                    setContactForm({ ...contactForm, status: e.target.value })
+                  }
+                  className="w-full bg-surface border border-wire rounded-lg px-3 py-1.5 text-sm text-ink outline-none focus:border-copper transition-colors"
+                >
                   <option value="active">Aktiivinen</option>
                   <option value="lead">Liidi</option>
                   <option value="inactive">Ei aktiivinen</option>
@@ -476,17 +743,33 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div className="bg-elevated border border-wire rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">Asiakkaan ilmoittamat tiedot</h2>
+              <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                Asiakkaan ilmoittamat tiedot
+              </h2>
               {editingCompany ? (
                 <div className="flex gap-1.5">
-                  <button onClick={() => setEditingCompany(false)} className="p-1.5 rounded-lg border border-wire text-ink-ghost hover:text-ink transition-colors"><X size={13} /></button>
-                  <button onClick={saveCompany} disabled={saving} className="flex items-center gap-1 px-2.5 py-1.5 bg-copper text-white rounded-lg text-xs font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
-                    <Check size={12} />{saving ? "..." : "Tallenna"}
+                  <button
+                    onClick={() => setEditingCompany(false)}
+                    className="p-1.5 rounded-lg border border-wire text-ink-ghost hover:text-ink transition-colors"
+                  >
+                    <X size={13} />
+                  </button>
+                  <button
+                    onClick={saveCompany}
+                    disabled={saving}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-copper text-white rounded-lg text-xs font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+                  >
+                    <Check size={12} />
+                    {saving ? "..." : "Tallenna"}
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setEditingCompany(true)} className="flex items-center gap-1 px-2.5 py-1.5 border border-wire rounded-lg text-xs text-ink-ghost hover:text-ink transition-colors">
-                  <Edit2 size={12} />Muokkaa
+                <button
+                  onClick={() => setEditingCompany(true)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 border border-wire rounded-lg text-xs text-ink-ghost hover:text-ink transition-colors"
+                >
+                  <Edit2 size={12} />
+                  Muokkaa
                 </button>
               )}
             </div>
@@ -498,15 +781,36 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
                   { key: "toimiala", label: "Toimiala" },
                 ].map(({ key, label }) => (
                   <div key={key}>
-                    <label className="block text-xs text-ink-ghost mb-1">{label}</label>
-                    <input value={(companyForm as Record<string, string>)[key]} onChange={(e) => setCompanyForm({ ...companyForm, [key]: e.target.value })}
-                      className="w-full bg-surface border border-wire rounded-lg px-3 py-1.5 text-sm text-ink outline-none focus:border-copper transition-colors" />
+                    <label className="block text-xs text-ink-ghost mb-1">
+                      {label}
+                    </label>
+                    <input
+                      value={(companyForm as Record<string, string>)[key]}
+                      onChange={(e) =>
+                        setCompanyForm({
+                          ...companyForm,
+                          [key]: e.target.value,
+                        })
+                      }
+                      className="w-full bg-surface border border-wire rounded-lg px-3 py-1.5 text-sm text-ink outline-none focus:border-copper transition-colors"
+                    />
                   </div>
                 ))}
                 <div>
-                  <label className="block text-xs text-ink-ghost mb-1">Lisätiedot</label>
-                  <textarea value={companyForm.lisatiedot} onChange={(e) => setCompanyForm({ ...companyForm, lisatiedot: e.target.value })} rows={3}
-                    className="w-full bg-surface border border-wire rounded-lg px-3 py-1.5 text-sm text-ink outline-none focus:border-copper transition-colors resize-none" />
+                  <label className="block text-xs text-ink-ghost mb-1">
+                    Lisätiedot
+                  </label>
+                  <textarea
+                    value={companyForm.lisatiedot}
+                    onChange={(e) =>
+                      setCompanyForm({
+                        ...companyForm,
+                        lisatiedot: e.target.value,
+                      })
+                    }
+                    rows={3}
+                    className="w-full bg-surface border border-wire rounded-lg px-3 py-1.5 text-sm text-ink outline-none focus:border-copper transition-colors resize-none"
+                  />
                 </div>
               </div>
             ) : (
@@ -524,7 +828,9 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
                 {customer.lisatiedot && (
                   <div>
                     <p className="text-xs text-ink-ghost">Lisätiedot</p>
-                    <p className="text-ink mt-0.5 whitespace-pre-wrap text-xs leading-relaxed">{customer.lisatiedot}</p>
+                    <p className="text-ink mt-0.5 whitespace-pre-wrap text-xs leading-relaxed">
+                      {customer.lisatiedot}
+                    </p>
                   </div>
                 )}
               </div>
@@ -533,9 +839,14 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
 
           <div className="bg-elevated border border-wire rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">CRM-yritystietue</h2>
+              <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                CRM-yritystietue
+              </h2>
               {customer.companies && (
-                <Link href={`/crm/yritykset/${customer.companies.id}`} className="flex items-center gap-1 text-xs text-copper hover:text-copper/80 transition-colors">
+                <Link
+                  href={`/crm/yritykset/${customer.companies.id}`}
+                  className="flex items-center gap-1 text-xs text-copper hover:text-copper/80 transition-colors"
+                >
                   Avaa <ExternalLink size={11} />
                 </Link>
               )}
@@ -547,7 +858,13 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
                   { label: "Y-tunnus", value: customer.companies.business_id },
                   { label: "Sähköposti", value: customer.companies.email },
                   { label: "Puhelin", value: customer.companies.phone },
-                  { label: "Osoite", value: [customer.companies.address, customer.companies.city].filter(Boolean).join(", ") || null },
+                  {
+                    label: "Osoite",
+                    value:
+                      [customer.companies.address, customer.companies.city]
+                        .filter(Boolean)
+                        .join(", ") || null,
+                  },
                 ].map(({ label, value }) => (
                   <div key={label}>
                     <p className="text-xs text-ink-ghost">{label}</p>
@@ -556,7 +873,10 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-ink-ghost py-4 text-center">Ei linkitettyä yritystä — hallitse yhdistämistä Asiakkaat-muokkauksesta.</p>
+              <p className="text-sm text-ink-ghost py-4 text-center">
+                Ei linkitettyä yritystä — hallitse yhdistämistä
+                Asiakkaat-muokkauksesta.
+              </p>
             )}
           </div>
         </div>
@@ -566,34 +886,64 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
       {tab === "muistiinpanot" && (
         <div className="flex flex-col gap-5 max-w-2xl">
           <div className="bg-elevated border border-wire rounded-xl p-5">
-            <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider mb-3">Pikamuistiinpano</h2>
-            <textarea value={quickNote} onChange={(e) => setQuickNote(e.target.value)} rows={3}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors resize-none" />
-            <button onClick={saveQuickNote} disabled={saving} className="mt-2 px-3 py-1.5 bg-copper text-white rounded-lg text-xs font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+            <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider mb-3">
+              Pikamuistiinpano
+            </h2>
+            <textarea
+              value={quickNote}
+              onChange={(e) => setQuickNote(e.target.value)}
+              rows={3}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors resize-none"
+            />
+            <button
+              onClick={saveQuickNote}
+              disabled={saving}
+              className="mt-2 px-3 py-1.5 bg-copper text-white rounded-lg text-xs font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+            >
               {saving ? "Tallennetaan..." : "Tallenna"}
             </button>
           </div>
 
           <div className="bg-elevated border border-wire rounded-xl p-5">
-            <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider mb-3">Muistiinpanohistoria</h2>
+            <h2 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider mb-3">
+              Muistiinpanohistoria
+            </h2>
             <div className="flex gap-2 mb-4">
-              <input value={newNoteBody} onChange={(e) => setNewNoteBody(e.target.value)} placeholder="Kirjoita uusi muistiinpano..."
-                onKeyDown={(e) => { if (e.key === "Enter") addNote(); }}
-                className="flex-1 bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
-              <button onClick={addNote} disabled={savingNote} className="px-3 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+              <input
+                value={newNoteBody}
+                onChange={(e) => setNewNoteBody(e.target.value)}
+                placeholder="Kirjoita uusi muistiinpano..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addNote();
+                }}
+                className="flex-1 bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
+              <button
+                onClick={addNote}
+                disabled={savingNote}
+                className="px-3 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+              >
                 Lisää
               </button>
             </div>
             {!notesLoaded ? (
-              <p className="text-sm text-ink-ghost py-4 text-center">Ladataan...</p>
+              <p className="text-sm text-ink-ghost py-4 text-center">
+                Ladataan...
+              </p>
             ) : notes.length === 0 ? (
-              <p className="text-sm text-ink-ghost py-4 text-center">Ei muistiinpanoja vielä</p>
+              <p className="text-sm text-ink-ghost py-4 text-center">
+                Ei muistiinpanoja vielä
+              </p>
             ) : (
               <div className="flex flex-col divide-y divide-wire/50">
                 {notes.map((n) => (
                   <div key={n.id} className="py-3">
-                    <p className="text-sm text-ink whitespace-pre-wrap">{n.body}</p>
-                    <p className="text-xs text-ink-ghost mt-1">{new Date(n.created_at).toLocaleString("fi-FI")}</p>
+                    <p className="text-sm text-ink whitespace-pre-wrap">
+                      {n.body}
+                    </p>
+                    <p className="text-xs text-ink-ghost mt-1">
+                      {new Date(n.created_at).toLocaleString("fi-FI")}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -608,25 +958,107 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
           {quotes.length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-sm text-ink-ghost mb-3">Ei tarjouksia vielä</p>
-              <button onClick={() => setShowNewQuote(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors">
-                <Plus size={14} />Luo ensimmäinen tarjous
+              <button
+                onClick={() => setShowNewQuote(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors"
+              >
+                <Plus size={14} />
+                Luo ensimmäinen tarjous
               </button>
             </div>
-          ) : quotes.map((q) => (
-            <Link key={q.id} href={`/portaali/tarjoukset/${q.id}`}
-              className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg hover:border-copper/30 transition-colors group">
-              <div>
-                <p className="text-sm font-medium text-ink group-hover:text-copper transition-colors">{q.title}</p>
-                <p className="text-xs text-ink-ghost">{new Date(q.created_at).toLocaleDateString("fi-FI")}</p>
+          ) : (
+            quotes.map((q) => (
+              <Link
+                key={q.id}
+                href={`/portaali/tarjoukset/${q.id}`}
+                className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg hover:border-copper/30 transition-colors group"
+              >
+                <div>
+                  <p className="text-sm font-medium text-ink group-hover:text-copper transition-colors">
+                    {q.title}
+                  </p>
+                  <p className="text-xs text-ink-ghost">
+                    {new Date(q.created_at).toLocaleDateString("fi-FI")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {q.amount != null && (
+                    <span className="text-sm text-ink">
+                      {q.amount.toLocaleString("fi-FI")} €
+                    </span>
+                  )}
+                  <Badge status={q.status} />
+                  <ArrowRight
+                    size={13}
+                    className="text-ink-ghost group-hover:text-copper transition-colors"
+                  />
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Tarjouspyynnöt */}
+      {tab === "tarjouspyynnot" && (
+        <div className="flex flex-col gap-3 max-w-2xl">
+          {leadRequests.length === 0 ? (
+            <p className="text-sm text-ink-ghost py-8 text-center">
+              Ei tarjouspyyntöjä vielä
+            </p>
+          ) : (
+            leadRequests.map((r) => (
+              <div
+                key={r.id}
+                className="bg-elevated border border-wire rounded-xl p-4"
+              >
+                <div className="flex items-start justify-between mb-3 gap-3">
+                  <p className="text-sm font-semibold text-ink">
+                    {r.service ?? "Tarjouspyyntö"}
+                    {r.solution ? ` — ${r.solution}` : ""}
+                  </p>
+                  <p className="text-xs text-ink-ghost whitespace-nowrap">
+                    {new Date(r.created_at).toLocaleString("fi-FI")}
+                  </p>
+                </div>
+                {(r.company ||
+                  r.phone ||
+                  r.budget ||
+                  r.timeline ||
+                  r.contact_preference) && (
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-3 text-sm">
+                    {[
+                      { label: "Yritys", value: r.company },
+                      { label: "Puhelin", value: r.phone },
+                      { label: "Budjetti", value: r.budget },
+                      { label: "Toivottu aloitusajankohta", value: r.timeline },
+                      {
+                        label: "Yhteydenottotapa",
+                        value: r.contact_preference,
+                      },
+                    ]
+                      .filter(({ value }) => value)
+                      .map(({ label, value }) => (
+                        <div key={label}>
+                          <p className="text-xs text-ink-ghost">{label}</p>
+                          <p className="text-ink mt-0.5">{value}</p>
+                        </div>
+                      ))}
+                  </div>
+                )}
+                {r.message && (
+                  <div>
+                    <p className="text-xs text-ink-ghost mb-1">
+                      Projektin kuvaus
+                    </p>
+                    <p className="text-sm text-ink whitespace-pre-wrap">
+                      {r.message}
+                    </p>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-3">
-                {q.amount != null && <span className="text-sm text-ink">{q.amount.toLocaleString("fi-FI")} €</span>}
-                <Badge status={q.status} />
-                <ArrowRight size={13} className="text-ink-ghost group-hover:text-copper transition-colors" />
-              </div>
-            </Link>
-          ))}
+            ))
+          )}
         </div>
       )}
 
@@ -634,26 +1066,47 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
       {tab === "projektit" && (
         <div className="flex flex-col gap-2">
           {projects.length === 0 ? (
-            <p className="text-sm text-ink-ghost py-8 text-center">Ei projekteja — hyväksy tarjous luodaksesi projektin</p>
-          ) : projects.map((p) => (
-            <Link key={p.id} href={`/portaali/projektit/${p.id}`}
-              className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg hover:border-copper/30 transition-colors group">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-ink group-hover:text-copper transition-colors">{p.name}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="flex-1 max-w-[120px] h-1.5 rounded-full bg-surface overflow-hidden">
-                    <div className="h-full bg-copper rounded-full" style={{ width: `${p.progress_pct}%` }} />
+            <p className="text-sm text-ink-ghost py-8 text-center">
+              Ei projekteja — hyväksy tarjous luodaksesi projektin
+            </p>
+          ) : (
+            projects.map((p) => (
+              <Link
+                key={p.id}
+                href={`/portaali/projektit/${p.id}`}
+                className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg hover:border-copper/30 transition-colors group"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-ink group-hover:text-copper transition-colors">
+                    {p.name}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex-1 max-w-[120px] h-1.5 rounded-full bg-surface overflow-hidden">
+                      <div
+                        className="h-full bg-copper rounded-full"
+                        style={{ width: `${p.progress_pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-ink-ghost">
+                      {p.progress_pct}%
+                    </span>
                   </div>
-                  <span className="text-xs text-ink-ghost">{p.progress_pct}%</span>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {p.deadline && <span className="text-xs text-ink-ghost">{new Date(p.deadline).toLocaleDateString("fi-FI")}</span>}
-                <Badge status={p.status} />
-                <ArrowRight size={13} className="text-ink-ghost group-hover:text-copper transition-colors" />
-              </div>
-            </Link>
-          ))}
+                <div className="flex items-center gap-3">
+                  {p.deadline && (
+                    <span className="text-xs text-ink-ghost">
+                      {new Date(p.deadline).toLocaleDateString("fi-FI")}
+                    </span>
+                  )}
+                  <Badge status={p.status} />
+                  <ArrowRight
+                    size={13}
+                    className="text-ink-ghost group-hover:text-copper transition-colors"
+                  />
+                </div>
+              </Link>
+            ))
+          )}
         </div>
       )}
 
@@ -661,31 +1114,54 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
       {tab === "laskut" && (
         <div className="flex flex-col gap-2">
           <div className="flex justify-end mb-1">
-            <button onClick={() => setShowNewInvoice(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-copper text-white rounded-lg text-xs font-medium hover:bg-copper/90 transition-colors">
-              <Plus size={12} />Uusi lasku
+            <button
+              onClick={() => setShowNewInvoice(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-copper text-white rounded-lg text-xs font-medium hover:bg-copper/90 transition-colors"
+            >
+              <Plus size={12} />
+              Uusi lasku
             </button>
           </div>
           {invoices.length === 0 ? (
-            <p className="text-sm text-ink-ghost py-8 text-center">Ei laskuja</p>
-          ) : invoices.map((inv) => (
-            <div key={inv.id} className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-ink">{inv.invoice_number ?? "Lasku"}</p>
-                {inv.due_date && <p className="text-xs text-ink-ghost">Eräpäivä: {new Date(inv.due_date).toLocaleDateString("fi-FI")}</p>}
+            <p className="text-sm text-ink-ghost py-8 text-center">
+              Ei laskuja
+            </p>
+          ) : (
+            invoices.map((inv) => (
+              <div
+                key={inv.id}
+                className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg"
+              >
+                <div>
+                  <p className="text-sm font-medium text-ink">
+                    {inv.invoice_number ?? "Lasku"}
+                  </p>
+                  {inv.due_date && (
+                    <p className="text-xs text-ink-ghost">
+                      Eräpäivä:{" "}
+                      {new Date(inv.due_date).toLocaleDateString("fi-FI")}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {inv.amount != null && (
+                    <span className="text-sm text-ink">
+                      {inv.amount.toLocaleString("fi-FI")} €
+                    </span>
+                  )}
+                  <Badge status={inv.status} />
+                  {(inv.status === "pending" || inv.status === "sent") && (
+                    <button
+                      onClick={() => markInvoicePaid(inv.id)}
+                      className="px-2.5 py-1 rounded-lg border border-ok/30 text-ok text-xs font-medium hover:bg-ok/10 transition-colors"
+                    >
+                      Merkitse maksetuksi
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                {inv.amount != null && <span className="text-sm text-ink">{inv.amount.toLocaleString("fi-FI")} €</span>}
-                <Badge status={inv.status} />
-                {(inv.status === "pending" || inv.status === "sent") && (
-                  <button onClick={() => markInvoicePaid(inv.id)}
-                    className="px-2.5 py-1 rounded-lg border border-ok/30 text-ok text-xs font-medium hover:bg-ok/10 transition-colors">
-                    Merkitse maksetuksi
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 
@@ -693,24 +1169,45 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
       {tab === "maksut" && (
         <div className="flex flex-col gap-2">
           {payments.length === 0 ? (
-            <p className="text-sm text-ink-ghost py-8 text-center">Ei maksuja vielä</p>
-          ) : payments.map((p) => (
-            <div key={p.id} className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-ink">{p.payment_method ?? "Maksu"}</p>
-                <p className="text-xs text-ink-ghost">{new Date(p.created_at).toLocaleDateString("fi-FI")}</p>
+            <p className="text-sm text-ink-ghost py-8 text-center">
+              Ei maksuja vielä
+            </p>
+          ) : (
+            payments.map((p) => (
+              <div
+                key={p.id}
+                className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg"
+              >
+                <div>
+                  <p className="text-sm font-medium text-ink">
+                    {p.payment_method ?? "Maksu"}
+                  </p>
+                  <p className="text-xs text-ink-ghost">
+                    {new Date(p.created_at).toLocaleDateString("fi-FI")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {p.amount != null && (
+                    <span className="text-sm text-ink">
+                      {p.amount.toLocaleString("fi-FI")}{" "}
+                      {(p.currency ?? "eur").toUpperCase()}
+                    </span>
+                  )}
+                  <Badge status={p.status} />
+                  {p.receipt_url && (
+                    <a
+                      href={p.receipt_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-ink-ghost hover:text-copper transition-colors"
+                    >
+                      <ExternalLink size={13} />
+                    </a>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                {p.amount != null && <span className="text-sm text-ink">{p.amount.toLocaleString("fi-FI")} {(p.currency ?? "eur").toUpperCase()}</span>}
-                <Badge status={p.status} />
-                {p.receipt_url && (
-                  <a href={p.receipt_url} target="_blank" rel="noopener noreferrer" className="text-ink-ghost hover:text-copper transition-colors">
-                    <ExternalLink size={13} />
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 
@@ -718,22 +1215,39 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
       {tab === "tiedostot" && (
         <div className="flex flex-col gap-2">
           {!filesLoaded ? (
-            <p className="text-sm text-ink-ghost py-8 text-center">Ladataan...</p>
+            <p className="text-sm text-ink-ghost py-8 text-center">
+              Ladataan...
+            </p>
           ) : files.length === 0 ? (
-            <p className="text-sm text-ink-ghost py-8 text-center">Ei tiedostoja — lataa tiedostoja asiakkaan projektin sisällä</p>
-          ) : files.map((f) => (
-            <div key={f.id} className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-ink truncate">{f.name}</p>
-                <p className="text-xs text-ink-ghost">{f.projects?.name ?? "—"} · {new Date(f.created_at).toLocaleDateString("fi-FI")}</p>
+            <p className="text-sm text-ink-ghost py-8 text-center">
+              Ei tiedostoja — lataa tiedostoja asiakkaan projektin sisällä
+            </p>
+          ) : (
+            files.map((f) => (
+              <div
+                key={f.id}
+                className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink truncate">
+                    {f.name}
+                  </p>
+                  <p className="text-xs text-ink-ghost">
+                    {f.projects?.name ?? "—"} ·{" "}
+                    {new Date(f.created_at).toLocaleDateString("fi-FI")}
+                  </p>
+                </div>
+                {f.project_id && (
+                  <Link
+                    href={`/portaali/projektit/${f.project_id}`}
+                    className="text-ink-ghost hover:text-copper transition-colors shrink-0"
+                  >
+                    <Download size={14} />
+                  </Link>
+                )}
               </div>
-              {f.project_id && (
-                <Link href={`/portaali/projektit/${f.project_id}`} className="text-ink-ghost hover:text-copper transition-colors shrink-0">
-                  <Download size={14} />
-                </Link>
-              )}
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 
@@ -741,18 +1255,34 @@ export function CustomerDetailClient({ customer: initial, quotes: initialQuotes,
       {tab === "tehtavat" && (
         <div className="flex flex-col gap-2">
           {!tasksLoaded ? (
-            <p className="text-sm text-ink-ghost py-8 text-center">Ladataan...</p>
+            <p className="text-sm text-ink-ghost py-8 text-center">
+              Ladataan...
+            </p>
           ) : tasks.length === 0 ? (
-            <p className="text-sm text-ink-ghost py-8 text-center">Ei tehtäviä</p>
-          ) : tasks.map((t) => (
-            <div key={t.id} className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-ink truncate">{t.title}</p>
-                <p className="text-xs text-ink-ghost">{t.projects?.name ?? "—"}{t.due_date ? ` · ${new Date(t.due_date).toLocaleDateString("fi-FI")}` : ""}</p>
+            <p className="text-sm text-ink-ghost py-8 text-center">
+              Ei tehtäviä
+            </p>
+          ) : (
+            tasks.map((t) => (
+              <div
+                key={t.id}
+                className="flex items-center justify-between p-3 bg-elevated border border-wire rounded-lg"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink truncate">
+                    {t.title}
+                  </p>
+                  <p className="text-xs text-ink-ghost">
+                    {t.projects?.name ?? "—"}
+                    {t.due_date
+                      ? ` · ${new Date(t.due_date).toLocaleDateString("fi-FI")}`
+                      : ""}
+                  </p>
+                </div>
+                <Badge status={t.status} labels={TASK_LABELS} />
               </div>
-              <Badge status={t.status} labels={TASK_LABELS} />
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 
