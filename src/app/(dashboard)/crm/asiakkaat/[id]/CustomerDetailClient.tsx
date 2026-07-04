@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   Edit2,
   Check,
@@ -430,11 +431,12 @@ export function CustomerDetailClient({
   projects,
   invoices: initialInvoices,
   payments,
-  leadRequests,
+  leadRequests: initialLeadRequests,
 }: Props) {
   const [customer, setCustomer] = useState(initial);
   const [quotes, setQuotes] = useState(initialQuotes);
   const [invoices, setInvoices] = useState(initialInvoices);
+  const [leadRequests, setLeadRequests] = useState(initialLeadRequests);
   const [tab, setTab] = useState<TabKey>("yhteystiedot");
   const [showNewQuote, setShowNewQuote] = useState(false);
   const [showNewInvoice, setShowNewInvoice] = useState(false);
@@ -562,6 +564,38 @@ export function CustomerDetailClient({
     }
   }
 
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
+
+  async function deleteNote(noteId: string) {
+    const res = await fetch(`/api/crm/customers/${customer.id}/notes`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ noteId }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error ?? "Poisto epäonnistui");
+    }
+    setNotes((prev) => prev.filter((n) => n.id !== noteId));
+  }
+
+  const [leadRequestToDelete, setLeadRequestToDelete] = useState<string | null>(
+    null,
+  );
+
+  async function deleteLeadRequest(id: string) {
+    const res = await fetch("/api/crm/lead-requests", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error ?? "Poisto epäonnistui");
+    }
+    setLeadRequests((prev) => prev.filter((r) => r.id !== id));
+  }
+
   async function markInvoicePaid(id: string) {
     const res = await fetch("/api/invoices", {
       method: "PATCH",
@@ -576,9 +610,16 @@ export function CustomerDetailClient({
     }
   }
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   async function deleteCustomer() {
-    if (!confirm("Poistetaanko asiakas?")) return;
-    await fetch(`/api/crm/customers/${customer.id}`, { method: "DELETE" });
+    const res = await fetch(`/api/crm/customers/${customer.id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error ?? "Poisto epäonnistui");
+    }
     router.push("/crm/asiakkaat");
   }
 
@@ -610,7 +651,7 @@ export function CustomerDetailClient({
             Uusi tarjous
           </button>
           <button
-            onClick={deleteCustomer}
+            onClick={() => setShowDeleteConfirm(true)}
             className="p-2 rounded-lg border border-wire text-ink-ghost hover:text-bad hover:border-bad/30 transition-colors"
           >
             <Trash2 size={15} />
@@ -937,13 +978,25 @@ export function CustomerDetailClient({
             ) : (
               <div className="flex flex-col divide-y divide-wire/50">
                 {notes.map((n) => (
-                  <div key={n.id} className="py-3">
-                    <p className="text-sm text-ink whitespace-pre-wrap">
-                      {n.body}
-                    </p>
-                    <p className="text-xs text-ink-ghost mt-1">
-                      {new Date(n.created_at).toLocaleString("fi-FI")}
-                    </p>
+                  <div
+                    key={n.id}
+                    className="py-3 flex items-start justify-between gap-3"
+                  >
+                    <div>
+                      <p className="text-sm text-ink whitespace-pre-wrap">
+                        {n.body}
+                      </p>
+                      <p className="text-xs text-ink-ghost mt-1">
+                        {new Date(n.created_at).toLocaleString("fi-FI")}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setNoteToDelete(n.id)}
+                      className="text-ink-ghost hover:text-bad transition-colors shrink-0 mt-0.5"
+                      aria-label="Poista muistiinpano"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1017,9 +1070,18 @@ export function CustomerDetailClient({
                     {r.service ?? "Tarjouspyyntö"}
                     {r.solution ? ` — ${r.solution}` : ""}
                   </p>
-                  <p className="text-xs text-ink-ghost whitespace-nowrap">
-                    {new Date(r.created_at).toLocaleString("fi-FI")}
-                  </p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <p className="text-xs text-ink-ghost whitespace-nowrap">
+                      {new Date(r.created_at).toLocaleString("fi-FI")}
+                    </p>
+                    <button
+                      onClick={() => setLeadRequestToDelete(r.id)}
+                      className="text-ink-ghost hover:text-bad transition-colors"
+                      aria-label="Poista tarjouspyyntö"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
                 {(r.company ||
                   r.phone ||
@@ -1304,6 +1366,36 @@ export function CustomerDetailClient({
           projects={projects}
           onClose={() => setShowNewInvoice(false)}
           onCreated={(inv) => setInvoices((prev) => [inv, ...prev])}
+        />
+      )}
+
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          title="Siirrä roskakoriin"
+          message="Asiakas siirretään roskakoriin yhdessä sen tarjousten, projektien, laskujen ja maksujen kanssa. Vain omistaja voi palauttaa tai poistaa pysyvästi Roskakori-näkymästä."
+          confirmLabel="Siirrä roskakoriin"
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={deleteCustomer}
+        />
+      )}
+
+      {noteToDelete && (
+        <ConfirmDialog
+          title="Siirrä roskakoriin"
+          message="Muistiinpano siirretään roskakoriin."
+          confirmLabel="Siirrä roskakoriin"
+          onClose={() => setNoteToDelete(null)}
+          onConfirm={() => deleteNote(noteToDelete)}
+        />
+      )}
+
+      {leadRequestToDelete && (
+        <ConfirmDialog
+          title="Siirrä roskakoriin"
+          message="Tarjouspyyntö siirretään roskakoriin."
+          confirmLabel="Siirrä roskakoriin"
+          onClose={() => setLeadRequestToDelete(null)}
+          onConfirm={() => deleteLeadRequest(leadRequestToDelete)}
         />
       )}
     </div>

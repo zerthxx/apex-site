@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Check, Receipt, Trash2, CreditCard, Pencil } from "lucide-react";
+import {
+  Plus,
+  X,
+  Check,
+  Receipt,
+  Trash2,
+  CreditCard,
+  Pencil,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface Invoice {
   id: string;
@@ -12,15 +21,34 @@ interface Invoice {
   due_date?: string | null;
   paid_at?: string | null;
   created_at: string;
-  customers?: { id: string; first_name?: string | null; last_name?: string | null; email?: string | null } | null;
+  customers?: {
+    id: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+  } | null;
   projects?: { id: string; name: string } | null;
 }
 
-interface Customer { id: string; first_name?: string | null; last_name?: string | null; email?: string | null; }
-interface Project { id: string; name: string; customer_id?: string | null; }
+interface Customer {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+}
+interface Project {
+  id: string;
+  name: string;
+  customer_id?: string | null;
+}
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Odottaa", sent: "Lähetetty", paid: "Maksettu", overdue: "Myöhässä", cancelled: "Peruttu", refunded: "Palautettu",
+  pending: "Odottaa",
+  sent: "Lähetetty",
+  paid: "Maksettu",
+  overdue: "Myöhässä",
+  cancelled: "Peruttu",
+  refunded: "Palautettu",
 };
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-surface text-ink-ghost border-wire",
@@ -33,13 +61,23 @@ const STATUS_COLORS: Record<string, string> = {
 
 function Badge({ status }: { status: string }) {
   return (
-    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border", STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire")}>
+    <span
+      className={cn(
+        "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border",
+        STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire",
+      )}
+    >
       {STATUS_LABELS[status] ?? status}
     </span>
   );
 }
 
-function NewInvoiceModal({ customers, projects, onClose, onCreated }: {
+function NewInvoiceModal({
+  customers,
+  projects,
+  onClose,
+  onCreated,
+}: {
   customers: Customer[];
   projects: Project[];
   onClose: () => void;
@@ -56,12 +94,17 @@ function NewInvoiceModal({ customers, projects, onClose, onCreated }: {
   const [error, setError] = useState("");
 
   const filteredProjects = form.customer_id
-    ? projects.filter((p) => !p.customer_id || p.customer_id === form.customer_id)
+    ? projects.filter(
+        (p) => !p.customer_id || p.customer_id === form.customer_id,
+      )
     : projects;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.customer_id) { setError("Asiakas vaaditaan"); return; }
+    if (!form.customer_id) {
+      setError("Asiakas vaaditaan");
+      return;
+    }
     setSaving(true);
     const res = await fetch("/api/invoices", {
       method: "POST",
@@ -76,65 +119,121 @@ function NewInvoiceModal({ customers, projects, onClose, onCreated }: {
     });
     const data = await res.json();
     setSaving(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
     onCreated(data.invoice);
     onClose();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-ink">Uusi lasku</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={16} /></button>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={16} />
+          </button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Asiakas *</label>
-            <select value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value, project_id: "" })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <label className="block text-xs text-ink-ghost mb-1">
+              Asiakas *
+            </label>
+            <select
+              value={form.customer_id}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  customer_id: e.target.value,
+                  project_id: "",
+                })
+              }
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="">Valitse asiakas...</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email}
+                  {[c.first_name, c.last_name].filter(Boolean).join(" ") ||
+                    c.email}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Projekti (valinnainen)</label>
-            <select value={form.project_id} onChange={(e) => setForm({ ...form, project_id: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <label className="block text-xs text-ink-ghost mb-1">
+              Projekti (valinnainen)
+            </label>
+            <select
+              value={form.project_id}
+              onChange={(e) => setForm({ ...form, project_id: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="">Ei projektia</option>
-              {filteredProjects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {filteredProjects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Summa (€)</label>
-              <input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                placeholder="0.00" min="0" step="0.01"
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Summa (€)
+              </label>
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Eräpäivä</label>
-              <input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Eräpäivä
+              </label>
+              <input
+                type="date"
+                value={form.due_date}
+                onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Tila</label>
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="pending">Luonnos</option>
               <option value="sent">Lähetä asiakkaalle</option>
             </select>
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 mt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+            >
+              Peruuta
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+            >
               {saving ? "..." : "Luo lasku"}
             </button>
           </div>
@@ -144,7 +243,12 @@ function NewInvoiceModal({ customers, projects, onClose, onCreated }: {
   );
 }
 
-function EditInvoiceModal({ inv, projects, onClose, onSaved }: {
+function EditInvoiceModal({
+  inv,
+  projects,
+  onClose,
+  onSaved,
+}: {
   inv: Invoice;
   projects: Project[];
   onClose: () => void;
@@ -176,45 +280,84 @@ function EditInvoiceModal({ inv, projects, onClose, onSaved }: {
     });
     const data = await res.json();
     setSaving(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
-    onSaved({ ...inv, ...data.invoice, projects: form.project_id ? (projects.find((p) => p.id === form.project_id) ?? inv.projects) : null });
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
+    onSaved({
+      ...inv,
+      ...data.invoice,
+      projects: form.project_id
+        ? (projects.find((p) => p.id === form.project_id) ?? inv.projects)
+        : null,
+    });
     onClose();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-ink">Muokkaa laskua</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={16} /></button>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={16} />
+          </button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Projekti (valinnainen)</label>
-            <select value={form.project_id} onChange={(e) => setForm({ ...form, project_id: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <label className="block text-xs text-ink-ghost mb-1">
+              Projekti (valinnainen)
+            </label>
+            <select
+              value={form.project_id}
+              onChange={(e) => setForm({ ...form, project_id: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="">Ei projektia</option>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Summa (€)</label>
-              <input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                min="0" step="0.01"
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Summa (€)
+              </label>
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                min="0"
+                step="0.01"
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Eräpäivä</label>
-              <input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Eräpäivä
+              </label>
+              <input
+                type="date"
+                value={form.due_date}
+                onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Tila</label>
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="pending">Odottaa</option>
               <option value="sent">Lähetetty</option>
               <option value="paid">Maksettu</option>
@@ -224,8 +367,18 @@ function EditInvoiceModal({ inv, projects, onClose, onSaved }: {
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 mt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+            >
+              Peruuta
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+            >
               {saving ? "Tallennetaan..." : "Tallenna"}
             </button>
           </div>
@@ -242,7 +395,13 @@ interface Props {
   isStaff: boolean;
 }
 
-export function InvoicesClient({ invoices: initial, customers, projects, isStaff, isAdmin }: Props & { isAdmin?: boolean }) {
+export function InvoicesClient({
+  invoices: initial,
+  customers,
+  projects,
+  isStaff,
+  isAdmin,
+}: Props & { isAdmin?: boolean }) {
   const [invoices, setInvoices] = useState(initial);
   const [statusFilter, setStatusFilter] = useState("all");
   const [showNew, setShowNew] = useState(false);
@@ -251,7 +410,10 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [editInvoice, setEditInvoice] = useState<Invoice | null>(null);
 
-  const filtered = statusFilter === "all" ? invoices : invoices.filter((i) => i.status === statusFilter);
+  const filtered =
+    statusFilter === "all"
+      ? invoices
+      : invoices.filter((i) => i.status === statusFilter);
 
   async function markPaid(id: string) {
     setMarkingPaid(id);
@@ -262,7 +424,10 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
     });
     const data = await res.json();
     setMarkingPaid(null);
-    if (res.ok) setInvoices((prev) => prev.map((i) => i.id === id ? { ...i, ...data.invoice } : i));
+    if (res.ok)
+      setInvoices((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, ...data.invoice } : i)),
+      );
   }
 
   async function payInvoice(invoiceId: string) {
@@ -274,7 +439,10 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
         body: JSON.stringify({ invoice_id: invoiceId }),
       });
       const data = await res.json();
-      if (!res.ok) { alert(data.error ?? "Maksun aloitus epäonnistui"); return; }
+      if (!res.ok) {
+        alert(data.error ?? "Maksun aloitus epäonnistui");
+        return;
+      }
       window.location.href = data.url;
     } catch {
       alert("Verkkovirhe. Yritä uudelleen.");
@@ -289,14 +457,19 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    if (res.ok) {
-      setInvoices((prev) => prev.filter((i) => i.id !== id));
-      setDeletingId(null);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error ?? "Poisto epäonnistui");
     }
+    setInvoices((prev) => prev.filter((i) => i.id !== id));
   }
 
-  const totalRevenue = invoices.filter((i) => i.status === "paid").reduce((sum, i) => sum + (i.amount ?? 0), 0);
-  const pending = invoices.filter((i) => i.status === "pending" || i.status === "sent");
+  const totalRevenue = invoices
+    .filter((i) => i.status === "paid")
+    .reduce((sum, i) => sum + (i.amount ?? 0), 0);
+  const pending = invoices.filter(
+    (i) => i.status === "pending" || i.status === "sent",
+  );
 
   return (
     <div>
@@ -304,7 +477,9 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-elevated border border-wire rounded-xl p-4">
             <p className="text-xs text-ink-ghost">Laskutettu yhteensä</p>
-            <p className="text-2xl font-bold text-ink mt-1">{totalRevenue.toLocaleString("fi-FI")} €</p>
+            <p className="text-2xl font-bold text-ink mt-1">
+              {totalRevenue.toLocaleString("fi-FI")} €
+            </p>
           </div>
           <div className="bg-elevated border border-wire rounded-xl p-4">
             <p className="text-xs text-ink-ghost">Avoimet laskut</p>
@@ -312,25 +487,37 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
           </div>
           <div className="bg-elevated border border-wire rounded-xl p-4">
             <p className="text-xs text-ink-ghost">Laskuja yhteensä</p>
-            <p className="text-2xl font-bold text-ink mt-1">{invoices.length}</p>
+            <p className="text-2xl font-bold text-ink mt-1">
+              {invoices.length}
+            </p>
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between mb-4 gap-3">
         <div className="flex gap-1 bg-surface border border-wire rounded-lg p-1 overflow-x-auto">
-          {["all","pending","sent","paid","overdue"].map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)}
-              className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap",
-                statusFilter === s ? "bg-elevated text-ink border border-wire shadow-sm" : "text-ink-ghost hover:text-ink")}>
+          {["all", "pending", "sent", "paid", "overdue"].map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap",
+                statusFilter === s
+                  ? "bg-elevated text-ink border border-wire shadow-sm"
+                  : "text-ink-ghost hover:text-ink",
+              )}
+            >
               {s === "all" ? "Kaikki" : STATUS_LABELS[s]}
             </button>
           ))}
         </div>
         {isStaff && (
-          <button onClick={() => setShowNew(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors shrink-0">
-            <Plus size={15} />Uusi lasku
+          <button
+            onClick={() => setShowNew(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors shrink-0"
+          >
+            <Plus size={15} />
+            Uusi lasku
           </button>
         )}
       </div>
@@ -346,8 +533,16 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
             <thead className="border-b border-wire">
               <tr className="text-xs text-ink-ghost">
                 <th className="text-left px-4 py-3 font-medium">Lasku</th>
-                {isStaff && <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Asiakas</th>}
-                {isStaff && <th className="text-left px-4 py-3 font-medium hidden lg:table-cell">Projekti</th>}
+                {isStaff && (
+                  <th className="text-left px-4 py-3 font-medium hidden md:table-cell">
+                    Asiakas
+                  </th>
+                )}
+                {isStaff && (
+                  <th className="text-left px-4 py-3 font-medium hidden lg:table-cell">
+                    Projekti
+                  </th>
+                )}
                 <th className="text-left px-4 py-3 font-medium">Summa</th>
                 <th className="text-left px-4 py-3 font-medium">Eräpäivä</th>
                 <th className="text-left px-4 py-3 font-medium">Tila</th>
@@ -357,23 +552,46 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
             <tbody className="divide-y divide-wire/50">
               {filtered.map((inv) => {
                 const customerName = inv.customers
-                  ? [inv.customers.first_name, inv.customers.last_name].filter(Boolean).join(" ") || inv.customers.email
+                  ? [inv.customers.first_name, inv.customers.last_name]
+                      .filter(Boolean)
+                      .join(" ") || inv.customers.email
                   : "—";
                 return (
-                  <tr key={inv.id} className="hover:bg-surface/30 transition-colors">
+                  <tr
+                    key={inv.id}
+                    className="hover:bg-surface/30 transition-colors"
+                  >
                     <td className="px-4 py-3">
-                      <p className="font-medium text-ink">{inv.invoice_number ?? "—"}</p>
-                      <p className="text-xs text-ink-ghost">{new Date(inv.created_at).toLocaleDateString("fi-FI")}</p>
+                      <p className="font-medium text-ink">
+                        {inv.invoice_number ?? "—"}
+                      </p>
+                      <p className="text-xs text-ink-ghost">
+                        {new Date(inv.created_at).toLocaleDateString("fi-FI")}
+                      </p>
                     </td>
-                    {isStaff && <td className="px-4 py-3 hidden md:table-cell text-ink">{customerName}</td>}
-                    {isStaff && <td className="px-4 py-3 hidden lg:table-cell text-ink-ghost">{inv.projects?.name ?? "—"}</td>}
+                    {isStaff && (
+                      <td className="px-4 py-3 hidden md:table-cell text-ink">
+                        {customerName}
+                      </td>
+                    )}
+                    {isStaff && (
+                      <td className="px-4 py-3 hidden lg:table-cell text-ink-ghost">
+                        {inv.projects?.name ?? "—"}
+                      </td>
+                    )}
                     <td className="px-4 py-3 font-medium text-ink">
-                      {inv.amount != null ? `${inv.amount.toLocaleString("fi-FI")} €` : "—"}
+                      {inv.amount != null
+                        ? `${inv.amount.toLocaleString("fi-FI")} €`
+                        : "—"}
                     </td>
                     <td className="px-4 py-3 text-ink-ghost">
-                      {inv.due_date ? new Date(inv.due_date).toLocaleDateString("fi-FI") : "—"}
+                      {inv.due_date
+                        ? new Date(inv.due_date).toLocaleDateString("fi-FI")
+                        : "—"}
                     </td>
-                    <td className="px-4 py-3"><Badge status={inv.status} /></td>
+                    <td className="px-4 py-3">
+                      <Badge status={inv.status} />
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         {isStaff ? (
@@ -385,13 +603,14 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
                             >
                               <Pencil size={12} />
                             </button>
-                            {["pending","sent"].includes(inv.status) && (
+                            {["pending", "sent"].includes(inv.status) && (
                               <button
                                 onClick={() => markPaid(inv.id)}
                                 disabled={markingPaid === inv.id}
                                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ok/10 text-ok text-xs font-medium hover:bg-ok/20 border border-ok/20 transition-colors disabled:opacity-50"
                               >
-                                <Check size={12} />{markingPaid === inv.id ? "..." : "Maksettu"}
+                                <Check size={12} />
+                                {markingPaid === inv.id ? "..." : "Maksettu"}
                               </button>
                             )}
                             {isAdmin && (
@@ -405,7 +624,7 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
                             )}
                           </>
                         ) : (
-                          ["sent","overdue"].includes(inv.status) && (
+                          ["sent", "overdue"].includes(inv.status) && (
                             <button
                               onClick={() => payInvoice(inv.id)}
                               disabled={checkingOut === inv.id}
@@ -441,31 +660,22 @@ export function InvoicesClient({ invoices: initial, customers, projects, isStaff
           projects={projects}
           onClose={() => setEditInvoice(null)}
           onSaved={(updated) => {
-            setInvoices((prev) => prev.map((i) => i.id === updated.id ? updated : i));
+            setInvoices((prev) =>
+              prev.map((i) => (i.id === updated.id ? updated : i)),
+            );
             setEditInvoice(null);
           }}
         />
       )}
 
       {deletingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeletingId(null)} />
-          <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
-            <h2 className="text-base font-semibold text-ink mb-2">Poista lasku</h2>
-            <p className="text-sm text-ink-dim mb-5">Poistetaanko lasku? Toimintoa ei voi kumota.</p>
-            <div className="flex gap-2">
-              <button onClick={() => setDeletingId(null)} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
-                Peruuta
-              </button>
-              <button
-                onClick={() => deleteInvoice(deletingId)}
-                className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 transition-colors"
-              >
-                Poista
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          title="Siirrä roskakoriin"
+          message="Lasku siirretään roskakoriin. Vain omistaja voi palauttaa tai poistaa sen pysyvästi."
+          confirmLabel="Siirrä roskakoriin"
+          onClose={() => setDeletingId(null)}
+          onConfirm={() => deleteInvoice(deletingId)}
+        />
       )}
     </div>
   );

@@ -6,19 +6,28 @@ export const metadata = { title: "Projektit — Apex Site" };
 
 export default async function ProjectsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
-  const canModerate = ["owner","admin"].includes(profile?.role ?? "");
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
+  const canModerate = ["owner", "admin"].includes(profile?.role ?? "");
 
   let projects = null;
 
   if (isStaff) {
     const { data } = await supabase
       .from("projects")
-      .select(`id, name, status, progress_pct, deadline, budget, created_at, customers(id, first_name, last_name, email)`)
+      .select(
+        `id, name, status, progress_pct, deadline, budget, created_at, customers(id, first_name, last_name, email)`,
+      )
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(100);
     projects = data;
@@ -32,8 +41,11 @@ export default async function ProjectsPage() {
     if (customerRecord) {
       const { data } = await supabase
         .from("projects")
-        .select(`id, name, status, progress_pct, deadline, budget, created_at, customers(id, first_name, last_name, email)`)
+        .select(
+          `id, name, status, progress_pct, deadline, budget, created_at, customers(id, first_name, last_name, email)`,
+        )
         .eq("customer_id", customerRecord.id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
       projects = data;
     }
@@ -47,7 +59,11 @@ export default async function ProjectsPage() {
           {isStaff ? "Hallitse kaikkia projekteja" : "Omat projektisi"}
         </p>
       </div>
-      <ProjectsClient initial={(projects ?? []) as any} isStaff={isStaff} canModerate={canModerate} />
+      <ProjectsClient
+        initial={(projects ?? []) as any}
+        isStaff={isStaff}
+        canModerate={canModerate}
+      />
     </div>
   );
 }

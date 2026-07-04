@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity";
+import { softDelete } from "@/lib/softDelete";
 
 async function getUser() {
   const supabase = await createClient();
@@ -35,6 +36,7 @@ export async function GET(req: NextRequest) {
       companies(id, name)
     `,
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (!isStaff) {
@@ -269,7 +271,7 @@ export async function DELETE(req: NextRequest) {
     .eq("id", id)
     .single();
 
-  const { error } = await supabase.from("quotes").delete().eq("id", id);
+  const { error } = await softDelete(supabase, "quotes", id);
   if (error)
     return NextResponse.json({ error: error.message }, { status: 500 });
 

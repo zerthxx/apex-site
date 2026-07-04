@@ -6,19 +6,28 @@ export const metadata = { title: "Tarjoukset — Apex Site" };
 
 export default async function QuotesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  const isStaff = ["owner","admin","employee"].includes(profile?.role ?? "");
-  const canModerate = ["owner","admin"].includes(profile?.role ?? "");
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
+  const canModerate = ["owner", "admin"].includes(profile?.role ?? "");
 
   let quotes = null;
 
   if (isStaff) {
     const { data } = await supabase
       .from("quotes")
-      .select(`id, title, status, amount, valid_until, created_at, customers(id, first_name, last_name, email), companies(id, name)`)
+      .select(
+        `id, title, status, amount, valid_until, created_at, customers(id, first_name, last_name, email), companies(id, name)`,
+      )
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(100);
     quotes = data;
@@ -32,8 +41,11 @@ export default async function QuotesPage() {
     if (customerRecord) {
       const { data } = await supabase
         .from("quotes")
-        .select(`id, title, status, amount, valid_until, created_at, customers(id, first_name, last_name, email), companies(id, name)`)
+        .select(
+          `id, title, status, amount, valid_until, created_at, customers(id, first_name, last_name, email), companies(id, name)`,
+        )
         .eq("customer_id", customerRecord.id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
       quotes = data;
     }
@@ -44,10 +56,16 @@ export default async function QuotesPage() {
       <div className="mb-6">
         <h1 className="text-xl font-bold text-ink">Tarjoukset</h1>
         <p className="text-sm text-ink-ghost mt-1">
-          {isStaff ? "Hallitse asiakkaiden tarjouksia" : "Sinulle lähetetyt tarjoukset"}
+          {isStaff
+            ? "Hallitse asiakkaiden tarjouksia"
+            : "Sinulle lähetetyt tarjoukset"}
         </p>
       </div>
-      <QuotesClient initial={(quotes ?? []) as any} isStaff={isStaff} canModerate={canModerate} />
+      <QuotesClient
+        initial={(quotes ?? []) as any}
+        isStaff={isStaff}
+        canModerate={canModerate}
+      />
     </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, User } from "lucide-react";
+import { Plus, X, User, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface Task {
   id: string;
@@ -15,7 +16,12 @@ interface Task {
   projects?: { id: string; name: string } | null;
 }
 
-interface StaffMember { id: string; first_name?: string | null; last_name?: string | null; role: string; }
+interface StaffMember {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  role: string;
+}
 
 const COLUMNS = [
   { id: "todo", label: "Tekemättä" },
@@ -24,7 +30,12 @@ const COLUMNS = [
   { id: "done", label: "Valmis" },
 ] as const;
 
-const PRIORITY_LABELS: Record<string, string> = { low: "Matala", medium: "Normaali", high: "Korkea", urgent: "Kiireellinen" };
+const PRIORITY_LABELS: Record<string, string> = {
+  low: "Matala",
+  medium: "Normaali",
+  high: "Korkea",
+  urgent: "Kiireellinen",
+};
 const PRIORITY_COLORS: Record<string, string> = {
   low: "text-ink-ghost border-wire bg-surface",
   medium: "text-copper border-copper/30 bg-copper/5",
@@ -39,20 +50,32 @@ function staffName(staff: StaffMember[], id?: string | null) {
   return [s.first_name, s.last_name].filter(Boolean).join(" ") || null;
 }
 
-function NewTaskModal({ staff, onClose, onCreated }: {
+function NewTaskModal({
+  staff,
+  onClose,
+  onCreated,
+}: {
   staff: StaffMember[];
   onClose: () => void;
   onCreated: (t: Task) => void;
 }) {
   const [form, setForm] = useState({
-    title: "", description: "", due_date: "", priority: "medium", status: "todo", assigned_to: "",
+    title: "",
+    description: "",
+    due_date: "",
+    priority: "medium",
+    status: "todo",
+    assigned_to: "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title) { setError("Otsikko vaaditaan"); return; }
+    if (!form.title) {
+      setError("Otsikko vaaditaan");
+      return;
+    }
     setSaving(true);
     const res = await fetch("/api/tasks", {
       method: "POST",
@@ -65,35 +88,59 @@ function NewTaskModal({ staff, onClose, onCreated }: {
     });
     const data = await res.json();
     setSaving(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
     onCreated(data.task);
     onClose();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-ink">Uusi tehtävä</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={17} />
+          </button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Otsikko *</label>
-            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+            <label className="block text-xs text-ink-ghost mb-1">
+              Otsikko *
+            </label>
+            <input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            />
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Kuvaus</label>
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors resize-none" />
+            <textarea
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+              rows={2}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors resize-none"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Prioriteetti</label>
-              <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+              <label className="block text-xs text-ink-ghost mb-1">
+                Prioriteetti
+              </label>
+              <select
+                value={form.priority}
+                onChange={(e) => setForm({ ...form, priority: e.target.value })}
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              >
                 <option value="low">Matala</option>
                 <option value="medium">Normaali</option>
                 <option value="high">Korkea</option>
@@ -101,34 +148,65 @@ function NewTaskModal({ staff, onClose, onCreated }: {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Eräpäivä</label>
-              <input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Eräpäivä
+              </label>
+              <input
+                type="date"
+                value={form.due_date}
+                onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Tila</label>
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
-              {COLUMNS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
+              {COLUMNS.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
             </select>
           </div>
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Vastuuhenkilö</label>
-            <select value={form.assigned_to} onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <label className="block text-xs text-ink-ghost mb-1">
+              Vastuuhenkilö
+            </label>
+            <select
+              value={form.assigned_to}
+              onChange={(e) =>
+                setForm({ ...form, assigned_to: e.target.value })
+              }
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="">Ei vastuuhenkilöä</option>
               {staff.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {[s.first_name, s.last_name].filter(Boolean).join(" ") || s.id}
+                  {[s.first_name, s.last_name].filter(Boolean).join(" ") ||
+                    s.id}
                 </option>
               ))}
             </select>
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 mt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">Peruuta</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+            >
+              Peruuta
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+            >
               {saving ? "..." : "Luo tehtävä"}
             </button>
           </div>
@@ -138,19 +216,52 @@ function NewTaskModal({ staff, onClose, onCreated }: {
   );
 }
 
-function TaskCard({ task, staff, onMove }: { task: Task; staff: StaffMember[]; onMove: (id: string, status: string) => void }) {
-  const nextStatus = COLUMNS[COLUMNS.findIndex((c) => c.id === task.status) + 1]?.id;
+function TaskCard({
+  task,
+  staff,
+  onMove,
+  onDelete,
+}: {
+  task: Task;
+  staff: StaffMember[];
+  onMove: (id: string, status: string) => void;
+  onDelete: (task: Task) => void;
+}) {
+  const nextStatus =
+    COLUMNS[COLUMNS.findIndex((c) => c.id === task.status) + 1]?.id;
   const assignee = staffName(staff, task.assigned_to);
   return (
-    <div className="bg-surface border border-wire rounded-lg p-3 flex flex-col gap-2">
-      <p className="text-sm font-medium text-ink leading-snug">{task.title}</p>
-      {task.description && <p className="text-xs text-ink-ghost line-clamp-2">{task.description}</p>}
+    <div className="bg-surface border border-wire rounded-lg p-3 flex flex-col gap-2 group">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium text-ink leading-snug">
+          {task.title}
+        </p>
+        <button
+          onClick={() => onDelete(task)}
+          className="opacity-0 group-hover:opacity-100 text-ink-ghost hover:text-bad transition-all shrink-0"
+          aria-label="Poista tehtävä"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
+      {task.description && (
+        <p className="text-xs text-ink-ghost line-clamp-2">
+          {task.description}
+        </p>
+      )}
       <div className="flex items-center justify-between mt-1">
-        <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border", PRIORITY_COLORS[task.priority])}>
+        <span
+          className={cn(
+            "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border",
+            PRIORITY_COLORS[task.priority],
+          )}
+        >
           {PRIORITY_LABELS[task.priority]}
         </span>
         {task.due_date && (
-          <span className="text-[10px] text-ink-ghost">{new Date(task.due_date).toLocaleDateString("fi-FI")}</span>
+          <span className="text-[10px] text-ink-ghost">
+            {new Date(task.due_date).toLocaleDateString("fi-FI")}
+          </span>
         )}
       </div>
       {assignee && (
@@ -185,12 +296,27 @@ export function TasksClient({ initial }: { initial: Task[] }) {
   }, []);
 
   async function moveTask(id: string, status: string) {
-    setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status } : t));
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
     await fetch("/api/tasks", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, status }),
     });
+  }
+
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+
+  async function deleteTask(id: string) {
+    const res = await fetch("/api/tasks", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error ?? "Poisto epäonnistui");
+    }
+    setTasks((prev) => prev.filter((t) => t.id !== id));
   }
 
   const visible = filterMine ? tasks.filter((t) => t.assigned_to) : tasks;
@@ -199,13 +325,21 @@ export function TasksClient({ initial }: { initial: Task[] }) {
     <div>
       <div className="flex items-center gap-3 mb-5">
         <label className="flex items-center gap-2 text-sm text-ink-ghost cursor-pointer">
-          <input type="checkbox" checked={filterMine} onChange={(e) => setFilterMine(e.target.checked)} className="accent-copper" />
+          <input
+            type="checkbox"
+            checked={filterMine}
+            onChange={(e) => setFilterMine(e.target.checked)}
+            className="accent-copper"
+          />
           Vain omat tehtävät
         </label>
         <div className="flex-1" />
-        <button onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-3 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors">
-          <Plus size={15} />Uusi tehtävä
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 px-3 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors"
+        >
+          <Plus size={15} />
+          Uusi tehtävä
         </button>
       </div>
 
@@ -214,16 +348,27 @@ export function TasksClient({ initial }: { initial: Task[] }) {
         {COLUMNS.map((col) => {
           const colTasks = visible.filter((t) => t.status === col.id);
           return (
-            <div key={col.id} className="bg-elevated border border-wire rounded-xl p-3">
+            <div
+              key={col.id}
+              className="bg-elevated border border-wire rounded-xl p-3"
+            >
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">{col.label}</h3>
+                <h3 className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  {col.label}
+                </h3>
                 <span className="text-xs text-ink-ghost bg-surface border border-wire px-1.5 py-0.5 rounded-full">
                   {colTasks.length}
                 </span>
               </div>
               <div className="flex flex-col gap-2">
                 {colTasks.map((t) => (
-                  <TaskCard key={t.id} task={t} staff={staff} onMove={moveTask} />
+                  <TaskCard
+                    key={t.id}
+                    task={t}
+                    staff={staff}
+                    onMove={moveTask}
+                    onDelete={setTaskToDelete}
+                  />
                 ))}
                 {colTasks.length === 0 && (
                   <div className="text-xs text-ink-ghost text-center py-4 border border-dashed border-wire rounded-lg">
@@ -241,6 +386,16 @@ export function TasksClient({ initial }: { initial: Task[] }) {
           staff={staff}
           onClose={() => setShowModal(false)}
           onCreated={(t) => setTasks((prev) => [t, ...prev])}
+        />
+      )}
+
+      {taskToDelete && (
+        <ConfirmDialog
+          title="Siirrä roskakoriin"
+          message={`Tehtävä "${taskToDelete.title}" siirretään roskakoriin. Vain omistaja voi palauttaa tai poistaa sen pysyvästi.`}
+          confirmLabel="Siirrä roskakoriin"
+          onClose={() => setTaskToDelete(null)}
+          onConfirm={() => deleteTask(taskToDelete.id)}
         />
       )}
     </div>

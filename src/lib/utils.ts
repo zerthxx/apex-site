@@ -23,3 +23,11 @@ export function readingTime(text: string): number {
   const words = text.trim().split(/\s+/).length;
   return Math.ceil(words / wordsPerMinute);
 }
+
+/** Escapes characters meaningful to PostgREST's .or() filter grammar (`,` `(` `)`)
+ * and to ILIKE's own pattern syntax (`%` `_`), so free-text search input is
+ * treated as a literal string instead of breaking the filter or matching
+ * unintentionally broadly. */
+export function sanitizeIlikeTerm(term: string): string {
+  return term.replace(/[,()%_\\]/g, "\\$&");
+}

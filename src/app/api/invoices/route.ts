@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity";
+import { softDelete } from "@/lib/softDelete";
 
 async function getUser() {
   const supabase = await createClient();
@@ -35,6 +36,7 @@ export async function GET(req: NextRequest) {
       projects(id, name)
     `,
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (!isStaff) {
@@ -69,7 +71,8 @@ export async function POST(req: NextRequest) {
   // Auto-generate invoice number: INV-YYYYMM-NNN
   const { count } = await supabase
     .from("invoices")
-    .select("*", { count: "exact", head: true });
+    .select("*", { count: "exact", head: true })
+    .is("deleted_at", null);
   const month = new Date().toISOString().slice(0, 7).replace("-", "");
   const invoiceNumber = `INV-${month}-${String((count ?? 0) + 1).padStart(3, "0")}`;
 
@@ -150,7 +153,8 @@ export async function DELETE(req: NextRequest) {
   }
 
   const { id } = await req.json();
-  const { error } = await supabase.from("invoices").delete().eq("id", id);
+  if (!id) return NextResponse.json({ error: "id vaaditaan" }, { status: 400 });
+  const { error } = await softDelete(supabase, "invoices", id);
   if (error)
     return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });

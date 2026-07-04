@@ -3,12 +3,22 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   if (!["owner", "admin"].includes(profile?.role ?? "")) {
-    return NextResponse.json({ error: "Vain admin voi viedä dataa" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Vain admin voi viedä dataa" },
+      { status: 403 },
+    );
   }
 
   const url = new URL(req.url);
@@ -17,7 +27,10 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from("payments")
-    .select("id, amount, currency, status, payment_method, type, created_at, paid_at, refunded_at, invoices(invoice_number), customers(first_name, last_name, email)")
+    .select(
+      "id, amount, currency, status, payment_method, type, created_at, paid_at, refunded_at, invoices(invoice_number), customers(first_name, last_name, email)",
+    )
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(5000);
 
@@ -25,14 +38,28 @@ export async function GET(req: NextRequest) {
   if (to) query = query.lte("created_at", to);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
 
   const rows = data ?? [];
-  const headers = ["ID", "Lasku", "Asiakas", "Sähköposti", "Summa (€)", "Valuutta", "Tila", "Maksutapa", "Luotu", "Maksettu", "Palautettu"];
+  const headers = [
+    "ID",
+    "Lasku",
+    "Asiakas",
+    "Sähköposti",
+    "Summa (€)",
+    "Valuutta",
+    "Tila",
+    "Maksutapa",
+    "Luotu",
+    "Maksettu",
+    "Palautettu",
+  ];
   const csvRows = rows.map((p) => {
     const inv = p.invoices as any;
     const cus = p.customers as any;
-    const cusName = [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") || "";
+    const cusName =
+      [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") || "";
     return [
       p.id,
       inv?.invoice_number ?? "",

@@ -5,29 +5,48 @@ import { stripe } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
 
   const { invoice_id } = await req.json();
-  if (!invoice_id) return NextResponse.json({ error: "invoice_id vaaditaan" }, { status: 400 });
+  if (!invoice_id)
+    return NextResponse.json(
+      { error: "invoice_id vaaditaan" },
+      { status: 400 },
+    );
 
   // Fetch invoice and verify customer ownership
   const { data: invoice } = await supabase
     .from("invoices")
     .select("id, invoice_number, amount, status, customer_id, projects(name)")
     .eq("id", invoice_id)
+    .is("deleted_at", null)
     .single();
 
-  if (!invoice) return NextResponse.json({ error: "Laskua ei löydy" }, { status: 404 });
+  if (!invoice)
+    return NextResponse.json({ error: "Laskua ei löydy" }, { status: 404 });
   if (!["sent", "overdue"].includes(invoice.status)) {
-    return NextResponse.json({ error: "Lasku ei ole maksettavissa" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Lasku ei ole maksettavissa" },
+      { status: 400 },
+    );
   }
   if (!invoice.amount || invoice.amount <= 0) {
-    return NextResponse.json({ error: "Laskun summa on virheellinen" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Laskun summa on virheellinen" },
+      { status: 400 },
+    );
   }
 
   // Verify the caller is the invoice's customer (or staff)
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
 
   if (!isStaff) {
@@ -53,7 +72,10 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   if (existingPayment?.status === "completed") {
-    return NextResponse.json({ error: "Lasku on jo maksettu" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Lasku on jo maksettu" },
+      { status: 400 },
+    );
   }
 
   const host = req.headers.get("host") ?? "apexsite.fi";
@@ -62,11 +84,16 @@ export async function POST(req: NextRequest) {
 
   // Create a pending payment record first (idempotency: reuse if already pending)
   let paymentId: string;
-  if (existingPayment?.status === "pending" && existingPayment.stripe_checkout_session) {
+  if (
+    existingPayment?.status === "pending" &&
+    existingPayment.stripe_checkout_session
+  ) {
     paymentId = existingPayment.id;
     // Retrieve and redirect to existing session if it's still valid
     try {
-      const session = await stripe.checkout.sessions.retrieve(existingPayment.stripe_checkout_session);
+      const session = await stripe.checkout.sessions.retrieve(
+        existingPayment.stripe_checkout_session,
+      );
       if (session.status === "open" && session.url) {
         return NextResponse.json({ url: session.url });
       }
@@ -90,7 +117,10 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (insertError || !newPayment) {
-    return NextResponse.json({ error: "Maksutietueen luonti epäonnistui" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Maksutietueen luonti epäonnistui" },
+      { status: 500 },
+    );
   }
   paymentId = newPayment.id;
 

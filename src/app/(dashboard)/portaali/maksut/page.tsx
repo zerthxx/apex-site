@@ -6,16 +6,25 @@ export const metadata = { title: "Maksut — Apex Site" };
 
 export default async function MaksutPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
 
   if (isStaff) {
     const { data: payments } = await supabase
       .from("payments")
-      .select("*, invoices(invoice_number, amount), customers(first_name, last_name, email)")
+      .select(
+        "*, invoices(invoice_number, amount), customers(first_name, last_name, email)",
+      )
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(100);
 
@@ -23,7 +32,9 @@ export default async function MaksutPage() {
       <div>
         <div className="mb-6">
           <h1 className="text-xl font-bold text-ink">Maksut</h1>
-          <p className="text-sm text-ink-ghost mt-1">Kaikki asiakkaiden maksutapahtumat</p>
+          <p className="text-sm text-ink-ghost mt-1">
+            Kaikki asiakkaiden maksutapahtumat
+          </p>
         </div>
         <PaymentsClient payments={(payments ?? []) as any} isStaff />
       </div>
@@ -54,6 +65,7 @@ export default async function MaksutPage() {
     .from("payments")
     .select("*, invoices(invoice_number, amount)")
     .eq("customer_id", customer.id)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(100);
 

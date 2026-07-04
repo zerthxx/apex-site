@@ -47,6 +47,7 @@ export default async function LeadsPage() {
       `id, first_name, last_name, email, phone, status, created_at, companies(id, name)`,
     )
     .eq("status", "lead")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -60,6 +61,7 @@ export default async function LeadsPage() {
     .select(
       "id, customer_id, first_name, last_name, email, phone, company, created_at",
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(100);
 

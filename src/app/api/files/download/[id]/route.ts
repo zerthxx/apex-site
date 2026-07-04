@@ -2,13 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
 
   // Use admin client for file lookup and signed URL — regular client can't access private bucket
@@ -18,9 +28,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .from("project_files")
     .select("storage_path, name, project_id")
     .eq("id", id)
+    .is("deleted_at", null)
     .single();
 
-  if (!file) return NextResponse.json({ error: "Tiedostoa ei löydy" }, { status: 404 });
+  if (!file)
+    return NextResponse.json({ error: "Tiedostoa ei löydy" }, { status: 404 });
 
   if (!isStaff) {
     // Customers can only download files from their own projects
@@ -30,7 +42,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       .eq("user_id", user.id)
       .single();
 
-    if (!customer) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+    if (!customer)
+      return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
 
     const { data: project } = await supabase
       .from("projects")
@@ -39,13 +52,18 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       .eq("customer_id", customer.id)
       .single();
 
-    if (!project) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
+    if (!project)
+      return NextResponse.json({ error: "Ei oikeuksia" }, { status: 403 });
   }
   const { data: signedUrl, error } = await adminClient.storage
     .from("project-files")
     .createSignedUrl(file.storage_path, 3600);
 
-  if (error || !signedUrl) return NextResponse.json({ error: "URL:n luonti epäonnistui" }, { status: 500 });
+  if (error || !signedUrl)
+    return NextResponse.json(
+      { error: "URL:n luonti epäonnistui" },
+      { status: 500 },
+    );
 
   return NextResponse.json({ url: signedUrl.signedUrl, name: file.name });
 }

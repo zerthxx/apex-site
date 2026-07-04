@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Receipt, ExternalLink, Search, Trash2, AlertTriangle, X } from "lucide-react";
+import {
+  Receipt,
+  ExternalLink,
+  Search,
+  Trash2,
+  AlertTriangle,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Payment {
@@ -15,7 +22,11 @@ interface Payment {
   paid_at?: string | null;
   refunded_at?: string | null;
   invoices?: { invoice_number?: string | null; amount?: number | null } | null;
-  customers?: { first_name?: string | null; last_name?: string | null; email?: string | null } | null;
+  customers?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+  } | null;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -36,13 +47,22 @@ const STATUS_COLORS: Record<string, string> = {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border", STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire")}>
+    <span
+      className={cn(
+        "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border",
+        STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire",
+      )}
+    >
       {STATUS_LABELS[status] ?? status}
     </span>
   );
 }
 
-function DeleteModal({ payment, onClose, onDeleted }: {
+function DeleteModal({
+  payment,
+  onClose,
+  onDeleted,
+}: {
   payment: Payment;
   onClose: () => void;
   onDeleted: (id: string) => void;
@@ -60,26 +80,42 @@ function DeleteModal({ payment, onClose, onDeleted }: {
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
     onDeleted(payment.id);
     onClose();
   }
 
   const inv = payment.invoices as any;
   const cus = payment.customers as any;
-  const cusName = [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") || cus?.email || "Tuntematon";
+  const cusName =
+    [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") ||
+    cus?.email ||
+    "Tuntematon";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-ink">Poista maksutapahtuma</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
+          <h2 className="text-base font-semibold text-ink">
+            Siirrä roskakoriin
+          </h2>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={17} />
+          </button>
         </div>
         <div className="flex items-start gap-3 mb-4 p-3 bg-bad/10 border border-bad/20 rounded-lg">
           <AlertTriangle size={16} className="text-bad mt-0.5 shrink-0" />
-          <p className="text-xs text-bad">Tämä poistaa maksutapahtuman pysyvästi tietokannasta.</p>
+          <p className="text-xs text-bad">
+            Maksutapahtuma siirretään roskakoriin. Vain omistaja voi palauttaa
+            tai poistaa sen pysyvästi.
+          </p>
         </div>
         <div className="space-y-2 mb-5 text-sm">
           <div className="flex justify-between">
@@ -88,19 +124,33 @@ function DeleteModal({ payment, onClose, onDeleted }: {
           </div>
           <div className="flex justify-between">
             <span className="text-ink-ghost">Lasku</span>
-            <span className="text-ink">{inv?.invoice_number ? `#${inv.invoice_number}` : "—"}</span>
+            <span className="text-ink">
+              {inv?.invoice_number ? `#${inv.invoice_number}` : "—"}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-ink-ghost">Summa</span>
-            <span className="text-ink font-bold">{payment.amount?.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €</span>
+            <span className="text-ink font-bold">
+              {payment.amount?.toLocaleString("fi-FI", {
+                minimumFractionDigits: 2,
+              })}{" "}
+              €
+            </span>
           </div>
         </div>
         {error && <p className="text-xs text-bad mb-3">{error}</p>}
         <div className="flex gap-2">
-          <button onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+          >
             Peruuta
           </button>
-          <button onClick={handleDelete} disabled={loading} className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors">
+          <button
+            onClick={handleDelete}
+            disabled={loading}
+            className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors"
+          >
             {loading ? "Poistetaan..." : "Poista"}
           </button>
         </div>
@@ -132,7 +182,10 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
       cus?.first_name,
       cus?.last_name,
       cus?.email,
-    ].filter(Boolean).join(" ").toLowerCase();
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
     const matchSearch = !search || text.includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     return matchSearch && matchStatus;
@@ -141,7 +194,11 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
   function customerName(p: Payment) {
     const cus = p.customers as any;
     if (!cus) return "—";
-    return [cus.first_name, cus.last_name].filter(Boolean).join(" ") || cus.email || "—";
+    return (
+      [cus.first_name, cus.last_name].filter(Boolean).join(" ") ||
+      cus.email ||
+      "—"
+    );
   }
 
   const totalPaid = payments
@@ -153,14 +210,34 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Yhteensä maksettu", value: `${totalPaid.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`, highlight: true },
+          {
+            label: "Yhteensä maksettu",
+            value: `${totalPaid.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`,
+            highlight: true,
+          },
           { label: "Maksuja", value: payments.length },
-          { label: "Maksettu", value: payments.filter((p) => p.status === "completed").length },
-          { label: "Palautettu", value: payments.filter((p) => p.status === "refunded").length },
+          {
+            label: "Maksettu",
+            value: payments.filter((p) => p.status === "completed").length,
+          },
+          {
+            label: "Palautettu",
+            value: payments.filter((p) => p.status === "refunded").length,
+          },
         ].map((s) => (
-          <div key={s.label} className="bg-elevated border border-wire rounded-xl px-4 py-3">
+          <div
+            key={s.label}
+            className="bg-elevated border border-wire rounded-xl px-4 py-3"
+          >
             <p className="text-xs text-ink-ghost mb-1">{s.label}</p>
-            <p className={cn("text-lg font-bold", s.highlight ? "text-copper" : "text-ink")}>{s.value}</p>
+            <p
+              className={cn(
+                "text-lg font-bold",
+                s.highlight ? "text-copper" : "text-ink",
+              )}
+            >
+              {s.value}
+            </p>
           </div>
         ))}
       </div>
@@ -169,7 +246,10 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
       <div className="flex items-center gap-3">
         {isStaff && (
           <div className="relative flex-1 max-w-sm">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost" />
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost"
+            />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -196,17 +276,31 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-2 text-sm text-ink-ghost">
             <Receipt size={28} className="opacity-30" />
-            {search || statusFilter !== "all" ? "Ei hakutuloksia" : "Ei maksutapahtumia vielä"}
+            {search || statusFilter !== "all"
+              ? "Ei hakutuloksia"
+              : "Ei maksutapahtumia vielä"}
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-wire">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Lasku</th>
-                {isStaff && <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">Asiakas</th>}
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Summa</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Tila</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">Päivämäärä</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  Lasku
+                </th>
+                {isStaff && (
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">
+                    Asiakas
+                  </th>
+                )}
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  Summa
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  Tila
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">
+                  Päivämäärä
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -214,7 +308,10 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
               {filtered.map((p) => {
                 const inv = p.invoices as any;
                 return (
-                  <tr key={p.id} className="hover:bg-surface/50 transition-colors">
+                  <tr
+                    key={p.id}
+                    className="hover:bg-surface/50 transition-colors"
+                  >
                     <td className="px-4 py-3 font-medium text-ink">
                       {inv?.invoice_number ? `#${inv.invoice_number}` : "—"}
                     </td>

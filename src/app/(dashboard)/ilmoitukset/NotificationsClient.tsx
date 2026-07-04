@@ -3,7 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FileText, FolderOpen, Receipt, MessageSquare, Bell, ArrowRight, Check, CheckCheck } from "lucide-react";
+import {
+  FileText,
+  FolderOpen,
+  Receipt,
+  MessageSquare,
+  Bell,
+  ArrowRight,
+  Check,
+  CheckCheck,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Notification {
@@ -39,20 +49,27 @@ function timeAgo(str: string) {
   if (mins < 60) return `${mins} min sitten`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs} t sitten`;
-  return new Date(str).toLocaleDateString("fi-FI", { day: "numeric", month: "short" });
+  return new Date(str).toLocaleDateString("fi-FI", {
+    day: "numeric",
+    month: "short",
+  });
 }
 
 interface NotificationsClientProps {
   notifications: Notification[];
 }
 
-export function NotificationsClient({ notifications: initial }: NotificationsClientProps) {
+export function NotificationsClient({
+  notifications: initial,
+}: NotificationsClientProps) {
   const router = useRouter();
   const [items, setItems] = useState(initial);
   const [markingAll, setMarkingAll] = useState(false);
 
   async function markRead(id: string) {
-    setItems((prev) => prev.map((n) => n.id === id ? { ...n, is_read: true } : n));
+    setItems((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
+    );
     await fetch("/api/notifications", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -71,6 +88,17 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
     });
     setMarkingAll(false);
     router.refresh();
+  }
+
+  async function dismiss(e: React.MouseEvent, id: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    setItems((prev) => prev.filter((n) => n.id !== id));
+    await fetch("/api/notifications", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
   }
 
   const unread = items.filter((n) => !n.is_read).length;
@@ -109,30 +137,60 @@ export function NotificationsClient({ notifications: initial }: NotificationsCli
             <div
               className={cn(
                 "flex items-start gap-3 px-4 py-4 transition-colors",
-                !n.is_read ? "bg-copper/3 hover:bg-copper/5" : "hover:bg-surface/50",
-                n.href ? "cursor-pointer" : ""
+                !n.is_read
+                  ? "bg-copper/3 hover:bg-copper/5"
+                  : "hover:bg-surface/50",
+                n.href ? "cursor-pointer" : "",
               )}
-              onClick={() => { if (!n.is_read) markRead(n.id); }}
+              onClick={() => {
+                if (!n.is_read) markRead(n.id);
+              }}
             >
-              <span className={cn("flex items-center justify-center w-8 h-8 rounded-lg border shrink-0 mt-0.5", accent)}>
+              <span
+                className={cn(
+                  "flex items-center justify-center w-8 h-8 rounded-lg border shrink-0 mt-0.5",
+                  accent,
+                )}
+              >
                 {icon}
               </span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <p className={cn("text-sm leading-snug", n.is_read ? "text-ink-dim" : "text-ink font-medium")}>
+                  <p
+                    className={cn(
+                      "text-sm leading-snug",
+                      n.is_read ? "text-ink-dim" : "text-ink font-medium",
+                    )}
+                  >
                     {n.title}
                   </p>
                   <div className="flex items-center gap-2 shrink-0">
-                    <time className="text-xs text-ink-ghost whitespace-nowrap">{timeAgo(n.created_at)}</time>
+                    <time className="text-xs text-ink-ghost whitespace-nowrap">
+                      {timeAgo(n.created_at)}
+                    </time>
                     {!n.is_read && (
                       <span className="w-2 h-2 rounded-full bg-copper shrink-0" />
                     )}
+                    <button
+                      onClick={(e) => dismiss(e, n.id)}
+                      className="text-ink-ghost hover:text-bad transition-colors"
+                      aria-label="Poista ilmoitus"
+                    >
+                      <X size={13} />
+                    </button>
                   </div>
                 </div>
-                {n.body && <p className="text-xs text-ink-ghost mt-0.5 leading-relaxed">{n.body}</p>}
+                {n.body && (
+                  <p className="text-xs text-ink-ghost mt-0.5 leading-relaxed">
+                    {n.body}
+                  </p>
+                )}
               </div>
               {n.href && (
-                <ArrowRight size={13} className="text-ink-ghost shrink-0 mt-1" />
+                <ArrowRight
+                  size={13}
+                  className="text-ink-ghost shrink-0 mt-1"
+                />
               )}
             </div>
           );

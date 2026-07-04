@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeIlikeTerm } from "@/lib/utils";
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
   if (!q || q.length < 2) return NextResponse.json({ results: [] });
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -18,41 +22,57 @@ export async function GET(req: NextRequest) {
   const isStaff = ["owner", "admin", "employee"].includes(profile?.role ?? "");
   if (!isStaff) return NextResponse.json({ results: [] });
 
-  const pattern = `%${q}%`;
+  const pattern = `%${sanitizeIlikeTerm(q)}%`;
 
   const [customers, companies, projects, quotes, files] = await Promise.all([
     supabase
       .from("customers")
       .select("id, first_name, last_name, email")
-      .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},email.ilike.${pattern}`)
+      .or(
+        `first_name.ilike.${pattern},last_name.ilike.${pattern},email.ilike.${pattern}`,
+      )
+      .is("deleted_at", null)
       .limit(5),
     supabase
       .from("companies")
       .select("id, name, email")
       .or(`name.ilike.${pattern},email.ilike.${pattern}`)
+      .is("deleted_at", null)
       .limit(5),
     supabase
       .from("projects")
       .select("id, name, status")
       .ilike("name", pattern)
+      .is("deleted_at", null)
       .limit(5),
     supabase
       .from("quotes")
       .select("id, title, status")
       .ilike("title", pattern)
+      .is("deleted_at", null)
       .limit(5),
     supabase
       .from("project_files")
       .select("id, name, project_id")
       .ilike("name", pattern)
+      .is("deleted_at", null)
       .limit(5),
   ]);
 
   const STATUS_FI: Record<string, string> = {
-    draft: "Luonnos", sent: "Lähetetty", accepted: "Hyväksytty", rejected: "Hylätty",
-    planning: "Suunnittelu", development: "Kehitys", testing: "Testaus",
-    review: "Katselmus", completed: "Valmis", cancelled: "Peruttu",
-    active: "Aktiivinen", inactive: "Ei aktiivinen", lead: "Liidi",
+    draft: "Luonnos",
+    sent: "Lähetetty",
+    accepted: "Hyväksytty",
+    rejected: "Hylätty",
+    planning: "Suunnittelu",
+    development: "Kehitys",
+    testing: "Testaus",
+    review: "Katselmus",
+    completed: "Valmis",
+    cancelled: "Peruttu",
+    active: "Aktiivinen",
+    inactive: "Ei aktiivinen",
+    lead: "Liidi",
   };
 
   const results = [

@@ -38,21 +38,25 @@ export default async function CustomerDetailPage({
         "*, companies(id, name, business_id, email, phone, address, city)",
       )
       .eq("id", id)
+      .is("deleted_at", null)
       .single(),
     supabase
       .from("quotes")
       .select("id, title, status, amount, created_at")
       .eq("customer_id", id)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
       .from("projects")
       .select("id, name, status, progress_pct, deadline")
       .eq("customer_id", id)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
       .from("invoices")
       .select("id, invoice_number, status, amount, due_date")
       .eq("customer_id", id)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
       .from("payments")
@@ -60,6 +64,7 @@ export default async function CustomerDetailPage({
         "id, amount, currency, status, payment_method, receipt_url, created_at, paid_at",
       )
       .eq("customer_id", id)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
       .from("lead_requests")
@@ -67,6 +72,7 @@ export default async function CustomerDetailPage({
         "id, service, solution, message, budget, timeline, contact_preference, company, phone, created_at",
       )
       .eq("customer_id", id)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
   ]);
 

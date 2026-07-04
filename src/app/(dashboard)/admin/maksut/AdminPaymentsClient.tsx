@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Download, RefreshCcw, Receipt, ExternalLink, X, AlertTriangle, Trash2 } from "lucide-react";
+import {
+  Search,
+  Download,
+  RefreshCcw,
+  Receipt,
+  ExternalLink,
+  X,
+  AlertTriangle,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Payment {
@@ -15,7 +24,11 @@ interface Payment {
   paid_at?: string | null;
   refunded_at?: string | null;
   invoices?: { invoice_number?: string | null; amount?: number | null } | null;
-  customers?: { first_name?: string | null; last_name?: string | null; email?: string | null } | null;
+  customers?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+  } | null;
 }
 
 interface Stats {
@@ -43,13 +56,22 @@ const STATUS_COLORS: Record<string, string> = {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border", STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire")}>
+    <span
+      className={cn(
+        "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border",
+        STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire",
+      )}
+    >
       {STATUS_LABELS[status] ?? status}
     </span>
   );
 }
 
-function RefundModal({ payment, onClose, onRefunded }: {
+function RefundModal({
+  payment,
+  onClose,
+  onRefunded,
+}: {
   payment: Payment;
   onClose: () => void;
   onRefunded: (id: string) => void;
@@ -63,26 +85,42 @@ function RefundModal({ payment, onClose, onRefunded }: {
     const res = await fetch("/api/payments/refund", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payment_id: payment.id, reason: "requested_by_customer" }),
+      body: JSON.stringify({
+        payment_id: payment.id,
+        reason: "requested_by_customer",
+      }),
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
     onRefunded(payment.id);
     onClose();
   }
 
   const inv = payment.invoices as any;
   const cus = payment.customers as any;
-  const cusName = [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") || cus?.email || "Tuntematon";
+  const cusName =
+    [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") ||
+    cus?.email ||
+    "Tuntematon";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-ink">Vahvista palautus</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
+          <h2 className="text-base font-semibold text-ink">
+            Vahvista palautus
+          </h2>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={17} />
+          </button>
         </div>
         <div className="flex items-start gap-3 mb-4 p-3 bg-bad/10 border border-bad/20 rounded-lg">
           <AlertTriangle size={16} className="text-bad mt-0.5 shrink-0" />
@@ -97,19 +135,33 @@ function RefundModal({ payment, onClose, onRefunded }: {
           </div>
           <div className="flex justify-between">
             <span className="text-ink-ghost">Lasku</span>
-            <span className="text-ink">{inv?.invoice_number ? `#${inv.invoice_number}` : "—"}</span>
+            <span className="text-ink">
+              {inv?.invoice_number ? `#${inv.invoice_number}` : "—"}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-ink-ghost">Palautettava summa</span>
-            <span className="text-ink font-bold">{payment.amount.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €</span>
+            <span className="text-ink font-bold">
+              {payment.amount.toLocaleString("fi-FI", {
+                minimumFractionDigits: 2,
+              })}{" "}
+              €
+            </span>
           </div>
         </div>
         {error && <p className="text-xs text-bad mb-3">{error}</p>}
         <div className="flex gap-2">
-          <button onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+          >
             Peruuta
           </button>
-          <button onClick={handleRefund} disabled={loading} className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors">
+          <button
+            onClick={handleRefund}
+            disabled={loading}
+            className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors"
+          >
             {loading ? "Käsitellään..." : "Tee palautus"}
           </button>
         </div>
@@ -118,7 +170,11 @@ function RefundModal({ payment, onClose, onRefunded }: {
   );
 }
 
-function DeleteModal({ payment, onClose, onDeleted }: {
+function DeleteModal({
+  payment,
+  onClose,
+  onDeleted,
+}: {
   payment: Payment;
   onClose: () => void;
   onDeleted: (id: string) => void;
@@ -136,27 +192,41 @@ function DeleteModal({ payment, onClose, onDeleted }: {
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
     onDeleted(payment.id);
     onClose();
   }
 
   const inv = payment.invoices as any;
   const cus = payment.customers as any;
-  const cusName = [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") || cus?.email || "Tuntematon";
+  const cusName =
+    [cus?.first_name, cus?.last_name].filter(Boolean).join(" ") ||
+    cus?.email ||
+    "Tuntematon";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-ink">Poista maksutapahtuma</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
+          <h2 className="text-base font-semibold text-ink">
+            Siirrä roskakoriin
+          </h2>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={17} />
+          </button>
         </div>
         <div className="flex items-start gap-3 mb-4 p-3 bg-bad/10 border border-bad/20 rounded-lg">
           <AlertTriangle size={16} className="text-bad mt-0.5 shrink-0" />
           <p className="text-xs text-bad">
-            Tämä poistaa maksutapahtuman pysyvästi tietokannasta.
+            Maksutapahtuma siirretään roskakoriin. Vain omistaja voi palauttaa
+            tai poistaa sen pysyvästi.
           </p>
         </div>
         <div className="space-y-2 mb-5 text-sm">
@@ -166,19 +236,33 @@ function DeleteModal({ payment, onClose, onDeleted }: {
           </div>
           <div className="flex justify-between">
             <span className="text-ink-ghost">Lasku</span>
-            <span className="text-ink">{inv?.invoice_number ? `#${inv.invoice_number}` : "—"}</span>
+            <span className="text-ink">
+              {inv?.invoice_number ? `#${inv.invoice_number}` : "—"}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-ink-ghost">Summa</span>
-            <span className="text-ink font-bold">{payment.amount?.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €</span>
+            <span className="text-ink font-bold">
+              {payment.amount?.toLocaleString("fi-FI", {
+                minimumFractionDigits: 2,
+              })}{" "}
+              €
+            </span>
           </div>
         </div>
         {error && <p className="text-xs text-bad mb-3">{error}</p>}
         <div className="flex gap-2">
-          <button onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+          >
             Peruuta
           </button>
-          <button onClick={handleDelete} disabled={loading} className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors">
+          <button
+            onClick={handleDelete}
+            disabled={loading}
+            className="flex-1 py-2 rounded-lg bg-bad text-white text-sm font-medium hover:bg-bad/90 disabled:opacity-50 transition-colors"
+          >
             {loading ? "Poistetaan..." : "Poista"}
           </button>
         </div>
@@ -209,7 +293,10 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
       cus?.last_name,
       cus?.email,
       p.id,
-    ].filter(Boolean).join(" ").toLowerCase();
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
     const matchSearch = !search || text.includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     return matchSearch && matchStatus;
@@ -218,12 +305,16 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
   function customerName(p: Payment) {
     const cus = p.customers as any;
     if (!cus) return "—";
-    return [cus.first_name, cus.last_name].filter(Boolean).join(" ") || cus.email || "—";
+    return (
+      [cus.first_name, cus.last_name].filter(Boolean).join(" ") ||
+      cus.email ||
+      "—"
+    );
   }
 
   function handleRefunded(paymentId: string) {
     setPayments((prev) =>
-      prev.map((p) => p.id === paymentId ? { ...p, status: "refunded" } : p)
+      prev.map((p) => (p.id === paymentId ? { ...p, status: "refunded" } : p)),
     );
   }
 
@@ -252,12 +343,27 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Kerätty yhteensä", value: `${stats.totalCollected.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`, color: "text-ok" },
-          { label: "Odottaa", value: `${stats.totalPending.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`, color: "text-copper" },
-          { label: "Palautettu", value: `${stats.totalRefunded.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`, color: "text-bad" },
+          {
+            label: "Kerätty yhteensä",
+            value: `${stats.totalCollected.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`,
+            color: "text-ok",
+          },
+          {
+            label: "Odottaa",
+            value: `${stats.totalPending.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`,
+            color: "text-copper",
+          },
+          {
+            label: "Palautettu",
+            value: `${stats.totalRefunded.toLocaleString("fi-FI", { minimumFractionDigits: 2 })} €`,
+            color: "text-bad",
+          },
           { label: "Tapahtumia", value: stats.count, color: "text-ink" },
         ].map((s) => (
-          <div key={s.label} className="bg-elevated border border-wire rounded-xl px-4 py-3">
+          <div
+            key={s.label}
+            className="bg-elevated border border-wire rounded-xl px-4 py-3"
+          >
             <p className="text-xs text-ink-ghost mb-1">{s.label}</p>
             <p className={cn("text-lg font-bold", s.color)}>{s.value}</p>
           </div>
@@ -267,7 +373,10 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
       {/* Filters + export */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost"
+          />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -301,27 +410,46 @@ export function AdminPaymentsClient({ payments: initial, stats }: Props) {
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-2 text-sm text-ink-ghost">
             <Receipt size={28} className="opacity-30" />
-            {search || statusFilter !== "all" ? "Ei hakutuloksia" : "Ei maksutapahtumia"}
+            {search || statusFilter !== "all"
+              ? "Ei hakutuloksia"
+              : "Ei maksutapahtumia"}
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-wire">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Lasku</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">Asiakas</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Summa</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Tila</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">Päivämäärä</th>
-                <th className="px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider text-right">Toiminnot</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  Lasku
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">
+                  Asiakas
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  Summa
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  Tila
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">
+                  Päivämäärä
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider text-right">
+                  Toiminnot
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-wire/50">
               {filtered.map((p) => {
                 const inv = p.invoices as any;
                 return (
-                  <tr key={p.id} className="hover:bg-surface/50 transition-colors">
+                  <tr
+                    key={p.id}
+                    className="hover:bg-surface/50 transition-colors"
+                  >
                     <td className="px-4 py-3 font-medium text-ink">
-                      {inv?.invoice_number ? `#${inv.invoice_number}` : p.id.slice(0, 8)}
+                      {inv?.invoice_number
+                        ? `#${inv.invoice_number}`
+                        : p.id.slice(0, 8)}
                     </td>
                     <td className="px-4 py-3 text-ink-dim hidden md:table-cell">
                       {customerName(p)}

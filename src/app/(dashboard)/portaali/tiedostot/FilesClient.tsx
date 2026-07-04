@@ -2,10 +2,24 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  ChevronDown, ChevronRight, Upload, Download, Trash2, Eye, X,
-  File, FileImage, FileText, FileCode, FolderOpen, Folder,
-  Bell, CheckCircle, Clock,
+  ChevronDown,
+  ChevronRight,
+  Upload,
+  Download,
+  Trash2,
+  Eye,
+  X,
+  File,
+  FileImage,
+  FileText,
+  FileCode,
+  FolderOpen,
+  Folder,
+  Bell,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface ProjectFile {
   id: string;
@@ -56,14 +70,22 @@ function formatDate(iso: string) {
 
 function FileIcon({ mime }: { mime: string | null }) {
   if (!mime) return <File size={15} className="text-ink-ghost" />;
-  if (mime.startsWith("image/")) return <FileImage size={15} className="text-copper" />;
-  if (mime === "application/pdf") return <FileText size={15} className="text-bad" />;
+  if (mime.startsWith("image/"))
+    return <FileImage size={15} className="text-copper" />;
+  if (mime === "application/pdf")
+    return <FileText size={15} className="text-bad" />;
   if (mime.startsWith("text/") || mime.includes("json") || mime.includes("xml"))
     return <FileCode size={15} className="text-ok" />;
   return <File size={15} className="text-ink-ghost" />;
 }
 
-function PreviewModal({ file, onClose }: { file: ProjectFile; onClose: () => void }) {
+function PreviewModal({
+  file,
+  onClose,
+}: {
+  file: ProjectFile;
+  onClose: () => void;
+}) {
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -71,8 +93,14 @@ function PreviewModal({ file, onClose }: { file: ProjectFile; onClose: () => voi
   useEffect(() => {
     fetch(`/api/files/download/${file.id}`)
       .then((r) => r.json())
-      .then((d) => { setUrl(d.url); setLoading(false); })
-      .catch(() => { setError("Esikatselu epäonnistui"); setLoading(false); });
+      .then((d) => {
+        setUrl(d.url);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Esikatselu epäonnistui");
+        setLoading(false);
+      });
   }, [file.id]);
 
   const isImage = file.mime_type?.startsWith("image/");
@@ -80,28 +108,58 @@ function PreviewModal({ file, onClose }: { file: ProjectFile; onClose: () => voi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-3xl mx-4 max-h-[85vh] bg-elevated border border-wire rounded-xl shadow-2xl flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-wire shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <FileIcon mime={file.mime_type} />
-            <span className="text-sm font-medium text-ink truncate">{file.name}</span>
+            <span className="text-sm font-medium text-ink truncate">
+              {file.name}
+            </span>
             {file.version > 1 && (
-              <span className="text-xs text-ink-ghost bg-surface border border-wire px-1.5 py-0.5 rounded shrink-0">v{file.version}</span>
+              <span className="text-xs text-ink-ghost bg-surface border border-wire px-1.5 py-0.5 rounded shrink-0">
+                v{file.version}
+              </span>
             )}
           </div>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink ml-3 shrink-0"><X size={16} /></button>
+          <button
+            onClick={onClose}
+            className="text-ink-ghost hover:text-ink ml-3 shrink-0"
+          >
+            <X size={16} />
+          </button>
         </div>
         <div className="flex-1 overflow-auto flex items-center justify-center p-4 min-h-0">
           {loading && <p className="text-sm text-ink-ghost">Ladataan...</p>}
           {error && <p className="text-sm text-bad">{error}</p>}
-          {url && isImage && <img src={url} alt={file.name} className="max-w-full max-h-full object-contain rounded" />}
-          {url && isPdf && <iframe src={url} className="w-full h-[60vh] rounded border border-wire" title={file.name} />}
+          {url && isImage && (
+            <img
+              src={url}
+              alt={file.name}
+              className="max-w-full max-h-full object-contain rounded"
+            />
+          )}
+          {url && isPdf && (
+            <iframe
+              src={url}
+              className="w-full h-[60vh] rounded border border-wire"
+              title={file.name}
+            />
+          )}
           {url && !isImage && !isPdf && (
             <div className="text-center">
               <File size={40} className="text-ink-ghost mx-auto mb-3" />
-              <p className="text-sm text-ink-ghost mb-4">Esikatselu ei tueta tälle tiedostotyypille</p>
-              <a href={url} download={file.name} className="inline-flex items-center gap-2 px-4 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors">
+              <p className="text-sm text-ink-ghost mb-4">
+                Esikatselu ei tueta tälle tiedostotyypille
+              </p>
+              <a
+                href={url}
+                download={file.name}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-copper text-white rounded-lg text-sm font-medium hover:bg-copper/90 transition-colors"
+              >
                 <Download size={14} /> Lataa
               </a>
             </div>
@@ -138,9 +196,16 @@ function UploadModal({
       fd.append("file", file);
       if (projectId) fd.append("project_id", projectId);
 
-      const res = await fetch("/api/files/upload", { method: "POST", body: fd });
+      const res = await fetch("/api/files/upload", {
+        method: "POST",
+        body: fd,
+      });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Lataus epäonnistui"); hasError = true; break; }
+      if (!res.ok) {
+        setError(data.error ?? "Lataus epäonnistui");
+        hasError = true;
+        break;
+      }
       onUploaded(data.file);
     }
 
@@ -151,29 +216,56 @@ function UploadModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-ink">Lataa tiedostoja</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={16} /></button>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={16} />
+          </button>
         </div>
 
         <div
           className="border-2 border-dashed border-wire rounded-xl p-8 text-center cursor-pointer hover:border-copper/50 hover:bg-surface/30 transition-colors"
           onClick={() => inputRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            handleFiles(e.dataTransfer.files);
+          }}
         >
           <Upload size={28} className="text-ink-ghost mx-auto mb-2" />
-          <p className="text-sm text-ink-ghost">Vedä tiedostoja tähän tai <span className="text-copper">valitse tiedostoja</span></p>
-          <p className="text-xs text-ink-ghost mt-1">Kaikki tiedostotyypit tuettu</p>
+          <p className="text-sm text-ink-ghost">
+            Vedä tiedostoja tähän tai{" "}
+            <span className="text-copper">valitse tiedostoja</span>
+          </p>
+          <p className="text-xs text-ink-ghost mt-1">
+            Kaikki tiedostotyypit tuettu
+          </p>
         </div>
-        <input ref={inputRef} type="file" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => handleFiles(e.target.files)}
+        />
 
-        {uploading && <p className="text-xs text-ink-ghost mt-3 text-center">{progress ?? "Ladataan..."}</p>}
+        {uploading && (
+          <p className="text-xs text-ink-ghost mt-3 text-center">
+            {progress ?? "Ladataan..."}
+          </p>
+        )}
         {error && <p className="text-xs text-bad mt-3">{error}</p>}
 
-        <button onClick={onClose} disabled={uploading} className="mt-4 w-full py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors disabled:opacity-50">
+        <button
+          onClick={onClose}
+          disabled={uploading}
+          className="mt-4 w-full py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors disabled:opacity-50"
+        >
           Sulje
         </button>
       </div>
@@ -198,8 +290,14 @@ function RequestModal({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) { setError("Otsikko vaaditaan"); return; }
-    if (!project.customer_id) { setError("Projektilla ei ole asiakasta"); return; }
+    if (!title.trim()) {
+      setError("Otsikko vaaditaan");
+      return;
+    }
+    if (!project.customer_id) {
+      setError("Projektilla ei ole asiakasta");
+      return;
+    }
     setSaving(true);
     setError("");
 
@@ -215,23 +313,34 @@ function RequestModal({
       }),
     });
     const data = await res.json();
-    if (!res.ok) { setError(data.error ?? "Virhe"); setSaving(false); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      setSaving(false);
+      return;
+    }
     onCreated(data.request);
     onClose();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-sm mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-ink">Pyydä tiedostoja</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={16} /></button>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={16} />
+          </button>
         </div>
 
         <form onSubmit={submit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-medium text-ink-ghost mb-1">Mitä tarvitset? *</label>
+            <label className="block text-xs font-medium text-ink-ghost mb-1">
+              Mitä tarvitset? *
+            </label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -240,7 +349,9 @@ function RequestModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-ink-ghost mb-1">Lisätiedot</label>
+            <label className="block text-xs font-medium text-ink-ghost mb-1">
+              Lisätiedot
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -250,7 +361,9 @@ function RequestModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-ink-ghost mb-1">Määräpäivä</label>
+            <label className="block text-xs font-medium text-ink-ghost mb-1">
+              Määräpäivä
+            </label>
             <input
               type="date"
               value={dueDate}
@@ -260,10 +373,18 @@ function RequestModal({
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink transition-colors"
+            >
               Peruuta
             </button>
-            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 transition-colors disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 transition-colors disabled:opacity-50"
+            >
               {saving ? "Lähetetään..." : "Lähetä pyyntö"}
             </button>
           </div>
@@ -300,7 +421,9 @@ function FileRequestCard({
       <Bell size={15} className="text-amber-400 shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-ink">{request.title}</p>
-        {request.description && <p className="text-xs text-ink-ghost mt-0.5">{request.description}</p>}
+        {request.description && (
+          <p className="text-xs text-ink-ghost mt-0.5">{request.description}</p>
+        )}
         {request.due_date && (
           <p className="text-xs text-ink-ghost mt-1 flex items-center gap-1">
             <Clock size={11} /> Määräpäivä: {formatDate(request.due_date)}
@@ -340,6 +463,7 @@ function FileRow({
 }) {
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   async function download() {
     setDownloading(true);
@@ -355,41 +479,79 @@ function FileRow({
   }
 
   async function remove() {
-    if (!confirm(`Poista "${file.name}"?`)) return;
     setDeleting(true);
-    const res = await fetch("/api/files", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: file.id }) });
-    if (res.ok) onDelete(file.id);
+    const res = await fetch("/api/files", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: file.id }),
+    });
     setDeleting(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error ?? "Poisto epäonnistui");
+    }
+    onDelete(file.id);
   }
 
-  const canPreview = file.mime_type?.startsWith("image/") || file.mime_type === "application/pdf";
+  const canPreview =
+    file.mime_type?.startsWith("image/") ||
+    file.mime_type === "application/pdf";
 
   return (
     <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-surface/30 transition-colors group">
       <FileIcon mime={file.mime_type} />
       <div className="flex-1 min-w-0">
         <p className="text-sm text-ink truncate">{file.name}</p>
-        <p className="text-xs text-ink-ghost">{file.mime_type ?? "—"} · {formatBytes(file.size_bytes)}</p>
+        <p className="text-xs text-ink-ghost">
+          {file.mime_type ?? "—"} · {formatBytes(file.size_bytes)}
+        </p>
       </div>
       {file.version > 1 && (
-        <span className="text-xs text-ink-ghost bg-surface border border-wire px-1.5 py-0.5 rounded shrink-0">v{file.version}</span>
+        <span className="text-xs text-ink-ghost bg-surface border border-wire px-1.5 py-0.5 rounded shrink-0">
+          v{file.version}
+        </span>
       )}
-      <span className="text-xs text-ink-ghost shrink-0 hidden sm:block">{formatDate(file.created_at)}</span>
+      <span className="text-xs text-ink-ghost shrink-0 hidden sm:block">
+        {formatDate(file.created_at)}
+      </span>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         {canPreview && (
-          <button onClick={() => onPreview(file)} title="Esikatselu" className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-ink transition-colors">
+          <button
+            onClick={() => onPreview(file)}
+            title="Esikatselu"
+            className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-ink transition-colors"
+          >
             <Eye size={14} />
           </button>
         )}
-        <button onClick={download} disabled={downloading} title="Lataa" className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-ink transition-colors disabled:opacity-50">
+        <button
+          onClick={download}
+          disabled={downloading}
+          title="Lataa"
+          className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-ink transition-colors disabled:opacity-50"
+        >
           <Download size={14} />
         </button>
         {isStaff && (
-          <button onClick={remove} disabled={deleting} title="Poista" className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-bad transition-colors disabled:opacity-50">
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleting}
+            title="Poista"
+            className="p-1.5 rounded hover:bg-surface text-ink-ghost hover:text-bad transition-colors disabled:opacity-50"
+          >
             <Trash2 size={14} />
           </button>
         )}
       </div>
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          title="Siirrä roskakoriin"
+          message={`Tiedosto "${file.name}" siirretään roskakoriin. Vain omistaja voi palauttaa tai poistaa sen pysyvästi.`}
+          confirmLabel="Siirrä roskakoriin"
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={remove}
+        />
+      )}
     </div>
   );
 }
@@ -428,9 +590,17 @@ function ProjectFolder({
         onClick={() => setOpen((o) => !o)}
       >
         <div className="flex items-center gap-2.5">
-          {open ? <FolderOpen size={16} className="text-copper" /> : <Folder size={16} className="text-copper" />}
-          <span className="text-sm font-medium text-ink">{project?.name ?? "Yleiset tiedostot"}</span>
-          <span className="text-xs text-ink-ghost bg-surface border border-wire px-1.5 py-0.5 rounded-full">{files.length}</span>
+          {open ? (
+            <FolderOpen size={16} className="text-copper" />
+          ) : (
+            <Folder size={16} className="text-copper" />
+          )}
+          <span className="text-sm font-medium text-ink">
+            {project?.name ?? "Yleiset tiedostot"}
+          </span>
+          <span className="text-xs text-ink-ghost bg-surface border border-wire px-1.5 py-0.5 rounded-full">
+            {files.length}
+          </span>
           {pendingRequests.length > 0 && (
             <span className="text-xs font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded-full">
               {pendingRequests.length} pyyntö
@@ -440,19 +610,29 @@ function ProjectFolder({
         <div className="flex items-center gap-2">
           {isStaff && project?.customer_id && (
             <button
-              onClick={(e) => { e.stopPropagation(); setShowRequest(true); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowRequest(true);
+              }}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-wire text-ink-ghost hover:text-ink hover:border-ink/40 transition-colors"
             >
               <Bell size={12} /> Pyydä tiedostoja
             </button>
           )}
           <button
-            onClick={(e) => { e.stopPropagation(); setShowUpload(true); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowUpload(true);
+            }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-copper text-white hover:bg-copper/90 transition-colors"
           >
             <Upload size={12} /> Lataa
           </button>
-          {open ? <ChevronDown size={15} className="text-ink-ghost" /> : <ChevronRight size={15} className="text-ink-ghost" />}
+          {open ? (
+            <ChevronDown size={15} className="text-ink-ghost" />
+          ) : (
+            <ChevronRight size={15} className="text-ink-ghost" />
+          )}
         </div>
       </div>
 
@@ -468,12 +648,24 @@ function ProjectFolder({
           ))}
           {files.length === 0 && pendingRequests.length === 0 ? (
             <div className="px-4 py-6 text-center text-sm text-ink-ghost">
-              Ei tiedostoja. <button onClick={() => setShowUpload(true)} className="text-copper hover:underline">Lataa ensimmäinen.</button>
+              Ei tiedostoja.{" "}
+              <button
+                onClick={() => setShowUpload(true)}
+                className="text-copper hover:underline"
+              >
+                Lataa ensimmäinen.
+              </button>
             </div>
           ) : files.length === 0 ? null : (
             <div className="divide-y divide-wire/50">
               {files.map((f) => (
-                <FileRow key={f.id} file={f} onDelete={onDelete} onPreview={onPreview} isStaff={isStaff} />
+                <FileRow
+                  key={f.id}
+                  file={f}
+                  onDelete={onDelete}
+                  onPreview={onPreview}
+                  isStaff={isStaff}
+                />
               ))}
             </div>
           )}
@@ -484,7 +676,10 @@ function ProjectFolder({
         <UploadModal
           projectId={project?.id ?? null}
           onClose={() => setShowUpload(false)}
-          onUploaded={(f) => { onUploaded(f); setOpen(true); }}
+          onUploaded={(f) => {
+            onUploaded(f);
+            setOpen(true);
+          }}
         />
       )}
 
@@ -499,7 +694,12 @@ function ProjectFolder({
   );
 }
 
-export function FilesClient({ projects, files: initial, fileRequests: initialRequests, isStaff }: FilesClientProps) {
+export function FilesClient({
+  projects,
+  files: initial,
+  fileRequests: initialRequests,
+  isStaff,
+}: FilesClientProps) {
   const [files, setFiles] = useState(initial);
   const [fileRequests, setFileRequests] = useState(initialRequests);
   const [preview, setPreview] = useState<ProjectFile | null>(null);
@@ -517,7 +717,11 @@ export function FilesClient({ projects, files: initial, fileRequests: initialReq
   }
 
   function handleRequestFulfilled(id: string) {
-    setFileRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: "fulfilled" as const } : r));
+    setFileRequests((prev) =>
+      prev.map((r) =>
+        r.id === id ? { ...r, status: "fulfilled" as const } : r,
+      ),
+    );
   }
 
   const noProject = files.filter((f) => !f.project_id);
@@ -558,7 +762,9 @@ export function FilesClient({ projects, files: initial, fileRequests: initialReq
         />
       )}
 
-      {preview && <PreviewModal file={preview} onClose={() => setPreview(null)} />}
+      {preview && (
+        <PreviewModal file={preview} onClose={() => setPreview(null)} />
+      )}
     </div>
   );
 }

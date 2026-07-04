@@ -72,7 +72,8 @@ export default async function DashboardLayout({
     .from("notifications")
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
-    .eq("is_read", false);
+    .eq("is_read", false)
+    .is("deleted_at", null);
 
   const firstName =
     profile?.first_name ?? user.user_metadata?.first_name ?? null;

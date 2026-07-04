@@ -3,16 +3,25 @@ import { createClient } from "@/lib/supabase/server";
 
 async function getStaffUser() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { supabase, user: null, profile: null };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   return { supabase, user, profile };
 }
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id } = await params;
   const { supabase, user, profile } = await getStaffUser();
-  if (!user || !["owner","admin","employee"].includes(profile?.role ?? "")) {
+  if (!user || !["owner", "admin", "employee"].includes(profile?.role ?? "")) {
     return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
   }
 
@@ -20,21 +29,30 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .from("customer_notes")
     .select("id, body, created_by, created_at, updated_at")
     .eq("customer_id", id)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ notes: data ?? [] });
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id } = await params;
   const { supabase, user, profile } = await getStaffUser();
-  if (!user || !["owner","admin","employee"].includes(profile?.role ?? "")) {
+  if (!user || !["owner", "admin", "employee"].includes(profile?.role ?? "")) {
     return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
   }
 
-  const { body } = await req.json().catch(() => ({})) as { body?: string };
-  if (!body?.trim()) return NextResponse.json({ error: "Muistiinpano ei voi olla tyhjä" }, { status: 400 });
+  const { body } = (await req.json().catch(() => ({}))) as { body?: string };
+  if (!body?.trim())
+    return NextResponse.json(
+      { error: "Muistiinpano ei voi olla tyhjä" },
+      { status: 400 },
+    );
 
   const { data, error } = await supabase
     .from("customer_notes")
@@ -42,6 +60,36 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .select("id, body, created_by, created_at, updated_at")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ note: data }, { status: 201 });
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const { supabase, user, profile } = await getStaffUser();
+  if (!user || !["owner", "admin", "employee"].includes(profile?.role ?? "")) {
+    return NextResponse.json({ error: "Ei oikeuksia" }, { status: 401 });
+  }
+
+  const { noteId } = (await req.json().catch(() => ({}))) as {
+    noteId?: string;
+  };
+  if (!noteId)
+    return NextResponse.json({ error: "noteId vaaditaan" }, { status: 400 });
+
+  // Scoped to the customer_id in the URL too, as defense-in-depth — matches
+  // the PATCH/notifications-delete pattern rather than trusting noteId alone.
+  const { error } = await supabase
+    .from("customer_notes")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", noteId)
+    .eq("customer_id", id)
+    .is("deleted_at", null);
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
 }

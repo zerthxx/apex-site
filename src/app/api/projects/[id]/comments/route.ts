@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { softDelete } from "@/lib/softDelete";
 
 async function getAuthedUser() {
   const supabase = await createClient();
@@ -51,6 +52,7 @@ export async function GET(
     .from("project_comments")
     .select("id, body, created_at, user_id")
     .eq("project_id", projectId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
   if (error)
@@ -214,11 +216,10 @@ export async function DELETE(req: NextRequest) {
   if (!commentId)
     return NextResponse.json({ error: "commentId vaaditaan" }, { status: 400 });
 
-  const adminDb = createAdminClient();
-  const { error } = await adminDb
-    .from("project_comments")
-    .delete()
-    .eq("id", commentId);
+  // Soft-delete via the cookie-scoped client (not the admin/service-role
+  // client) so RLS actually governs this write, rather than being bypassed
+  // entirely for the one operation that most needs it enforced.
+  const { error } = await softDelete(supabase, "project_comments", commentId);
   if (error)
     return NextResponse.json({ error: error.message }, { status: 500 });
 
