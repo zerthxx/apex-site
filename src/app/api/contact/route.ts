@@ -8,11 +8,27 @@ const contactSchema = z.object({
   sahkoposti: z.string().email("Virheellinen sähköpostiosoite"),
   puhelin: z.string().optional(),
   yritys: z.string().optional(),
-  palvelu: z.enum(["verkkosivut", "startti", "kasvu", "pro", "perus", "standardi", "premium", "verkkokaupat", "mobiilisovellukset", "ai-ratkaisut", "ohjelmistot", "muu"]),
+  palvelu: z.enum([
+    "verkkosivut",
+    "startti",
+    "kasvu",
+    "pro",
+    "perus",
+    "standardi",
+    "premium",
+    "verkkokaupat",
+    "mobiilisovellukset",
+    "ai-ratkaisut",
+    "ohjelmistot",
+    "muu",
+  ]),
   budjetti: z.string().optional(),
   aikataulu: z.string().optional(),
   yhteydenotto: z.string().optional(),
-  viesti: z.string().min(20, "Viesti on liian lyhyt").max(2000, "Viesti on liian pitkä"),
+  viesti: z
+    .string()
+    .min(20, "Viesti on liian lyhyt")
+    .max(2000, "Viesti on liian pitkä"),
   honeypot: z.string().max(0),
 });
 
@@ -52,10 +68,14 @@ const SERVICE_LABELS: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 
   if (!checkRateLimit(ip)) {
-    return NextResponse.json({ error: "Liian monta yhteydenottoa. Odota hetki." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Liian monta yhteydenottoa. Odota hetki." },
+      { status: 429 },
+    );
   }
 
   let body: unknown;
@@ -67,10 +87,24 @@ export async function POST(request: NextRequest) {
 
   const result = contactSchema.safeParse(body);
   if (!result.success) {
-    return NextResponse.json({ error: "Validointivirhe", issues: result.error.issues }, { status: 422 });
+    return NextResponse.json(
+      { error: "Validointivirhe", issues: result.error.issues },
+      { status: 422 },
+    );
   }
 
-  const { nimi, sahkoposti, puhelin, yritys, palvelu, budjetti, aikataulu, yhteydenotto, viesti, honeypot } = result.data;
+  const {
+    nimi,
+    sahkoposti,
+    puhelin,
+    yritys,
+    palvelu,
+    budjetti,
+    aikataulu,
+    yhteydenotto,
+    viesti,
+    honeypot,
+  } = result.data;
 
   if (honeypot && honeypot.length > 0) {
     return NextResponse.json({ success: true });
@@ -85,13 +119,16 @@ export async function POST(request: NextRequest) {
   // Create lead in database (service role bypasses RLS)
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     // Use service role client for DB writes (contact form is unauthenticated)
-    const { createClient: createServiceClient } = await import("@supabase/supabase-js");
+    const { createClient: createServiceClient } =
+      await import("@supabase/supabase-js");
     const serviceSupabase = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
     // Check if customer already exists with this email.
@@ -99,14 +136,19 @@ export async function POST(request: NextRequest) {
     // duplicate rows for the same email, and single() errors (rather than
     // returning null) when more than one row matches, which used to be
     // silently misread as "no existing customer".
-    const { data: existingCustomers, error: lookupError } = await serviceSupabase
-      .from("customers")
-      .select("id, status")
-      .eq("email", sahkoposti)
-      .order("created_at", { ascending: false })
-      .limit(1);
+    const { data: existingCustomers, error: lookupError } =
+      await serviceSupabase
+        .from("customers")
+        .select("id, status")
+        .eq("email", sahkoposti)
+        .order("created_at", { ascending: false })
+        .limit(1);
 
-    if (lookupError) console.error("[api/contact] customer lookup failed:", lookupError.message);
+    if (lookupError)
+      console.error(
+        "[api/contact] customer lookup failed:",
+        lookupError.message,
+      );
     const existingCustomer = existingCustomers?.[0] ?? null;
 
     let customerId: string | null = null;
@@ -133,16 +175,23 @@ export async function POST(request: NextRequest) {
         .select("id")
         .single();
 
-      if (insertError) console.error("[api/contact] lead insert failed:", insertError.message);
+      if (insertError)
+        console.error("[api/contact] lead insert failed:", insertError.message);
       customerId = newCustomer?.id ?? null;
       isNewLead = customerId !== null;
 
       if (customerId) {
-        const { error: noteError } = await serviceSupabase.from("customer_notes").insert({
-          customer_id: customerId,
-          body: `Uusi liidi lomakkeen kautta\n\n${contactSummary}`,
-        });
-        if (noteError) console.error("[api/contact] lead note insert failed:", noteError.message);
+        const { error: noteError } = await serviceSupabase
+          .from("customer_notes")
+          .insert({
+            customer_id: customerId,
+            body: `Uusi liidi lomakkeen kautta\n\n${contactSummary}`,
+          });
+        if (noteError)
+          console.error(
+            "[api/contact] lead note insert failed:",
+            noteError.message,
+          );
       }
 
       // If company name provided, check/create company
@@ -153,13 +202,15 @@ export async function POST(request: NextRequest) {
           .eq("name", yritys)
           .single();
 
-        const companyId = existingCompany?.id ?? (
-          await serviceSupabase
-            .from("companies")
-            .insert({ name: yritys })
-            .select("id")
-            .single()
-        ).data?.id;
+        const companyId =
+          existingCompany?.id ??
+          (
+            await serviceSupabase
+              .from("companies")
+              .insert({ name: yritys })
+              .select("id")
+              .single()
+          ).data?.id;
 
         if (companyId) {
           await serviceSupabase
@@ -176,7 +227,11 @@ export async function POST(request: NextRequest) {
           .from("customers")
           .update({ status: "lead" })
           .eq("id", existingCustomer.id);
-        if (updateError) console.error("[api/contact] lead status update failed:", updateError.message);
+        if (updateError)
+          console.error(
+            "[api/contact] lead status update failed:",
+            updateError.message,
+          );
         isNewLead = !updateError;
       }
 
@@ -185,12 +240,43 @@ export async function POST(request: NextRequest) {
       // "I'd like a second project" would leave no trace once the notification is
       // marked read. Log it as a customer_notes entry so it shows up on the
       // Customer 360 Muistiinpanot tab.
-      const { error: noteError } = await serviceSupabase.from("customer_notes").insert({
-        customer_id: existingCustomer.id,
-        body: `Uusi yhteydenotto lomakkeen kautta${yritys ? ` (${yritys})` : ""}\n\n${contactSummary}`,
-      });
-      if (noteError) console.error("[api/contact] customer note insert failed:", noteError.message);
+      const { error: noteError } = await serviceSupabase
+        .from("customer_notes")
+        .insert({
+          customer_id: existingCustomer.id,
+          body: `Uusi yhteydenotto lomakkeen kautta${yritys ? ` (${yritys})` : ""}\n\n${contactSummary}`,
+        });
+      if (noteError)
+        console.error(
+          "[api/contact] customer note insert failed:",
+          noteError.message,
+        );
     }
+
+    // Always log this submission as its own request event, regardless of the
+    // matched customer's status. customers.status only ever moves toward
+    // "lead" for a brand-new email or a returning "inactive" customer — an
+    // existing "active" (paying) customer's new request must not flip their
+    // status back to "lead" (that would misrepresent a real customer as an
+    // unconfirmed one), but staff still need to see it on CRM -> Liidit. See
+    // migration 012.
+    const { error: requestLogError } = await serviceSupabase
+      .from("lead_requests")
+      .insert({
+        customer_id: customerId,
+        first_name: firstName,
+        last_name: lastName,
+        email: sahkoposti,
+        phone: puhelin ?? null,
+        company: yritys ?? null,
+        service: serviceLabel,
+        message: contactSummary,
+      });
+    if (requestLogError)
+      console.error(
+        "[api/contact] lead request log insert failed:",
+        requestLogError.message,
+      );
 
     // Notify owners about the new lead
     const { data: owners } = await serviceSupabase
@@ -206,7 +292,7 @@ export async function POST(request: NextRequest) {
           title: isNewLead ? "Uusi liidi" : "Yhteydenotto asiakkaalta",
           body: `${nimi} otti yhteyttä: ${serviceLabel}${yritys ? ` (${yritys})` : ""}`,
           href: customerId ? `/crm/asiakkaat/${customerId}` : "/crm/asiakkaat",
-        }))
+        })),
       );
     }
   } catch {
