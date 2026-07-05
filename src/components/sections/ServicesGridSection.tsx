@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { ServiceCard } from "@/components/shared/ServiceCard";
 import { SERVICES } from "@/lib/constants";

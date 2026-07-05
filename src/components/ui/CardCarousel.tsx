@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface CardCarouselProps {
@@ -11,19 +11,26 @@ interface CardCarouselProps {
   defaultIndex?: number;
 }
 
-export function CardCarousel({ children, className, defaultIndex = 0 }: CardCarouselProps) {
+export function CardCarousel({
+  children,
+  className,
+  defaultIndex = 0,
+}: CardCarouselProps) {
   const [index, setIndex] = useState(defaultIndex);
   const [direction, setDirection] = useState(1);
   const [animating, setAnimating] = useState(false);
   const total = children.length;
 
-  const goTo = useCallback((newIndex: number, dir: number) => {
-    if (animating) return;
-    setDirection(dir);
-    setAnimating(true);
-    setIndex(newIndex);
-    setTimeout(() => setAnimating(false), 400);
-  }, [animating]);
+  const goTo = useCallback(
+    (newIndex: number, dir: number) => {
+      if (animating) return;
+      setDirection(dir);
+      setAnimating(true);
+      setIndex(newIndex);
+      setTimeout(() => setAnimating(false), 400);
+    },
+    [animating],
+  );
 
   const prev = () => goTo(Math.max(0, index - 1), -1);
   const next = () => goTo(Math.min(total - 1, index + 1), 1);
@@ -32,13 +39,17 @@ export function CardCarousel({ children, className, defaultIndex = 0 }: CardCaro
     <div className={cn("relative", className)}>
       <div className="md:hidden">
         <div className="relative" style={{ marginInline: "56px" }}>
-
           {/* Left ghost — hidden during animation */}
           {!animating && index > 0 && (
             <div
               aria-hidden
               className="absolute inset-0 overflow-hidden rounded-xl"
-              style={{ transform: "translateX(-56px)", zIndex: 1, opacity: 0.55, pointerEvents: "none" }}
+              style={{
+                transform: "translateX(-56px)",
+                zIndex: 1,
+                opacity: 0.55,
+                pointerEvents: "none",
+              }}
             >
               {children[index - 1]}
             </div>
@@ -49,16 +60,36 @@ export function CardCarousel({ children, className, defaultIndex = 0 }: CardCaro
             <div
               aria-hidden
               className="absolute inset-0 overflow-hidden rounded-xl"
-              style={{ transform: "translateX(56px)", zIndex: 1, opacity: 0.55, pointerEvents: "none" }}
+              style={{
+                transform: "translateX(56px)",
+                zIndex: 1,
+                opacity: 0.55,
+                pointerEvents: "none",
+              }}
             >
               {children[index + 1]}
             </div>
           )}
 
           {/* Fixed-height grid */}
-          <div style={{ display: "grid", position: "relative", zIndex: 10, perspective: "1000px" }}>
+          <div
+            style={{
+              display: "grid",
+              position: "relative",
+              zIndex: 10,
+              perspective: "1000px",
+            }}
+          >
             {children.map((child, i) => (
-              <div key={`sizer-${i}`} aria-hidden style={{ gridArea: "1/1", visibility: "hidden", pointerEvents: "none" }}>
+              <div
+                key={`sizer-${i}`}
+                aria-hidden
+                style={{
+                  gridArea: "1/1",
+                  visibility: "hidden",
+                  pointerEvents: "none",
+                }}
+              >
                 {child}
               </div>
             ))}
@@ -70,7 +101,10 @@ export function CardCarousel({ children, className, defaultIndex = 0 }: CardCaro
                   initial={{ x: direction * 90, opacity: 0, scale: 0.9 }}
                   animate={{ x: 0, opacity: 1, scale: 1 }}
                   exit={{ x: direction * -90, opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  transition={{
+                    duration: 0.25,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                  }}
                 >
                   {children[index]}
                 </motion.div>
@@ -97,7 +131,7 @@ export function CardCarousel({ children, className, defaultIndex = 0 }: CardCaro
                 onClick={() => goTo(i, i > index ? 1 : -1)}
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-200",
-                  i === index ? "bg-copper w-4" : "bg-wire-bold w-1.5"
+                  i === index ? "bg-copper w-4" : "bg-wire-bold w-1.5",
                 )}
                 aria-label={`Siirry kortille ${i + 1}`}
               />
@@ -116,9 +150,7 @@ export function CardCarousel({ children, className, defaultIndex = 0 }: CardCaro
       </div>
 
       {/* Desktop grid */}
-      <div className="hidden md:contents">
-        {children}
-      </div>
+      <div className="hidden md:contents">{children}</div>
     </div>
   );
 }

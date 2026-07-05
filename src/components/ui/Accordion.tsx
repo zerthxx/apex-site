@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { accordionContent } from "@/lib/animations";
@@ -18,7 +18,11 @@ interface AccordionProps {
   className?: string;
 }
 
-export function Accordion({ items, allowMultiple = false, className }: AccordionProps) {
+export function Accordion({
+  items,
+  allowMultiple = false,
+  className,
+}: AccordionProps) {
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
 
   const toggle = (id: string) => {
@@ -46,7 +50,9 @@ export function Accordion({ items, allowMultiple = false, className }: Accordion
               className="flex w-full items-center justify-between gap-4 py-5 text-left text-ink hover:text-copper transition-colors duration-150 focus-visible:outline-none focus-visible:text-copper"
               aria-expanded={isOpen}
             >
-              <span className="font-medium text-base text-ink">{item.question}</span>
+              <span className="font-medium text-base text-ink">
+                {item.question}
+              </span>
               <motion.span
                 animate={{ rotate: isOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
@@ -63,7 +69,9 @@ export function Accordion({ items, allowMultiple = false, className }: Accordion
                   animate="visible"
                   exit="hidden"
                 >
-                  <p className="pb-5 text-ink-dim leading-relaxed">{item.answer}</p>
+                  <p className="pb-5 text-ink-dim leading-relaxed">
+                    {item.answer}
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>

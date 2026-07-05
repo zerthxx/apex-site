@@ -1,8 +1,12 @@
 "use client";
-import { motion, useReducedMotion, type Transition } from "framer-motion";
+import { motion, useReducedMotion, type Transition } from "motion/react";
 
 const PULSE_TRANSITION: Transition = { duration: 2, repeat: Infinity };
-const FLOAT_TRANSITION: Transition = { duration: 5, repeat: Infinity, ease: "easeInOut" };
+const FLOAT_TRANSITION: Transition = {
+  duration: 5,
+  repeat: Infinity,
+  ease: "easeInOut",
+};
 const DOT_DELAYS = [0, 0.15, 0.3];
 
 export function AiDashboardMockup() {
@@ -23,7 +27,9 @@ export function AiDashboardMockup() {
             transition={reduced ? undefined : PULSE_TRANSITION}
             className="w-2 h-2 rounded-full bg-ok/80"
           />
-          <span className="text-[11px] text-ink-ghost font-medium">Apex AI — Aktiivinen</span>
+          <span className="text-[11px] text-ink-ghost font-medium">
+            Apex AI — Aktiivinen
+          </span>
           <div className="ml-auto flex gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-bad/40" />
             <div className="w-2.5 h-2.5 rounded-full bg-copper/40" />
@@ -63,8 +69,16 @@ export function AiDashboardMockup() {
               {DOT_DELAYS.map((delay, i) => (
                 <motion.div
                   key={i}
-                  animate={reduced ? undefined : { opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
-                  transition={reduced ? undefined : { duration: 1, repeat: Infinity, delay }}
+                  animate={
+                    reduced
+                      ? undefined
+                      : { opacity: [0.3, 1, 0.3], y: [0, -2, 0] }
+                  }
+                  transition={
+                    reduced
+                      ? undefined
+                      : { duration: 1, repeat: Infinity, delay }
+                  }
                   className="w-1.5 h-1.5 rounded-full bg-copper/60"
                 />
               ))}
@@ -81,7 +95,9 @@ export function AiDashboardMockup() {
           ].map(({ label, value }) => (
             <div key={label} className="text-center">
               <p className="text-copper font-bold text-sm">{value}</p>
-              <p className="text-[10px] text-ink-ghost leading-tight mt-0.5">{label}</p>
+              <p className="text-[10px] text-ink-ghost leading-tight mt-0.5">
+                {label}
+              </p>
             </div>
           ))}
         </div>

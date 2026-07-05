@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { ButtonVariant, ButtonSize } from "@/lib/types";
 
@@ -19,10 +19,8 @@ const variants: Record<ButtonVariant, string> = {
     "bg-gradient-to-br from-copper to-copper-light text-ink-flip font-semibold shadow-glow hover:shadow-glow focus-visible:ring-2 focus-visible:ring-copper/50 group overflow-hidden",
   secondary:
     "border border-wire-bold text-ink hover:border-copper hover:text-copper bg-transparent",
-  ghost:
-    "text-ink-dim hover:text-ink hover:bg-subtle bg-transparent",
-  icon:
-    "text-ink-dim hover:text-ink hover:bg-subtle bg-transparent aspect-square flex items-center justify-center",
+  ghost: "text-ink-dim hover:text-ink hover:bg-subtle bg-transparent",
+  icon: "text-ink-dim hover:text-ink hover:bg-subtle bg-transparent aspect-square flex items-center justify-center",
 };
 
 const sizes: Record<ButtonSize, string> = {
@@ -51,7 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       asChild: _asChild,
       ...props
     },
-    ref
+    ref,
   ) => {
     const isIcon = variant === "icon";
 
@@ -66,7 +64,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none",
           variants[variant],
           isIcon ? iconSizes[size] : sizes[size],
-          className
+          className,
         )}
         disabled={disabled || isLoading}
         {...(props as React.ComponentProps<typeof motion.button>)}
@@ -82,13 +80,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%] opacity-0 group-hover:opacity-100 animate-shimmer pointer-events-none"
           />
         )}
-        <span className={cn("flex items-center gap-inherit", isLoading && "invisible")}>
+        <span
+          className={cn(
+            "flex items-center gap-inherit",
+            isLoading && "invisible",
+          )}
+        >
           {leftIcon && <span className="shrink-0">{leftIcon}</span>}
           {children}
           {rightIcon && <span className="shrink-0">{rightIcon}</span>}
         </span>
       </motion.button>
     );
-  }
+  },
 );
 Button.displayName = "Button";

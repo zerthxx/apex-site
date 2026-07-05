@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { FAQ_HOME } from "@/lib/constants";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface TiltCardProps {
@@ -10,19 +10,29 @@ interface TiltCardProps {
   intensity?: number;
 }
 
-export function TiltCard({ children, className, intensity = 6 }: TiltCardProps) {
+export function TiltCard({
+  children,
+  className,
+  intensity = 6,
+}: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [intensity, -intensity]), {
-    stiffness: 300,
-    damping: 35,
-  });
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-intensity, intensity]), {
-    stiffness: 300,
-    damping: 35,
-  });
+  const rotateX = useSpring(
+    useTransform(y, [-0.5, 0.5], [intensity, -intensity]),
+    {
+      stiffness: 300,
+      damping: 35,
+    },
+  );
+  const rotateY = useSpring(
+    useTransform(x, [-0.5, 0.5], [-intensity, intensity]),
+    {
+      stiffness: 300,
+      damping: 35,
+    },
+  );
 
   const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -47,8 +57,16 @@ export function TiltCard({ children, className, intensity = 6 }: TiltCardProps) 
     <div className="perspective-1000">
       <motion.div
         ref={ref}
-        onMouseMove={typeof window !== "undefined" && "ontouchstart" in window ? undefined : onMouseMove}
-        onMouseLeave={typeof window !== "undefined" && "ontouchstart" in window ? undefined : onMouseLeave}
+        onMouseMove={
+          typeof window !== "undefined" && "ontouchstart" in window
+            ? undefined
+            : onMouseMove
+        }
+        onMouseLeave={
+          typeof window !== "undefined" && "ontouchstart" in window
+            ? undefined
+            : onMouseLeave
+        }
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
         className={cn("relative group", className)}
       >

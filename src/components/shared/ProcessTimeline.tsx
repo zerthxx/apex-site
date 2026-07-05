@@ -1,6 +1,11 @@
 "use client";
 import { useRef } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useReducedMotion,
+} from "motion/react";
 
 type Step = { title: string; text: string };
 
@@ -18,7 +23,10 @@ export function ProcessTimeline({ steps }: { steps: Step[] }) {
   return (
     <div ref={containerRef} className="max-w-2xl mx-auto relative">
       {/* Static background line */}
-      <div className="absolute left-5 top-5 bottom-5 w-px bg-wire/30" aria-hidden />
+      <div
+        className="absolute left-5 top-5 bottom-5 w-px bg-wire/30"
+        aria-hidden
+      />
 
       {/* Animated copper fill line */}
       {!reduced && (
@@ -37,7 +45,9 @@ export function ProcessTimeline({ steps }: { steps: Step[] }) {
             </div>
           </div>
           <div className="pb-8 pt-1.5">
-            <h3 className="font-heading font-semibold text-ink mb-1">{step.title}</h3>
+            <h3 className="font-heading font-semibold text-ink mb-1">
+              {step.title}
+            </h3>
             <p className="text-ink-dim text-sm leading-relaxed">{step.text}</p>
           </div>
         </div>

@@ -2,7 +2,13 @@
 
 import { useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "motion/react";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -11,24 +17,27 @@ import { fadeUp, staggerContainer } from "@/lib/animations";
 
 /* ── Floating particles ──────────────────────────────────────────────────── */
 const PARTICLES = [
-  { x: 12,  y: 18,  s: 2,   a: "animate-particle-1", o: 0.5, d: 0    },
-  { x: 88,  y: 12,  s: 1.5, a: "animate-particle-2", o: 0.4, d: 1.5  },
-  { x: 22,  y: 72,  s: 2.5, a: "animate-particle-3", o: 0.6, d: 0.5  },
-  { x: 78,  y: 58,  s: 1,   a: "animate-particle-1", o: 0.3, d: 3    },
-  { x: 55,  y: 28,  s: 2,   a: "animate-particle-2", o: 0.5, d: 2    },
-  { x: 8,   y: 88,  s: 1.5, a: "animate-particle-3", o: 0.35,d: 4    },
-  { x: 92,  y: 82,  s: 2,   a: "animate-particle-1", o: 0.45,d: 1    },
-  { x: 38,  y: 8,   s: 1,   a: "animate-particle-2", o: 0.4, d: 2.5  },
-  { x: 68,  y: 44,  s: 2.5, a: "animate-particle-3", o: 0.3, d: 0.5  },
-  { x: 30,  y: 62,  s: 1,   a: "animate-particle-1", o: 0.5, d: 3.5  },
-  { x: 50,  y: 92,  s: 2,   a: "animate-particle-2", o: 0.4, d: 1    },
-  { x: 82,  y: 32,  s: 1.5, a: "animate-particle-3", o: 0.35,d: 2    },
+  { x: 12, y: 18, s: 2, a: "animate-particle-1", o: 0.5, d: 0 },
+  { x: 88, y: 12, s: 1.5, a: "animate-particle-2", o: 0.4, d: 1.5 },
+  { x: 22, y: 72, s: 2.5, a: "animate-particle-3", o: 0.6, d: 0.5 },
+  { x: 78, y: 58, s: 1, a: "animate-particle-1", o: 0.3, d: 3 },
+  { x: 55, y: 28, s: 2, a: "animate-particle-2", o: 0.5, d: 2 },
+  { x: 8, y: 88, s: 1.5, a: "animate-particle-3", o: 0.35, d: 4 },
+  { x: 92, y: 82, s: 2, a: "animate-particle-1", o: 0.45, d: 1 },
+  { x: 38, y: 8, s: 1, a: "animate-particle-2", o: 0.4, d: 2.5 },
+  { x: 68, y: 44, s: 2.5, a: "animate-particle-3", o: 0.3, d: 0.5 },
+  { x: 30, y: 62, s: 1, a: "animate-particle-1", o: 0.5, d: 3.5 },
+  { x: 50, y: 92, s: 2, a: "animate-particle-2", o: 0.4, d: 1 },
+  { x: 82, y: 32, s: 1.5, a: "animate-particle-3", o: 0.35, d: 2 },
 ];
 
 function ParticleField({ reduced }: { reduced: boolean | null }) {
   if (reduced) return null;
   return (
-    <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
+    <div
+      aria-hidden
+      className="absolute inset-0 pointer-events-none overflow-hidden"
+    >
       {PARTICLES.map((p, i) => (
         <div
           key={i}
@@ -65,15 +74,24 @@ function CursorGlow() {
 function HeroVisual({ reduced }: { reduced: boolean | null }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [5, -5]), { stiffness: 300, damping: 35 });
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-5, 5]), { stiffness: 300, damping: 35 });
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [5, -5]), {
+    stiffness: 300,
+    damping: 35,
+  });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-5, 5]), {
+    stiffness: 300,
+    damping: 35,
+  });
 
   const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     x.set((e.clientX - rect.left) / rect.width - 0.5);
     y.set((e.clientY - rect.top) / rect.height - 0.5);
   };
-  const onMouseLeave = () => { x.set(0); y.set(0); };
+  const onMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   return (
     <motion.div
@@ -104,13 +122,18 @@ function HeroVisual({ reduced }: { reduced: boolean | null }) {
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: "Myynti",    value: "+47%",  color: "text-ok" },
-              { label: "Kävijät",   value: "+2.3x", color: "text-copper" },
-              { label: "Konversio", value: "8.2%",  color: "text-teal-brand" },
+              { label: "Myynti", value: "+47%", color: "text-ok" },
+              { label: "Kävijät", value: "+2.3x", color: "text-copper" },
+              { label: "Konversio", value: "8.2%", color: "text-teal-brand" },
             ].map((stat) => (
-              <div key={stat.label} className="bg-surface rounded-xl p-3 border border-wire">
+              <div
+                key={stat.label}
+                className="bg-surface rounded-xl p-3 border border-wire"
+              >
                 <p className="text-xs text-ink-ghost mb-1">{stat.label}</p>
-                <p className={`text-base font-bold font-heading ${stat.color}`}>{stat.value}</p>
+                <p className={`text-base font-bold font-heading ${stat.color}`}>
+                  {stat.value}
+                </p>
               </div>
             ))}
           </div>
@@ -122,7 +145,11 @@ function HeroVisual({ reduced }: { reduced: boolean | null }) {
                   key={i}
                   initial={{ height: 0 }}
                   animate={{ height: `${h}%` }}
-                  transition={{ duration: 0.6, delay: 0.6 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 0.6 + i * 0.07,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
                   className="flex-1 rounded-sm bg-linear-to-t from-copper/60 to-copper/20"
                 />
               ))}
@@ -131,9 +158,21 @@ function HeroVisual({ reduced }: { reduced: boolean | null }) {
           {/* List items */}
           <div className="space-y-2">
             {[
-              { label: "Uusi verkkokauppa",      status: "Valmis",      color: "text-ok" },
-              { label: "AI-chatbot integraatio",  status: "Käynnissä",   color: "text-copper" },
-              { label: "Mobiilisovellus v2",      status: "Suunnittelu", color: "text-teal-brand" },
+              {
+                label: "Uusi verkkokauppa",
+                status: "Valmis",
+                color: "text-ok",
+              },
+              {
+                label: "AI-chatbot integraatio",
+                status: "Käynnissä",
+                color: "text-copper",
+              },
+              {
+                label: "Mobiilisovellus v2",
+                status: "Suunnittelu",
+                color: "text-teal-brand",
+              },
             ].map((item, i) => (
               <motion.div
                 key={item.label}
@@ -143,7 +182,9 @@ function HeroVisual({ reduced }: { reduced: boolean | null }) {
                 className="flex items-center justify-between"
               >
                 <p className="text-xs text-ink-dim">{item.label}</p>
-                <span className={`text-xs font-medium ${item.color}`}>{item.status}</span>
+                <span className={`text-xs font-medium ${item.color}`}>
+                  {item.status}
+                </span>
               </motion.div>
             ))}
           </div>
@@ -153,7 +194,7 @@ function HeroVisual({ reduced }: { reduced: boolean | null }) {
       {/* Floating badge */}
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.8 }}
-        animate={{ opacity: 1, y: 0,  scale: 1 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, delay: 1.4, ease: [0.16, 1, 0.3, 1] }}
         className="absolute -bottom-4 -right-4 bg-elevated border border-wire rounded-xl px-3 py-2 flex items-center gap-2 shadow-card-hover"
       >
@@ -172,15 +213,19 @@ const wordVariant = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, delay: 0.1 + i * 0.08, ease: "easeOut" as const },
+    transition: {
+      duration: 0.55,
+      delay: 0.1 + i * 0.08,
+      ease: "easeOut" as const,
+    },
   }),
 };
 
 /* ── Stats ───────────────────────────────────────────────────────────────── */
 const STATS = [
-  { to: 47, suffix: "+",   label: "projektia toteutettu" },
-  { to: 98, suffix: " %",  label: "tyytyväisiä asiakkaita" },
-  { to: 5,  suffix: "★",   label: "Google-arvosana" },
+  { to: 47, suffix: "+", label: "projektia toteutettu" },
+  { to: 98, suffix: " %", label: "tyytyväisiä asiakkaita" },
+  { to: 5, suffix: "★", label: "Google-arvosana" },
 ];
 
 /* ── Main export ─────────────────────────────────────────────────────────── */
@@ -203,7 +248,10 @@ export function HeroSection() {
   }, [prefersReduced]);
 
   return (
-    <section ref={sectionRef} className="relative min-h-[65dvh] md:min-h-[78dvh] flex flex-col overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative min-h-[65dvh] md:min-h-[78dvh] flex flex-col overflow-hidden"
+    >
       {/* Background orbs */}
       <div
         aria-hidden
@@ -220,7 +268,10 @@ export function HeroSection() {
       />
 
       {/* Topographic texture */}
-      <div aria-hidden className="absolute inset-0 topo-texture pointer-events-none" />
+      <div
+        aria-hidden
+        className="absolute inset-0 topo-texture pointer-events-none"
+      />
 
       {/* Floating particles */}
       <ParticleField reduced={prefersReduced} />
@@ -282,8 +333,8 @@ export function HeroSection() {
               variants={fadeUp}
               className="text-ink-dim text-lg sm:text-xl leading-relaxed max-w-lg"
             >
-              Verkkosivuista mobiilisovelluksiin ja AI-ratkaisuihin —
-              Apex Site on täyspalvelun kumppanisi digitaalisessa kasvussa.
+              Verkkosivuista mobiilisovelluksiin ja AI-ratkaisuihin — Apex Site
+              on täyspalvelun kumppanisi digitaalisessa kasvussa.
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
@@ -294,8 +345,8 @@ export function HeroSection() {
 
             <motion.div variants={fadeUp} className="space-y-3">
               <p className="text-ink-ghost text-sm leading-relaxed max-w-lg">
-                Yksi kumppani kaikkiin digitaalisiin ratkaisuihin – verkkosivut, verkkokaupat,
-                AI-ratkaisut ja mobiilisovellukset.
+                Yksi kumppani kaikkiin digitaalisiin ratkaisuihin – verkkosivut,
+                verkkokaupat, AI-ratkaisut ja mobiilisovellukset.
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -316,7 +367,10 @@ export function HeroSection() {
             </motion.div>
 
             {/* Social proof avatars */}
-            <motion.div variants={fadeUp} className="flex items-center gap-3 pt-2">
+            <motion.div
+              variants={fadeUp}
+              className="flex items-center gap-3 pt-2"
+            >
               <div className="flex -space-x-2">
                 {["MK", "JL", "AT", "RV"].map((initials, i) => (
                   <div
@@ -328,7 +382,8 @@ export function HeroSection() {
                 ))}
               </div>
               <p className="text-sm text-ink-ghost">
-                <span className="text-ink font-semibold">47+</span> tyytyväistä asiakasta
+                <span className="text-ink font-semibold">47+</span> tyytyväistä
+                asiakasta
               </p>
             </motion.div>
           </motion.div>
@@ -353,7 +408,11 @@ export function HeroSection() {
                 className="flex flex-col items-center gap-0.5 px-4"
               >
                 <span className="font-display font-bold text-copper text-2xl sm:text-3xl">
-                  <AnimatedCounter to={stat.to} suffix={stat.suffix} duration={1.8} />
+                  <AnimatedCounter
+                    to={stat.to}
+                    suffix={stat.suffix}
+                    duration={1.8}
+                  />
                 </span>
                 <span className="text-xs sm:text-sm text-ink-ghost text-center">
                   {stat.label}

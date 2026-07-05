@@ -1,7 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { CheckCircle2, XCircle, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ToastMessage } from "@/lib/types";
@@ -40,9 +46,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       const id = Math.random().toString(36).slice(2);
       const duration = msg.duration ?? 4500;
       setToasts((prev) => [...prev.slice(-4), { ...msg, id }]);
-      timers.current.set(id, setTimeout(() => dismiss(id), duration));
+      timers.current.set(
+        id,
+        setTimeout(() => dismiss(id), duration),
+      );
     },
-    [dismiss]
+    [dismiss],
   );
 
   return (
@@ -87,7 +96,7 @@ function ToastItem({
       transition={{ duration: 0.2 }}
       className={cn(
         "flex items-start gap-3 p-4 rounded-xl border shadow-modal",
-        "bg-elevated border-wire w-[340px] max-w-[90vw]"
+        "bg-elevated border-wire w-[340px] max-w-[90vw]",
       )}
     >
       {icons[t.variant]}

@@ -1,15 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
-  Globe, ShoppingCart, Smartphone, Cpu, Code2, type LucideProps
+  Globe,
+  ShoppingCart,
+  Smartphone,
+  Cpu,
+  Code2,
+  type LucideProps,
 } from "lucide-react";
 import { dropdownMenu } from "@/lib/animations";
 import { SERVICES } from "@/lib/constants";
 
 const ICON_MAP: Record<string, React.FC<LucideProps>> = {
-  Globe, ShoppingCart, Smartphone, Cpu, Code2,
+  Globe,
+  ShoppingCart,
+  Smartphone,
+  Cpu,
+  Code2,
 };
 
 interface ServicesDropdownProps {

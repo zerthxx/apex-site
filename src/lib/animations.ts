@@ -1,4 +1,4 @@
-import type { Variants } from "framer-motion";
+import type { Variants } from "motion/react";
 
 export const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -49,13 +49,20 @@ export const accordionContent: Variants = {
     height: "auto",
     opacity: 1,
     overflow: "hidden",
-    transition: { height: { duration: 0.3, ease: "easeInOut" }, opacity: { duration: 0.2, delay: 0.05 } },
+    transition: {
+      height: { duration: 0.3, ease: "easeInOut" },
+      opacity: { duration: 0.2, delay: 0.05 },
+    },
   },
 };
 
 export const pageTransition: Variants = {
   hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeInOut" } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, ease: "easeInOut" },
+  },
   exit: { opacity: 0, y: -8, transition: { duration: 0.2 } },
 };
 
@@ -67,7 +74,10 @@ export const mobileMenuOverlay: Variants = {
 
 export const mobileMenuPanel: Variants = {
   hidden: { x: "100%" },
-  visible: { x: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
+  visible: {
+    x: 0,
+    transition: { type: "spring", stiffness: 300, damping: 30 },
+  },
   exit: { x: "100%", transition: { duration: 0.25, ease: "easeIn" } },
 };
 

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { usePathname } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
@@ -17,7 +17,8 @@ export function IntroOverlay() {
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    if (pathname === "/" && !sessionStorage.getItem("intro-seen")) setVisible(true);
+    if (pathname === "/" && !sessionStorage.getItem("intro-seen"))
+      setVisible(true);
   }, [pathname]);
 
   useEffect(() => {
@@ -26,7 +27,9 @@ export function IntroOverlay() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) setLoggedIn(true);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_, session) => {
       setLoggedIn(!!session);
     });
     return () => subscription.unsubscribe();
@@ -40,7 +43,9 @@ export function IntroOverlay() {
 
   useEffect(() => {
     document.body.style.overflow = visible ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [visible]);
 
   useEffect(() => {
@@ -123,8 +128,14 @@ export function IntroOverlay() {
           lastFrameTime = now;
           ctx.drawImage(frames[idx], 0, 0, captureW, captureH);
           idx += dir;
-          if (idx >= frames.length) { idx = frames.length - 2; dir = -1; }
-          if (idx < 0) { idx = 1; dir = 1; }
+          if (idx >= frames.length) {
+            idx = frames.length - 2;
+            dir = -1;
+          }
+          if (idx < 0) {
+            idx = 1;
+            dir = 1;
+          }
         }
         rafRef.current = requestAnimationFrame(draw);
       };
@@ -227,23 +238,31 @@ export function IntroOverlay() {
               <button
                 onClick={dismiss}
                 className="px-7 py-2.5 md:px-10 md:py-3.5 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-sm md:text-base tracking-wide hover:bg-copper-light transition-colors duration-200"
-                style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
+                style={{ animation: "glow-shift 4s ease-in-out infinite" }}
               >
                 Aloita →
               </button>
             ) : (
               <div className="flex gap-2 md:gap-3">
                 <button
-                  onClick={() => { window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signin" })); }}
+                  onClick={() => {
+                    window.dispatchEvent(
+                      new CustomEvent("open-auth-modal", { detail: "signin" }),
+                    );
+                  }}
                   className="px-5 py-2 md:px-8 md:py-3.5 rounded-full bg-copper text-[#0A0C10] font-display font-bold text-sm md:text-base tracking-wide hover:bg-copper-light transition-colors duration-200"
-                  style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
+                  style={{ animation: "glow-shift 4s ease-in-out infinite" }}
                 >
                   Kirjaudu
                 </button>
                 <button
-                  onClick={() => { window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "signup" })); }}
+                  onClick={() => {
+                    window.dispatchEvent(
+                      new CustomEvent("open-auth-modal", { detail: "signup" }),
+                    );
+                  }}
                   className="px-5 py-2 md:px-8 md:py-3.5 rounded-full bg-white/10 border border-white/30 text-white font-display font-bold text-sm md:text-base tracking-wide hover:bg-white/20 transition-colors duration-200 backdrop-blur-sm whitespace-nowrap"
-                  style={{ animation: 'glow-shift 4s ease-in-out infinite' }}
+                  style={{ animation: "glow-shift 4s ease-in-out infinite" }}
                 >
                   Luo tili
                 </button>

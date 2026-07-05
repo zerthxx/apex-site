@@ -1,13 +1,22 @@
 "use client";
-import { motion, useReducedMotion, type Transition } from "framer-motion";
+import { motion, useReducedMotion, type Transition } from "motion/react";
 
-const FLOAT_TRANSITION: Transition = { duration: 6, repeat: Infinity, ease: "easeInOut" };
+const FLOAT_TRANSITION: Transition = {
+  duration: 6,
+  repeat: Infinity,
+  ease: "easeInOut",
+};
 const PULSE_TRANSITION: Transition = { duration: 2, repeat: Infinity };
 
 const ORDERS = [
   { id: "#1042", product: "Tuote A — Sininen L", price: "49 €", status: "ok" },
   { id: "#1041", product: "Tuote B — Paketti S", price: "89 €", status: "ok" },
-  { id: "#1040", product: "Tuote C — Musta XL", price: "34 €", status: "copper" },
+  {
+    id: "#1040",
+    product: "Tuote C — Musta XL",
+    price: "34 €",
+    status: "copper",
+  },
 ];
 
 export function EcommerceDashboardMockup() {
@@ -28,7 +37,9 @@ export function EcommerceDashboardMockup() {
             transition={reduced ? undefined : PULSE_TRANSITION}
             className="w-2 h-2 rounded-full bg-ok/80"
           />
-          <span className="text-[11px] text-ink-ghost font-medium">Apex Store — Kauppa auki</span>
+          <span className="text-[11px] text-ink-ghost font-medium">
+            Apex Store — Kauppa auki
+          </span>
           <div className="ml-auto flex gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-bad/40" />
             <div className="w-2.5 h-2.5 rounded-full bg-copper/40" />
@@ -41,7 +52,9 @@ export function EcommerceDashboardMockup() {
           <span className="text-[10px] font-semibold text-ink-ghost uppercase tracking-widest">
             Viimeisimmät tilaukset
           </span>
-          <span className="text-[10px] text-copper font-medium">Näytä kaikki →</span>
+          <span className="text-[10px] text-copper font-medium">
+            Näytä kaikki →
+          </span>
         </div>
 
         {/* Orders */}
@@ -51,7 +64,9 @@ export function EcommerceDashboardMockup() {
               key={id}
               initial={reduced ? undefined : { opacity: 0, x: -8 }}
               animate={reduced ? undefined : { opacity: 1, x: 0 }}
-              transition={reduced ? undefined : { duration: 0.4, delay: i * 0.12 }}
+              transition={
+                reduced ? undefined : { duration: 0.4, delay: i * 0.12 }
+              }
               className="flex items-center gap-3 p-2.5 rounded-lg bg-surface border border-wire"
             >
               <div
@@ -60,10 +75,14 @@ export function EcommerceDashboardMockup() {
                 }`}
               />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold text-ink truncate">{id}</p>
+                <p className="text-[11px] font-semibold text-ink truncate">
+                  {id}
+                </p>
                 <p className="text-[10px] text-ink-ghost truncate">{product}</p>
               </div>
-              <span className="text-[11px] text-copper font-bold shrink-0">{price}</span>
+              <span className="text-[11px] text-copper font-bold shrink-0">
+                {price}
+              </span>
             </motion.div>
           ))}
         </div>
@@ -77,7 +96,9 @@ export function EcommerceDashboardMockup() {
           ].map(({ label, value }) => (
             <div key={label} className="text-center">
               <p className="text-copper font-bold text-sm">{value}</p>
-              <p className="text-[10px] text-ink-ghost leading-tight mt-0.5">{label}</p>
+              <p className="text-[10px] text-ink-ghost leading-tight mt-0.5">
+                {label}
+              </p>
             </div>
           ))}
         </div>

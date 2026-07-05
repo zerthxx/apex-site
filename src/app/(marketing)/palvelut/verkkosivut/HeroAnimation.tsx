@@ -1,5 +1,5 @@
 "use client";
-import { motion, useReducedMotion, type Transition } from "framer-motion";
+import { motion, useReducedMotion, type Transition } from "motion/react";
 
 const FLOAT_TRANSITION: Transition = {
   duration: 6,
@@ -25,17 +25,21 @@ export function HeroAnimation() {
   return (
     <div className="hidden lg:block">
       <motion.div
-        animate={reduced ? undefined : {
-          y: [0, -6, -4, -7, 0],
-          rotate: [0, 0.3, -0.2, 0.3, 0],
-          boxShadow: [
-            "0 25px 50px -12px rgba(0,0,0,0.4)",
-            "0 35px 60px -12px rgba(200,129,58,0.15)",
-            "0 30px 55px -12px rgba(0,0,0,0.35)",
-            "0 40px 65px -12px rgba(200,129,58,0.18)",
-            "0 25px 50px -12px rgba(0,0,0,0.4)",
-          ],
-        }}
+        animate={
+          reduced
+            ? undefined
+            : {
+                y: [0, -6, -4, -7, 0],
+                rotate: [0, 0.3, -0.2, 0.3, 0],
+                boxShadow: [
+                  "0 25px 50px -12px rgba(0,0,0,0.4)",
+                  "0 35px 60px -12px rgba(200,129,58,0.15)",
+                  "0 30px 55px -12px rgba(0,0,0,0.35)",
+                  "0 40px 65px -12px rgba(200,129,58,0.18)",
+                  "0 25px 50px -12px rgba(0,0,0,0.4)",
+                ],
+              }
+        }
         transition={reduced ? undefined : FLOAT_TRANSITION}
         className="rounded-2xl border border-wire bg-elevated overflow-hidden"
         style={{ boxShadow: "0 25px 50px -12px rgba(0,0,0,0.4)" }}
@@ -61,7 +65,11 @@ export function HeroAnimation() {
             <div className="h-4 w-20 rounded bg-copper/20" />
             <div className="flex gap-3">
               {[56, 48, 52, 44].map((w, i) => (
-                <div key={i} className="h-3 rounded bg-wire" style={{ width: w }} />
+                <div
+                  key={i}
+                  className="h-3 rounded bg-wire"
+                  style={{ width: w }}
+                />
               ))}
             </div>
             <div className="h-7 w-24 rounded-lg bg-copper/30" />
@@ -87,7 +95,10 @@ export function HeroAnimation() {
             className="grid grid-cols-3 gap-3"
           >
             {[0, 1, 2].map((i) => (
-              <div key={i} className="rounded-lg border border-wire p-3 space-y-2">
+              <div
+                key={i}
+                className="rounded-lg border border-wire p-3 space-y-2"
+              >
                 <div className="w-6 h-6 rounded-md bg-copper/20" />
                 <div className="h-3 w-full rounded bg-ink/15" />
                 <div className="h-2.5 w-4/5 rounded bg-ink/10" />
@@ -99,7 +110,10 @@ export function HeroAnimation() {
           {/* Mock stats */}
           <div className="flex gap-4 pt-1">
             {["Nopea", "Turvallinen", "SEO-optimoitu"].map((l) => (
-              <div key={l} className="flex items-center gap-1.5 text-[10px] text-ink-ghost">
+              <div
+                key={l}
+                className="flex items-center gap-1.5 text-[10px] text-ink-ghost"
+              >
                 <div className="w-1.5 h-1.5 rounded-full bg-ok/60" />
                 {l}
               </div>

@@ -1,6 +1,6 @@
 "use client";
 import { useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { fadeUp } from "@/lib/animations";
 import { useRevealInView } from "@/lib/useRevealInView";
 

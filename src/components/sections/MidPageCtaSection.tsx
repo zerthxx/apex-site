@@ -1,6 +1,6 @@
 "use client";
 import { useRef } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";

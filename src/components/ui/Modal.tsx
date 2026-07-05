@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,13 @@ const sizes = {
   xl: "max-w-2xl",
 };
 
-export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = "md",
+}: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,7 +68,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
             aria-labelledby={title ? "modal-title" : undefined}
             className={cn(
               "relative z-10 w-full rounded-2xl bg-elevated border border-wire shadow-modal",
-              sizes[size]
+              sizes[size],
             )}
           >
             {title && (
@@ -95,6 +101,6 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
         </div>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

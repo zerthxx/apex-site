@@ -1,7 +1,11 @@
 "use client";
-import { motion, useReducedMotion, type Transition } from "framer-motion";
+import { motion, useReducedMotion, type Transition } from "motion/react";
 
-const FLOAT_TRANSITION: Transition = { duration: 5, repeat: Infinity, ease: "easeInOut" };
+const FLOAT_TRANSITION: Transition = {
+  duration: 5,
+  repeat: Infinity,
+  ease: "easeInOut",
+};
 const PULSE_TRANSITION: Transition = { duration: 2, repeat: Infinity };
 
 const ACTIVITY = [
@@ -48,7 +52,9 @@ export function MobileAppMockup() {
             </div>
             <div>
               <p className="text-[9px] text-ink-ghost leading-none">Hei,</p>
-              <p className="text-[11px] font-semibold text-ink leading-none mt-0.5">Matti</p>
+              <p className="text-[11px] font-semibold text-ink leading-none mt-0.5">
+                Matti
+              </p>
             </div>
           </div>
           <div className="relative">
@@ -56,7 +62,11 @@ export function MobileAppMockup() {
               <div className="w-3 h-3 border border-ink-ghost/50 rounded-sm" />
             </div>
             <motion.div
-              animate={reduced ? undefined : { opacity: [1, 0.3, 1], scale: [1, 1.2, 1] }}
+              animate={
+                reduced
+                  ? undefined
+                  : { opacity: [1, 0.3, 1], scale: [1, 1.2, 1] }
+              }
               transition={reduced ? undefined : PULSE_TRANSITION}
               className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-copper"
             />
@@ -73,11 +83,17 @@ export function MobileAppMockup() {
               key={label}
               initial={reduced ? undefined : { opacity: 0, y: 6 }}
               animate={reduced ? undefined : { opacity: 1, y: 0 }}
-              transition={reduced ? undefined : { duration: 0.35, delay: i * 0.1 }}
+              transition={
+                reduced ? undefined : { duration: 0.35, delay: i * 0.1 }
+              }
               className="bg-surface border border-wire rounded-xl p-2.5"
             >
-              <p className="text-copper font-bold text-base leading-none">{value}</p>
-              <p className="text-[9px] text-ink-ghost mt-1 leading-none">{label}</p>
+              <p className="text-copper font-bold text-base leading-none">
+                {value}
+              </p>
+              <p className="text-[9px] text-ink-ghost mt-1 leading-none">
+                {label}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -96,7 +112,9 @@ export function MobileAppMockup() {
               key={label}
               initial={reduced ? undefined : { opacity: 0, x: -6 }}
               animate={reduced ? undefined : { opacity: 1, x: 0 }}
-              transition={reduced ? undefined : { duration: 0.3, delay: 0.2 + i * 0.1 }}
+              transition={
+                reduced ? undefined : { duration: 0.3, delay: 0.2 + i * 0.1 }
+              }
               className="flex items-center justify-between p-2 rounded-lg bg-surface border border-wire"
             >
               <div className="flex items-center gap-1.5">
@@ -126,7 +144,9 @@ export function MobileAppMockup() {
               className={`flex flex-col items-center gap-0.5 ${i === 0 ? "opacity-100" : "opacity-30"}`}
             >
               <div className="w-4 h-4 rounded bg-ink-ghost/20 border border-wire/60" />
-              <div className={`h-0.5 w-3 rounded-full ${i === 0 ? "bg-copper" : "bg-transparent"}`} />
+              <div
+                className={`h-0.5 w-3 rounded-full ${i === 0 ? "bg-copper" : "bg-transparent"}`}
+              />
             </div>
           ))}
         </div>

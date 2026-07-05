@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, animate, useMotionValue, useTransform } from "framer-motion";
+import { motion, animate, useMotionValue, useTransform } from "motion/react";
 import { useEffect } from "react";
 import { useRevealInView } from "@/lib/useRevealInView";
 
