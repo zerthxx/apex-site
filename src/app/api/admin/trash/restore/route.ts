@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { TRASH_ENTITIES } from "@/lib/trashEntities";
+import {
+  cascadeRestoreCustomer,
+  cascadeRestoreProject,
+} from "@/lib/softDelete";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -34,5 +38,13 @@ export async function POST(req: NextRequest) {
 
   if (error)
     return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Symmetric with the DELETE routes' cascadeSoftDelete* calls: restoring a
+  // customer/project also restores everything that was cascade-trashed with
+  // it, rather than leaving those children stuck in the Trash to be restored
+  // one by one.
+  if (entity_type === "customers") await cascadeRestoreCustomer(supabase, id);
+  if (entity_type === "projects") await cascadeRestoreProject(supabase, id);
+
   return NextResponse.json({ success: true });
 }

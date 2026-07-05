@@ -4,6 +4,7 @@ import {
   createTestUser,
   signInAs,
   signInForCookie,
+  testEmail,
   TestRegistry,
   APP_URL,
 } from "./helpers";
@@ -320,6 +321,142 @@ describe("Soft-delete + Trash", () => {
       ).not.toBeNull();
 
       await admin.from("tasks").delete().eq("id", task!.id);
+    });
+  });
+
+  describe("cascade on restore (customer -> project -> tasks)", () => {
+    it("restoring a customer via the Trash API cascade-restores their project and its tasks", async () => {
+      const owner = await createTestUser(
+        registry,
+        "trash-restore-cascade-owner",
+        {
+          role: "owner",
+          withCustomerRecord: false,
+        },
+      );
+      const customer = await createTestUser(
+        registry,
+        "trash-restore-cascade-cust",
+      );
+      const admin = adminClient();
+
+      const { data: project } = await admin
+        .from("projects")
+        .insert({
+          customer_id: customer.customerId,
+          name: "Cascade restore test project",
+          status: "planning",
+          progress_pct: 0,
+        })
+        .select()
+        .single();
+      registry.projectIds.push(project!.id);
+
+      const { data: task } = await admin
+        .from("tasks")
+        .insert({
+          title: "Cascade restore test task",
+          project_id: project!.id,
+        })
+        .select()
+        .single();
+
+      // Also cover the customer_id-direct path (quotes/invoices tied to the
+      // project already exercise project_id; customer_notes and lead_requests
+      // are only ever reachable via customer_id, never via a project).
+      const { data: note } = await admin
+        .from("customer_notes")
+        .insert({
+          customer_id: customer.customerId,
+          body: "Cascade restore test note",
+        })
+        .select()
+        .single();
+
+      const { data: leadRequest } = await admin
+        .from("lead_requests")
+        .insert({
+          customer_id: customer.customerId,
+          first_name: "Cascade",
+          last_name: "Restore",
+          email: testEmail("trash-restore-cascade-lead"),
+          service: "verkkosivut",
+        })
+        .select()
+        .single();
+
+      const cookie = await signInForCookie(owner);
+
+      // Trash the customer via the real DELETE route (cascades to the project
+      // and its tasks, same as the delete-cascade test above).
+      const deleteRes = await fetch(
+        `${APP_URL}/api/crm/customers/${customer.customerId}`,
+        { method: "DELETE", headers: { Cookie: cookie } },
+      );
+      expect(deleteRes.status).toBe(200);
+
+      // Restore the customer via the Trash API.
+      const restoreRes = await fetch(`${APP_URL}/api/admin/trash/restore`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Cookie: cookie },
+        body: JSON.stringify({
+          entity_type: "customers",
+          id: customer.customerId,
+        }),
+      });
+      const restoreBody = await restoreRes.json().catch(() => ({}));
+      expect(restoreRes.status, JSON.stringify(restoreBody)).toBe(200);
+
+      const { data: customerRow } = await admin
+        .from("customers")
+        .select("deleted_at")
+        .eq("id", customer.customerId)
+        .single();
+      expect(customerRow?.deleted_at).toBeNull();
+
+      const { data: projectRow } = await admin
+        .from("projects")
+        .select("deleted_at")
+        .eq("id", project!.id)
+        .single();
+      expect(
+        projectRow?.deleted_at,
+        "restoring a customer must cascade-restore their projects",
+      ).toBeNull();
+
+      const { data: taskRow } = await admin
+        .from("tasks")
+        .select("deleted_at")
+        .eq("id", task!.id)
+        .single();
+      expect(
+        taskRow?.deleted_at,
+        "the restore cascade must be transitive: customer -> project -> the project's own tasks",
+      ).toBeNull();
+
+      const { data: noteRow } = await admin
+        .from("customer_notes")
+        .select("deleted_at")
+        .eq("id", note!.id)
+        .single();
+      expect(
+        noteRow?.deleted_at,
+        "restoring a customer must cascade-restore their customer_notes (customer_id-direct, no project involved)",
+      ).toBeNull();
+
+      const { data: leadRequestRow } = await admin
+        .from("lead_requests")
+        .select("deleted_at")
+        .eq("id", leadRequest!.id)
+        .single();
+      expect(
+        leadRequestRow?.deleted_at,
+        "restoring a customer must cascade-restore their lead_requests (customer_id-direct, no project involved)",
+      ).toBeNull();
+
+      await admin.from("tasks").delete().eq("id", task!.id);
+      await admin.from("customer_notes").delete().eq("id", note!.id);
+      await admin.from("lead_requests").delete().eq("id", leadRequest!.id);
     });
   });
 

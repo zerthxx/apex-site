@@ -26,16 +26,23 @@ export async function GET(
   }
 
   const [companyRes, contactsRes, projectsRes] = await Promise.all([
-    supabase.from("companies").select("*").eq("id", id).single(),
+    supabase
+      .from("companies")
+      .select("*")
+      .eq("id", id)
+      .is("deleted_at", null)
+      .single(),
     supabase
       .from("customers")
       .select("id, first_name, last_name, email, phone, status")
       .eq("company_id", id)
+      .is("deleted_at", null)
       .order("first_name"),
     supabase
       .from("projects")
       .select("id, name, status, progress_pct, deadline")
       .eq("customer_id", id)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false }),
   ]);
 

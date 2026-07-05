@@ -76,7 +76,15 @@ export function TrashClient() {
       setError(data.error ?? "Palautus epäonnistui");
       return;
     }
-    setItems((prev) => prev.filter((i) => i.id !== item.id));
+    // Restoring a customer or project also cascade-restores its already-
+    // trashed children in the database — reload the whole list rather than
+    // just splicing this one row, or those children would linger as stale
+    // ghost rows until the next search/filter change.
+    if (item.entity_type === "customers" || item.entity_type === "projects") {
+      await load();
+    } else {
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+    }
   }
 
   async function permanentlyDelete(item: TrashItem) {
