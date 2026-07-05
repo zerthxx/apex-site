@@ -6,6 +6,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import {
+  User,
+  Mail,
+  Phone,
+  Building2,
+  Layers,
+  Wallet,
+  CalendarClock,
+  MessageCircle,
+} from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
@@ -17,17 +27,46 @@ const contactSchema = z.object({
   sahkoposti: z.string().email("Virheellinen sähköpostiosoite"),
   puhelin: z.string().optional(),
   yritys: z.string().optional(),
-  palvelu: z.enum(["verkkosivut", "startti", "kasvu", "pro", "perus", "standardi", "premium", "verkkokaupat", "mobiilisovellukset", "ai-ratkaisut", "ohjelmistot", "muu"]),
+  palvelu: z.enum([
+    "verkkosivut",
+    "startti",
+    "kasvu",
+    "pro",
+    "perus",
+    "standardi",
+    "premium",
+    "verkkokaupat",
+    "mobiilisovellukset",
+    "ai-ratkaisut",
+    "ohjelmistot",
+    "muu",
+  ]),
   budjetti: z.string().optional(),
   aikataulu: z.string().optional(),
   yhteydenotto: z.string().optional(),
-  viesti: z.string().min(20, "Kerro lisää projektistasi (vähintään 20 merkkiä)").max(2000),
+  viesti: z
+    .string()
+    .min(20, "Kerro lisää projektistasi (vähintään 20 merkkiä)")
+    .max(2000),
   honeypot: z.string().max(0),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
 
-const VALID_PALVELU_VALUES = ["verkkosivut", "startti", "kasvu", "pro", "perus", "standardi", "premium", "verkkokaupat", "mobiilisovellukset", "ai-ratkaisut", "ohjelmistot", "muu"] as const;
+const VALID_PALVELU_VALUES = [
+  "verkkosivut",
+  "startti",
+  "kasvu",
+  "pro",
+  "perus",
+  "standardi",
+  "premium",
+  "verkkokaupat",
+  "mobiilisovellukset",
+  "ai-ratkaisut",
+  "ohjelmistot",
+  "muu",
+] as const;
 
 const palveluToTyyppi: Record<string, string> = {
   startti: "verkkosivut",
@@ -93,10 +132,12 @@ export function ContactForm() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const palveluParam = searchParams.get("palvelu") ?? "";
-  const defaultPalvelu = VALID_PALVELU_VALUES.includes(palveluParam as never) ? palveluParam : "";
+  const defaultPalvelu = VALID_PALVELU_VALUES.includes(palveluParam as never)
+    ? palveluParam
+    : "";
 
   const [palveluTyyppi, setPalveluTyyppi] = useState<string>(
-    palveluToTyyppi[defaultPalvelu] ?? ""
+    palveluToTyyppi[defaultPalvelu] ?? "",
   );
 
   const {
@@ -119,8 +160,16 @@ export function ContactForm() {
   }, [defaultPalvelu, setValue]);
 
   const currentPalvelu = watch("palvelu");
-  const FIXED_PRICE_PALVELUT = new Set(["startti", "kasvu", "pro", "perus", "standardi", "premium"]);
-  const showBudget = !!currentPalvelu && !FIXED_PRICE_PALVELUT.has(currentPalvelu as string);
+  const FIXED_PRICE_PALVELUT = new Set([
+    "startti",
+    "kasvu",
+    "pro",
+    "perus",
+    "standardi",
+    "premium",
+  ]);
+  const showBudget =
+    !!currentPalvelu && !FIXED_PRICE_PALVELUT.has(currentPalvelu as string);
 
   const handleTyyppiChange = (val: string) => {
     setPalveluTyyppi(val);
@@ -156,7 +205,11 @@ export function ContactForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      className="flex flex-col gap-5"
+    >
       {/* Honeypot — hidden from real users */}
       <input
         {...register("honeypot")}
@@ -175,6 +228,7 @@ export function ContactForm() {
           placeholder="Matti Meikäläinen"
           error={errors.nimi?.message}
           autoComplete="name"
+          leftIcon={<User size={15} />}
         />
         <Input
           {...register("sahkoposti")}
@@ -183,6 +237,7 @@ export function ContactForm() {
           placeholder="matti@yritys.fi"
           error={errors.sahkoposti?.message}
           autoComplete="email"
+          leftIcon={<Mail size={15} />}
         />
       </div>
 
@@ -195,6 +250,7 @@ export function ContactForm() {
           placeholder="+358 50 123 4567"
           hint="Valinnainen"
           autoComplete="tel"
+          leftIcon={<Phone size={15} />}
         />
         <Input
           {...register("yritys")}
@@ -202,6 +258,7 @@ export function ContactForm() {
           placeholder="Yritys Oy"
           hint="Valinnainen"
           autoComplete="organization"
+          leftIcon={<Building2 size={15} />}
         />
       </div>
 
@@ -212,6 +269,7 @@ export function ContactForm() {
         placeholder="Valitse palvelu"
         value={palveluTyyppi}
         onChange={(e) => handleTyyppiChange(e.target.value)}
+        leftIcon={<Layers size={15} />}
       />
 
       {/* Step 2: Sub-option (only for verkkosivut / yllapito) */}
@@ -219,12 +277,15 @@ export function ContactForm() {
         <Select
           {...register("palvelu")}
           defaultValue={
-            palveluToTyyppi[defaultPalvelu] === palveluTyyppi ? defaultPalvelu : ""
+            palveluToTyyppi[defaultPalvelu] === palveluTyyppi
+              ? defaultPalvelu
+              : ""
           }
           label="Minkä ratkaisun haluat? *"
           options={SUB_SERVICES[palveluTyyppi]}
           placeholder="Valitse ratkaisu"
           error={errors.palvelu?.message}
+          leftIcon={<Layers size={15} />}
         />
       )}
 
@@ -237,6 +298,7 @@ export function ContactForm() {
           options={BUDGET_OPTIONS}
           placeholder="Valitse budjetti"
           hint="Valinnainen"
+          leftIcon={<Wallet size={15} />}
         />
       )}
 
@@ -248,6 +310,7 @@ export function ContactForm() {
         options={AIKATAULU_OPTIONS}
         placeholder="Valitse aikataulu"
         hint="Valinnainen"
+        leftIcon={<CalendarClock size={15} />}
       />
 
       {/* Contact preference */}
@@ -258,6 +321,7 @@ export function ContactForm() {
         options={YHTEYDENOTTO_OPTIONS}
         placeholder="Valitse yhteydenottotapa"
         hint="Valinnainen"
+        leftIcon={<MessageCircle size={15} />}
       />
 
       {/* Message */}
@@ -271,18 +335,26 @@ export function ContactForm() {
 
       {/* Trust text */}
       <p className="text-sm text-ink-dim leading-relaxed">
-        Vastaamme kaikkiin yhteydenottoihin 24 tunnin sisällä. Maksuton kartoitus ei sido sinua
-        mihinkään.
+        Vastaamme kaikkiin yhteydenottoihin 24 tunnin sisällä. Maksuton
+        kartoitus ei sido sinua mihinkään.
       </p>
 
-      <Button type="submit" size="lg" isLoading={isSubmitting} className="w-full sm:w-auto">
+      <Button
+        type="submit"
+        size="lg"
+        isLoading={isSubmitting}
+        className="w-full sm:w-auto"
+      >
         {isSubmitting ? "Lähetetään..." : "Lähetä viesti"}
       </Button>
 
       {/* Privacy text */}
       <p className="text-xs text-ink-ghost leading-relaxed">
         Lähettämällä lomakkeen hyväksyt{" "}
-        <Link href="/tietosuoja" className="underline hover:text-copper transition-colors">
+        <Link
+          href="/tietosuoja"
+          className="underline hover:text-copper transition-colors"
+        >
           tietosuojakäytäntömme
         </Link>
         . Käytämme tietojasi vain yhteydenottoasi varten.

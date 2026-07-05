@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Search, X, Edit2, Trash2, Check } from "lucide-react";
+import { Plus, Search, X, Edit2, Trash2, Check, Building2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { RevealSection } from "@/components/shared/RevealSection";
 
 interface Company {
   id: string;
@@ -214,7 +216,7 @@ export function CompaniesClient({ initial }: { initial: Company[] }) {
   const editingCompany = companies.find((c) => c.id === editingId);
 
   return (
-    <div>
+    <RevealSection>
       <div className="flex items-center gap-3 mb-5">
         <div className="relative flex-1 max-w-sm">
           <Search
@@ -245,9 +247,10 @@ export function CompaniesClient({ initial }: { initial: Company[] }) {
 
       <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-ink-ghost text-sm">
-            {search ? "Ei hakutuloksia" : "Ei yrityksiä vielä"}
-          </div>
+          <EmptyState
+            icon={Building2}
+            title={search ? "Ei hakutuloksia" : "Ei yrityksiä vielä"}
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -281,9 +284,14 @@ export function CompaniesClient({ initial }: { initial: Company[] }) {
                   <td className="px-4 py-3">
                     <Link
                       href={`/crm/yritykset/${c.id}`}
-                      className="font-medium text-ink hover:text-copper transition-colors"
+                      className="flex items-center gap-2.5 group"
                     >
-                      {c.name}
+                      <div className="w-7 h-7 rounded-full bg-teal-brand/15 border border-teal-brand/20 flex items-center justify-center text-teal-brand shrink-0">
+                        <Building2 size={13} strokeWidth={1.5} />
+                      </div>
+                      <span className="font-medium text-ink group-hover:text-copper transition-colors">
+                        {c.name}
+                      </span>
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-ink-dim hidden md:table-cell">
@@ -356,6 +364,6 @@ export function CompaniesClient({ initial }: { initial: Company[] }) {
           onConfirm={() => deleteCompany(deleteConfirm)}
         />
       )}
-    </div>
+    </RevealSection>
   );
 }

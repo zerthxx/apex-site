@@ -39,9 +39,7 @@ export function DashboardShell({
           unreadNotifications={unreadNotifications}
           onMobileMenuOpen={() => setMobileOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-5 md:p-8">{children}</main>
       </div>
     </div>
   );

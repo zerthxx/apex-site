@@ -1,19 +1,9 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Users, Building2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { cn } from "@/lib/utils";
-
-const STATUS_LABELS: Record<string, string> = {
-  active: "Aktiivinen",
-  inactive: "Ei aktiivinen",
-  lead: "Liidi",
-};
-const STATUS_COLORS: Record<string, string> = {
-  active: "bg-ok/10 text-ok border-ok/20",
-  inactive: "bg-surface text-ink-ghost border-wire",
-  lead: "bg-copper/10 text-copper border-copper/20",
-};
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { EmptyState } from "@/components/dashboard/EmptyState";
 
 export default async function CompanyDetailPage({
   params,
@@ -64,13 +54,18 @@ export default async function CompanyDetailPage({
         Yritykset
       </Link>
 
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-ink">{company.name}</h1>
-        {company.business_id && (
-          <p className="text-sm text-ink-ghost mt-0.5">
-            Y-tunnus: {company.business_id}
-          </p>
-        )}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-11 h-11 rounded-xl bg-teal-brand/15 border border-teal-brand/20 flex items-center justify-center text-teal-brand shrink-0">
+          <Building2 size={20} strokeWidth={1.5} />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-ink">{company.name}</h1>
+          {company.business_id && (
+            <p className="text-sm text-ink-ghost mt-0.5">
+              Y-tunnus: {company.business_id}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -100,8 +95,8 @@ export default async function CompanyDetailPage({
             Yhteyshenkilöt ({contacts.length})
           </h2>
           {contacts.length === 0 ? (
-            <div className="bg-elevated border border-wire rounded-xl py-10 text-center text-sm text-ink-ghost">
-              Ei yhteyshenkilöitä
+            <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
+              <EmptyState icon={Users} title="Ei yhteyshenkilöitä" />
             </div>
           ) : (
             <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
@@ -141,15 +136,7 @@ export default async function CompanyDetailPage({
                         {c.email ?? "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border",
-                            STATUS_COLORS[c.status] ??
-                              "bg-surface text-ink-ghost border-wire",
-                          )}
-                        >
-                          {STATUS_LABELS[c.status] ?? c.status}
-                        </span>
+                        <StatusBadge status={c.status} />
                       </td>
                     </tr>
                   ))}

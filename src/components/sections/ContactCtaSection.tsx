@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { motion } from "motion/react";
 import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Container } from "@/components/shared/Container";
 import { COMPANY_PHONE } from "@/lib/constants";
 import { fadeUp, staggerContainer } from "@/lib/animations";
 import { useRevealInView } from "@/lib/useRevealInView";
@@ -14,7 +15,7 @@ export function ContactCtaSection() {
   const isInView = useRevealInView(ref);
 
   return (
-    <section className="relative py-12 md:py-24 overflow-hidden bg-elevated border-t border-wire">
+    <section className="relative py-12 md:py-24 lg:py-32 overflow-hidden bg-elevated border-t border-wire">
       {/* Mesh gradient background */}
       <div
         aria-hidden
@@ -25,7 +26,7 @@ export function ContactCtaSection() {
         <div className="absolute inset-0 bg-gradient-to-t from-base/60 to-transparent" />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <Container className="relative">
         <motion.div
           ref={ref}
           variants={staggerContainer}
@@ -78,7 +79,7 @@ export function ContactCtaSection() {
             <span>Ilmainen kartoitus</span>
           </motion.div>
         </motion.div>
-      </div>
+      </Container>
     </section>
   );
 }

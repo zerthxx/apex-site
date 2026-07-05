@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, X, ArrowRight, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus, Search, X, ArrowRight, Trash2, FileText } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { RevealSection } from "@/components/shared/RevealSection";
 
 interface Quote {
   id: string;
@@ -27,32 +29,6 @@ interface Customer {
   first_name?: string | null;
   last_name?: string | null;
   email?: string | null;
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  draft: "Luonnos",
-  sent: "Lähetetty",
-  accepted: "Hyväksytty",
-  rejected: "Hylätty",
-};
-const STATUS_COLORS: Record<string, string> = {
-  draft: "bg-surface text-ink-ghost border-wire",
-  sent: "bg-copper/10 text-copper border-copper/20",
-  accepted: "bg-ok/10 text-ok border-ok/20",
-  rejected: "bg-bad/10 text-bad border-bad/20",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border",
-        STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire",
-      )}
-    >
-      {STATUS_LABELS[status] ?? status}
-    </span>
-  );
 }
 
 function NewQuoteModal({
@@ -279,7 +255,7 @@ export function QuotesClient({ initial, isStaff, canModerate }: Props) {
   }
 
   return (
-    <div>
+    <RevealSection>
       <div className="flex items-center gap-3 mb-5">
         <div className="relative flex-1 max-w-sm">
           <Search
@@ -317,11 +293,14 @@ export function QuotesClient({ initial, isStaff, canModerate }: Props) {
 
       <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-sm text-ink-ghost">
-            {search || statusFilter !== "all"
-              ? "Ei hakutuloksia"
-              : "Ei tarjouksia vielä"}
-          </div>
+          <EmptyState
+            icon={FileText}
+            title={
+              search || statusFilter !== "all"
+                ? "Ei hakutuloksia"
+                : "Ei tarjouksia vielä"
+            }
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -432,6 +411,6 @@ export function QuotesClient({ initial, isStaff, canModerate }: Props) {
           onConfirm={() => deleteQuote(quoteToDelete)}
         />
       )}
-    </div>
+    </RevealSection>
   );
 }

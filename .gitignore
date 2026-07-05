@@ -42,3 +42,4 @@ next-env.d.ts
 
 # Claude Code hook runtime state (see .claude/hooks/pre-commit.md)
 .claude/.precommit-clear
+.claude/skills/

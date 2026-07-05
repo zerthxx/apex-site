@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, animate, useMotionValue, useTransform } from "motion/react";
 import { useEffect } from "react";
 import { useRevealInView } from "@/lib/useRevealInView";
+import { Container } from "@/components/shared/Container";
 
 const STATS = [
   { value: 50, suffix: "+", label: "Toimitettua projektia", decimals: 0 },
@@ -41,7 +42,7 @@ export function StatsSection() {
 
   return (
     <section className="bg-surface border-y border-wire py-10 md:py-14">
-      <div ref={ref} className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <Container ref={ref}>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {STATS.map((stat, i) => (
             <motion.div
@@ -63,7 +64,7 @@ export function StatsSection() {
             </motion.div>
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

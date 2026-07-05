@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { StatusBadge, STATUS_LABELS } from "@/components/dashboard/StatusBadge";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { RevealSection } from "@/components/shared/RevealSection";
 
 interface Invoice {
   id: string;
@@ -40,36 +43,6 @@ interface Project {
   id: string;
   name: string;
   customer_id?: string | null;
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Odottaa",
-  sent: "Lähetetty",
-  paid: "Maksettu",
-  overdue: "Myöhässä",
-  cancelled: "Peruttu",
-  refunded: "Palautettu",
-};
-const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-surface text-ink-ghost border-wire",
-  sent: "bg-copper/10 text-copper border-copper/20",
-  paid: "bg-ok/10 text-ok border-ok/20",
-  overdue: "bg-bad/10 text-bad border-bad/20",
-  cancelled: "bg-surface text-ink-ghost border-wire",
-  refunded: "bg-surface text-ink-ghost border-wire",
-};
-
-function Badge({ status }: { status: string }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border",
-        STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire",
-      )}
-    >
-      {STATUS_LABELS[status] ?? status}
-    </span>
-  );
 }
 
 function NewInvoiceModal({
@@ -472,7 +445,7 @@ export function InvoicesClient({
   );
 
   return (
-    <div>
+    <RevealSection>
       {isStaff && (
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-elevated border border-wire rounded-xl p-4">
@@ -523,9 +496,8 @@ export function InvoicesClient({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border border-wire bg-elevated">
-          <Receipt size={28} className="text-ink-ghost mb-3" />
-          <p className="text-sm text-ink-ghost">Ei laskuja</p>
+        <div className="rounded-xl border border-wire bg-elevated">
+          <EmptyState icon={Receipt} title="Ei laskuja" />
         </div>
       ) : (
         <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
@@ -590,7 +562,7 @@ export function InvoicesClient({
                         : "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge status={inv.status} />
+                      <StatusBadge status={inv.status} />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
@@ -677,6 +649,6 @@ export function InvoicesClient({
           onConfirm={() => deleteInvoice(deletingId)}
         />
       )}
-    </div>
+    </RevealSection>
   );
 }

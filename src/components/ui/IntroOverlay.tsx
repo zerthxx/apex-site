@@ -1,25 +1,41 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
-
-type Phase = "loading" | "playing" | "pingpong";
+import { Lightfall } from "@/components/ui/Lightfall";
+import FuzzyText from "@/components/ui/FuzzyText";
 
 export function IntroOverlay() {
   const pathname = usePathname();
+  const prefersReduced = useReducedMotion();
   const [visible, setVisible] = useState(false);
-  const [phase, setPhase] = useState<Phase>("loading");
   const [loggedIn, setLoggedIn] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const framesRef = useRef<ImageBitmap[]>([]);
-  const rafRef = useRef<number>(0);
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches,
+  );
 
   useEffect(() => {
     if (pathname === "/" && !sessionStorage.getItem("intro-seen"))
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
   }, [pathname]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const onChange = () => setIsMobile(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!visible || !isMobile) return;
+    const timeout = setTimeout(() => dismiss(), 3500);
+    return () => clearTimeout(timeout);
+  }, [visible, isMobile]);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
@@ -48,149 +64,7 @@ export function IntroOverlay() {
     };
   }, [visible]);
 
-  useEffect(() => {
-    if (!visible) return;
-    const video = videoRef.current;
-    if (!video) return;
-
-    const captureCanvas = document.createElement("canvas");
-    const capturePromises: Promise<ImageBitmap>[] = [];
-    let capturing = false;
-    let framesResolved = false;
-    let captureW = 1920;
-    let captureH = 1080;
-
-    function captureFrame() {
-      if (!capturing) return;
-      const captureCtx = captureCanvas.getContext("2d")!;
-      captureCtx.drawImage(video!, 0, 0, captureW, captureH);
-      capturePromises.push(createImageBitmap(captureCanvas));
-    }
-
-    function startCapture() {
-      const isMobile = window.innerWidth < 768;
-      captureW = Math.min(video!.videoWidth || 1920, isMobile ? 640 : 1920);
-      captureH = Math.min(video!.videoHeight || 1080, isMobile ? 360 : 1080);
-      captureCanvas.width = captureW;
-      captureCanvas.height = captureH;
-
-      capturing = true;
-      if ("requestVideoFrameCallback" in video!) {
-        const onVFC = () => {
-          captureFrame();
-          if (capturing) (video as any).requestVideoFrameCallback(onVFC);
-        };
-        (video as any).requestVideoFrameCallback(onVFC);
-      } else {
-        let lastCapture = 0;
-        const onRAF = (now: number) => {
-          if (!capturing) return;
-          if (now - lastCapture >= 1000 / 30) {
-            captureFrame();
-            lastCapture = now;
-          }
-          requestAnimationFrame(onRAF);
-        };
-        requestAnimationFrame(onRAF);
-      }
-    }
-
-    const onTimeUpdate = () => {
-      if (framesResolved) return;
-      const dur = video.duration;
-      if (!dur || isNaN(dur)) return;
-      if (video.currentTime >= dur - 0.5) {
-        framesResolved = true;
-        capturing = false;
-        Promise.all(capturePromises).then((bitmaps) => {
-          framesRef.current = bitmaps;
-        });
-      }
-    };
-
-    const startPingPong = (frames: ImageBitmap[]) => {
-      setPhase("pingpong");
-      const canvas = canvasRef.current;
-      if (!canvas || !frames.length) return;
-
-      // Set canvas internal resolution to match capture size
-      canvas.width = captureW;
-      canvas.height = captureH;
-      const ctx = canvas.getContext("2d")!;
-
-      let idx = frames.length - 1;
-      let dir = -1;
-      let lastFrameTime = 0;
-      const msPerFrame = 1000 / 30;
-
-      const draw = (now: number) => {
-        if (now - lastFrameTime >= msPerFrame) {
-          lastFrameTime = now;
-          ctx.drawImage(frames[idx], 0, 0, captureW, captureH);
-          idx += dir;
-          if (idx >= frames.length) {
-            idx = frames.length - 2;
-            dir = -1;
-          }
-          if (idx < 0) {
-            idx = 1;
-            dir = 1;
-          }
-        }
-        rafRef.current = requestAnimationFrame(draw);
-      };
-      rafRef.current = requestAnimationFrame(draw);
-    };
-
-    const onEnded = () => {
-      if (window.innerWidth < 768) {
-        dismiss();
-        return;
-      }
-      if (framesRef.current.length > 0) {
-        startPingPong(framesRef.current);
-      } else {
-        Promise.all(capturePromises).then((bitmaps) => {
-          framesRef.current = bitmaps;
-          startPingPong(bitmaps);
-        });
-      }
-    };
-
-    const onCanPlay = () => {
-      setPhase("playing");
-      startCapture();
-      video.play().catch(() => {});
-    };
-
-    const fallback = setTimeout(() => {
-      video.load();
-      video.play().catch(() => {});
-      setPhase("playing");
-    }, 4000);
-
-    video.addEventListener("canplay", onCanPlay, { once: true });
-    video.addEventListener("timeupdate", onTimeUpdate);
-    video.addEventListener("ended", onEnded, { once: true });
-
-    return () => {
-      clearTimeout(fallback);
-      capturing = false;
-      cancelAnimationFrame(rafRef.current);
-      video.removeEventListener("canplay", onCanPlay);
-      video.removeEventListener("timeupdate", onTimeUpdate);
-      video.removeEventListener("ended", onEnded);
-      video.pause();
-      framesRef.current.forEach((b) => b.close());
-      framesRef.current = [];
-    };
-  }, [visible]);
-
   function dismiss() {
-    cancelAnimationFrame(rafRef.current);
-    videoRef.current?.pause();
-    framesRef.current.forEach((b) => b.close());
-    framesRef.current = [];
     sessionStorage.setItem("intro-seen", "1");
     setVisible(false);
   }
@@ -199,28 +73,33 @@ export function IntroOverlay() {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] bg-[#0A0C10] flex items-center justify-center"
+          className="fixed inset-0 z-[9999] bg-[#05070B] flex items-center justify-center"
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
         >
-          <video
-            ref={videoRef}
-            src="/videos/apex-site-intro-1.mp4"
-            muted
-            playsInline
-            preload="auto"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ display: phase === "pingpong" ? "none" : "block" }}
-          />
-
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ display: phase === "pingpong" ? "block" : "none" }}
-          />
+          {!prefersReduced && (
+            <Lightfall
+              className="absolute inset-0 z-0"
+              colors={["#C8813A", "#D99550", "#2ABFBF"]}
+              backgroundColor="#05070B"
+              speed={isMobile ? 0.3 : 0.5}
+              streakCount={isMobile ? 2 : 3}
+              streakWidth={1}
+              streakLength={1.1}
+              density={0.55}
+              twinkle={1}
+              glow={1}
+              zoom={3}
+              backgroundGlow={0.5}
+              opacity={1}
+              mouseInteraction={!isMobile}
+              mouseStrength={0.4}
+              mouseRadius={0.9}
+            />
+          )}
 
           <motion.div
-            className="absolute bottom-32 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-4"
+            className="relative z-10 flex flex-col items-center gap-8 md:gap-9 px-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.2, ease: "easeInOut", delay: 0.3 }}
@@ -234,6 +113,39 @@ export function IntroOverlay() {
                 100% { box-shadow: 0 0 22px 7px rgba(99,210,255,0.8),  0 0 55px 18px rgba(99,210,255,0.3); }
               }
             `}</style>
+
+            <Image
+              src="/logo-mark.png"
+              alt="Apex Site"
+              width={454}
+              height={370}
+              className="w-16 h-auto sm:w-20 md:w-28 object-contain"
+              style={{
+                filter:
+                  "drop-shadow(0 0 14px rgba(200,129,58,0.45)) drop-shadow(0 0 28px rgba(42,191,191,0.3))",
+              }}
+              priority
+            />
+
+            {prefersReduced ? (
+              <h1 className="font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-copper via-copper-light to-teal-brand text-6xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight text-center select-none">
+                APEXSITE
+              </h1>
+            ) : (
+              <FuzzyText
+                className="font-display select-none"
+                fontSize="clamp(3.5rem, 12vw, 9rem)"
+                fontWeight={800}
+                gradient={["#C8813A", "#2ABFBF"]}
+                enableHover={false}
+                baseIntensity={0.06}
+                fuzzRange={isMobile ? 10 : 16}
+                letterSpacing={2}
+              >
+                APEXSITE
+              </FuzzyText>
+            )}
+
             {loggedIn ? (
               <button
                 onClick={dismiss}

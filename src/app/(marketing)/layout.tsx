@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { ScrollProgressBar } from "@/components/ui/ScrollProgressBar";
 
@@ -18,7 +19,9 @@ export default function MarketingLayout({
         Siirry pääsisältöön
       </a>
       <Header />
-      <main id="main-content" className="flex flex-col flex-1">{children}</main>
+      <main id="main-content" className="flex flex-col flex-1">
+        <PageTransition>{children}</PageTransition>
+      </main>
       <Footer />
     </ToastProvider>
   );

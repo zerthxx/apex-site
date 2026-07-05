@@ -10,6 +10,12 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  StatusBadge,
+  PAYMENT_STATUS_LABELS,
+} from "@/components/dashboard/StatusBadge";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { RevealSection } from "@/components/shared/RevealSection";
 
 interface Payment {
   id: string;
@@ -27,35 +33,6 @@ interface Payment {
     last_name?: string | null;
     email?: string | null;
   } | null;
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Odottaa",
-  completed: "Maksettu",
-  failed: "Epäonnistui",
-  refunded: "Palautettu",
-  cancelled: "Peruutettu",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-copper/10 text-copper border-copper/20",
-  completed: "bg-ok/10 text-ok border-ok/20",
-  failed: "bg-bad/10 text-bad border-bad/20",
-  refunded: "bg-surface text-ink-ghost border-wire",
-  cancelled: "bg-surface text-ink-ghost border-wire",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border",
-        STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire",
-      )}
-    >
-      {STATUS_LABELS[status] ?? status}
-    </span>
-  );
 }
 
 function DeleteModal({
@@ -206,7 +183,7 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
     .reduce((sum, p) => sum + (p.amount ?? 0), 0);
 
   return (
-    <div className="space-y-5">
+    <RevealSection className="space-y-5">
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
@@ -274,12 +251,14 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
       {/* Table */}
       <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-2 text-sm text-ink-ghost">
-            <Receipt size={28} className="opacity-30" />
-            {search || statusFilter !== "all"
-              ? "Ei hakutuloksia"
-              : "Ei maksutapahtumia vielä"}
-          </div>
+          <EmptyState
+            icon={Receipt}
+            title={
+              search || statusFilter !== "all"
+                ? "Ei hakutuloksia"
+                : "Ei maksutapahtumia vielä"
+            }
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -326,7 +305,10 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
                         : "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={p.status} />
+                      <StatusBadge
+                        status={p.status}
+                        labels={PAYMENT_STATUS_LABELS}
+                      />
                     </td>
                     <td className="px-4 py-3 text-ink-ghost hidden md:table-cell">
                       {p.paid_at
@@ -373,6 +355,6 @@ export function PaymentsClient({ payments: initial, isStaff }: Props) {
           onDeleted={handleDeleted}
         />
       )}
-    </div>
+    </RevealSection>
   );
 }

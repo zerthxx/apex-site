@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Plus, Search, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus, Search, X, Users } from "lucide-react";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { RevealSection } from "@/components/shared/RevealSection";
 
 interface Customer {
   id: string;
@@ -16,29 +18,41 @@ interface Customer {
   companies?: { id: string; name: string } | null;
 }
 
-const STATUS_LABELS: Record<string, string> = { active: "Aktiivinen", inactive: "Ei aktiivinen", lead: "Liidi" };
-const STATUS_COLORS: Record<string, string> = {
-  active: "bg-ok/10 text-ok border-ok/20",
-  inactive: "bg-surface text-ink-ghost border-wire",
-  lead: "bg-copper/10 text-copper border-copper/20",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border", STATUS_COLORS[status] ?? "bg-surface text-ink-ghost border-wire")}>
-      {STATUS_LABELS[status] ?? status}
-    </span>
-  );
+function initialsOf(c: Customer) {
+  const name =
+    [c.first_name, c.last_name].filter(Boolean).join(" ") || c.email || "?";
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
-function NewCustomerModal({ onClose, onCreated }: { onClose: () => void; onCreated: (c: Customer) => void }) {
-  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", status: "active", notes: "" });
+function NewCustomerModal({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: (c: Customer) => void;
+}) {
+  const [form, setForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    status: "active",
+    notes: "",
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.first_name && !form.email) { setError("Nimi tai sähköposti vaaditaan"); return; }
+    if (!form.first_name && !form.email) {
+      setError("Nimi tai sähköposti vaaditaan");
+      return;
+    }
     setSaving(true);
     setError("");
     const res = await fetch("/api/crm/customers", {
@@ -48,62 +62,110 @@ function NewCustomerModal({ onClose, onCreated }: { onClose: () => void; onCreat
     });
     const data = await res.json();
     setSaving(false);
-    if (!res.ok) { setError(data.error ?? "Virhe"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Virhe");
+      return;
+    }
     onCreated(data.customer);
     onClose();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-ink">Uusi asiakas</h2>
-          <button onClick={onClose} className="text-ink-ghost hover:text-ink"><X size={17} /></button>
+          <button onClick={onClose} className="text-ink-ghost hover:text-ink">
+            <X size={17} />
+          </button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Etunimi</label>
-              <input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Etunimi
+              </label>
+              <input
+                value={form.first_name}
+                onChange={(e) =>
+                  setForm({ ...form, first_name: e.target.value })
+                }
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
             <div>
-              <label className="block text-xs text-ink-ghost mb-1">Sukunimi</label>
-              <input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+              <label className="block text-xs text-ink-ghost mb-1">
+                Sukunimi
+              </label>
+              <input
+                value={form.last_name}
+                onChange={(e) =>
+                  setForm({ ...form, last_name: e.target.value })
+                }
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Sähköposti</label>
-            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+            <label className="block text-xs text-ink-ghost mb-1">
+              Sähköposti
+            </label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            />
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Puhelin</label>
-            <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors" />
+            <input
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            />
           </div>
           <div>
             <label className="block text-xs text-ink-ghost mb-1">Tila</label>
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors">
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+            >
               <option value="active">Aktiivinen</option>
               <option value="lead">Liidi</option>
               <option value="inactive">Ei aktiivinen</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs text-ink-ghost mb-1">Muistiinpanot</label>
-            <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors resize-none" />
+            <label className="block text-xs text-ink-ghost mb-1">
+              Muistiinpanot
+            </label>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              rows={2}
+              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors resize-none"
+            />
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
           <div className="flex gap-2 mt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink hover:border-wire-bold transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 rounded-lg border border-wire text-sm text-ink-ghost hover:text-ink hover:border-wire-bold transition-colors"
+            >
               Peruuta
             </button>
-            <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
+            >
               {saving ? "Tallennetaan..." : "Lisää asiakas"}
             </button>
           </div>
@@ -120,25 +182,34 @@ interface CustomersClientProps {
   emptyText?: string;
 }
 
-export function CustomersClient({ initial, initialStatusFilter = "all", title = "Hae asiakkaita...", emptyText = "Ei asiakkaita vielä" }: CustomersClientProps) {
+export function CustomersClient({
+  initial,
+  initialStatusFilter = "all",
+  title = "Hae asiakkaita...",
+  emptyText = "Ei asiakkaita vielä",
+}: CustomersClientProps) {
   const [customers, setCustomers] = useState(initial);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(initialStatusFilter);
   const [showModal, setShowModal] = useState(false);
 
   const filtered = customers.filter((c) => {
-    const name = `${c.first_name ?? ""} ${c.last_name ?? ""} ${c.email ?? ""}`.toLowerCase();
+    const name =
+      `${c.first_name ?? ""} ${c.last_name ?? ""} ${c.email ?? ""}`.toLowerCase();
     const matchSearch = !search || name.includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || c.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
   return (
-    <div>
+    <RevealSection>
       {/* Toolbar */}
       <div className="flex items-center gap-3 mb-5">
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost"
+          />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -168,35 +239,71 @@ export function CustomersClient({ initial, initialStatusFilter = "all", title = 
       {/* Table */}
       <div className="bg-elevated border border-wire rounded-xl overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-ink-ghost text-sm">
-            {search || statusFilter !== "all" ? "Ei hakutuloksia" : emptyText}
-          </div>
+          <EmptyState
+            icon={Users}
+            title={
+              search || statusFilter !== "all" ? "Ei hakutuloksia" : emptyText
+            }
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-wire">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Asiakas</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">Yritys</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">Sähköposti</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">Puhelin</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">Tila</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">Luotu</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  Asiakas
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">
+                  Yritys
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">
+                  Sähköposti
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden lg:table-cell">
+                  Puhelin
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                  Tila
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wider hidden md:table-cell">
+                  Luotu
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-wire/50">
               {filtered.map((c) => (
-                <tr key={c.id} className="hover:bg-surface/50 transition-colors">
+                <tr
+                  key={c.id}
+                  className="hover:bg-surface/50 transition-colors"
+                >
                   <td className="px-4 py-3">
-                    <Link href={`/crm/asiakkaat/${c.id}`} className="font-medium text-ink hover:text-copper transition-colors">
-                      {[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email || "—"}
+                    <Link
+                      href={`/crm/asiakkaat/${c.id}`}
+                      className="flex items-center gap-2.5 group"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-copper/15 border border-copper/20 flex items-center justify-center text-copper text-[10px] font-bold shrink-0">
+                        {initialsOf(c)}
+                      </div>
+                      <span className="font-medium text-ink group-hover:text-copper transition-colors">
+                        {[c.first_name, c.last_name]
+                          .filter(Boolean)
+                          .join(" ") ||
+                          c.email ||
+                          "—"}
+                      </span>
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-ink-dim hidden md:table-cell">
                     {c.companies?.name ?? "—"}
                   </td>
-                  <td className="px-4 py-3 text-ink-dim hidden lg:table-cell">{c.email ?? "—"}</td>
-                  <td className="px-4 py-3 text-ink-dim hidden lg:table-cell">{c.phone ?? "—"}</td>
-                  <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
+                  <td className="px-4 py-3 text-ink-dim hidden lg:table-cell">
+                    {c.email ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-ink-dim hidden lg:table-cell">
+                    {c.phone ?? "—"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={c.status} />
+                  </td>
                   <td className="px-4 py-3 text-ink-ghost hidden md:table-cell">
                     {new Date(c.created_at).toLocaleDateString("fi-FI")}
                   </td>
@@ -213,6 +320,6 @@ export function CustomersClient({ initial, initialStatusFilter = "all", title = 
           onCreated={(c) => setCustomers((prev) => [c, ...prev])}
         />
       )}
-    </div>
+    </RevealSection>
   );
 }

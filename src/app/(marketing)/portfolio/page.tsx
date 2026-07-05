@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/shared/PageHero";
 import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
-import Link from "next/link";
+import { Container } from "@/components/shared/Container";
+import { PortfolioComingSoon } from "./PortfolioComingSoon";
 
 export const metadata: Metadata = {
   title: "Portfolio — Referenssit ja asiakasprojektit",
@@ -14,24 +15,15 @@ export default function PortfolioPage() {
     <>
       <PageHero
         eyebrow="Portfolio"
-        title="Referenssit tulossa pian."
-        description="Rakennamme parhaillaan portfoliomme. Ota yhteyttä niin kerromme kokemuksestamme suoraan."
+        title="Referenssimme julkaistaan pian."
+        description="Työskentelemme parhaillaan asiakkaidemme kanssa uusien projektien parissa. Alta näet, millaisia referenssejä olemme julkaisemassa kuhunkin kategoriaan — tai ota suoraan yhteyttä ja kerromme lisää."
         cta={{ label: "Ota yhteyttä", href: "/yhteystiedot" }}
       />
 
-      <section className="py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-elevated border border-wire text-ink-dim text-sm">
-            <span className="text-2xl">🚧</span>
-            <span>Portfoliomme on rakenteilla — referenssit lisätään pian.</span>
-          </div>
-          <p className="mt-8 text-ink-dim text-sm">
-            Haluatko tietää enemmän projekteistamme?{" "}
-            <Link href="/yhteystiedot" className="text-copper hover:underline">
-              Ota yhteyttä
-            </Link>
-          </p>
-        </div>
+      <section className="py-16 md:py-24 lg:py-32">
+        <Container>
+          <PortfolioComingSoon />
+        </Container>
       </section>
 
       <ContactCtaSection />

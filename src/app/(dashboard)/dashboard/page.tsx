@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
+import { EmptyState } from "@/components/dashboard/EmptyState";
 import {
   FolderOpen,
   FileText,
@@ -149,6 +150,7 @@ export default async function DashboardPage() {
             icon={<Users size={15} />}
             description="Aktiiviset"
             accent="copper"
+            href="/crm/asiakkaat"
           />
           <StatCard
             label="Liidejä"
@@ -156,12 +158,14 @@ export default async function DashboardPage() {
             icon={<Building2 size={15} />}
             description="Odottaa seurantaa"
             accent={leadCount.count ? "copper" : "default"}
+            href="/crm/liidit"
           />
           <StatCard
             label="Projektit"
             value={activeProjects.count ?? 0}
             icon={<FolderOpen size={15} />}
             description="Käynnissä"
+            href="/portaali/projektit"
           />
           <StatCard
             label="Liikevaihto"
@@ -178,6 +182,7 @@ export default async function DashboardPage() {
             icon={<FileText size={15} />}
             description="Odottaa vastausta"
             accent={pendingQuotes.count ? "copper" : "default"}
+            href="/portaali/tarjoukset"
           />
           <StatCard
             label="Avoimet laskut"
@@ -185,6 +190,7 @@ export default async function DashboardPage() {
             icon={<Receipt size={15} />}
             description="Odottaa maksua"
             accent={pendingInvoices.count ? "copper" : "default"}
+            href="/portaali/laskut"
           />
           <StatCard
             label="Myöhästyneet"
@@ -192,12 +198,14 @@ export default async function DashboardPage() {
             icon={<AlertCircle size={15} />}
             description="Laskut myöhässä"
             accent={overdueInvoices.count ? "copper" : "default"}
+            href="/portaali/laskut"
           />
           <StatCard
             label="Tehtävät"
             value={openTasks.count ?? 0}
             icon={<CheckSquare size={15} />}
             description="Avoimet tehtävät"
+            href="/tehtavat"
           />
         </div>
 
@@ -226,11 +234,9 @@ export default async function DashboardPage() {
               </div>
               <div className="flex flex-col gap-1">
                 {(recentCustomersResult.data ?? []).length === 0 && (
-                  <p className="text-sm text-ink-ghost py-4 text-center">
-                    Ei asiakkaita vielä
-                  </p>
+                  <EmptyState title="Ei asiakkaita vielä" className="py-4" />
                 )}
-                {(recentCustomersResult.data ?? []).map((c: any) => (
+                {(recentCustomersResult.data ?? []).map((c) => (
                   <Link
                     key={c.id}
                     href={`/crm/asiakkaat/${c.id}`}
@@ -389,12 +395,14 @@ export default async function DashboardPage() {
           icon={<FolderOpen size={15} />}
           description="Käynnissä"
           accent="copper"
+          href="/portaali/projektit"
         />
         <StatCard
           label="Tarjoukset"
           value={myQuotes.count ?? 0}
           icon={<FileText size={15} />}
           description="Yhteensä"
+          href="/portaali/tarjoukset"
         />
         <StatCard
           label="Avoimet laskut"
@@ -402,6 +410,7 @@ export default async function DashboardPage() {
           icon={<Receipt size={15} />}
           description="Odottaa maksua"
           accent={(myInvoices.count ?? 0) > 0 ? "copper" : "default"}
+          href="/portaali/laskut"
         />
         <StatCard
           label="Ilmoitukset"
@@ -409,6 +418,7 @@ export default async function DashboardPage() {
           icon={<Bell size={15} />}
           description="Lukemattomat"
           accent={(notifResult.count ?? 0) > 0 ? "copper" : "default"}
+          href="/ilmoitukset"
         />
       </div>
 

@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion } from "motion/react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
+import { Container } from "@/components/shared/Container";
 import { TestimonialCard } from "@/components/shared/TestimonialCard";
 import { TESTIMONIALS } from "@/lib/constants";
 import { fadeUp, staggerContainer } from "@/lib/animations";
@@ -13,8 +14,8 @@ export function TestimonialsSection() {
   const isInView = useRevealInView(ref);
 
   return (
-    <section className="py-10 md:py-20 bg-surface/30">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 md:py-24 lg:py-32 bg-surface/30">
+      <Container>
         <SectionHeader
           eyebrow="Asiakkaat"
           heading="Mitä asiakkaamme sanovat"
@@ -39,7 +40,7 @@ export function TestimonialsSection() {
             </motion.div>
           ))}
         </motion.div>
-      </div>
+      </Container>
     </section>
   );
 }

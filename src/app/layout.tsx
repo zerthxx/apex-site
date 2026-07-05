@@ -37,8 +37,6 @@ const geistMono = Geist_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export const metadata: Metadata = {
@@ -106,18 +104,25 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "ProfessionalService",
-            "name": "Apex Site",
-            "url": "https://apexsite.fi",
-            "email": "info@apexsite.fi",
-            "address": { "@type": "PostalAddress", "addressLocality": "Helsinki", "addressCountry": "FI" },
-            "areaServed": "FI",
-            "description": "Verkkosivut, verkkokaupat, mobiilisovellukset ja AI-ratkaisut yrityksellesi. Suomalainen ohjelmistotalo Helsingistä.",
-            "priceRange": "€€€",
-            "sameAs": ["https://apexsite.fi"]
-          }) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ProfessionalService",
+              name: "Apex Site",
+              url: "https://apexsite.fi",
+              email: "info@apexsite.fi",
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Helsinki",
+                addressCountry: "FI",
+              },
+              areaServed: "FI",
+              description:
+                "Verkkosivut, verkkokaupat, mobiilisovellukset ja AI-ratkaisut yrityksellesi. Suomalainen ohjelmistotalo Helsingistä.",
+              priceRange: "€€€",
+              sameAs: ["https://apexsite.fi"],
+            }),
+          }}
         />
         <SessionGuard />
         <IntroOverlay />

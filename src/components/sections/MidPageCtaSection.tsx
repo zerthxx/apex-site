@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Container } from "@/components/shared/Container";
 import { useRevealInView } from "@/lib/useRevealInView";
 
 const TRUST = ["Maksuton kartoitus", "Tarjous 48 h", "Ei sitoutumista"];
@@ -13,8 +14,8 @@ export function MidPageCtaSection() {
   const inView = useRevealInView(ref, "-60px");
 
   return (
-    <section ref={ref} className="py-16 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto">
+    <section ref={ref} className="py-16 md:py-24 lg:py-32">
+      <Container>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -62,7 +63,7 @@ export function MidPageCtaSection() {
             </div>
           </div>
         </motion.div>
-      </div>
+      </Container>
     </section>
   );
 }

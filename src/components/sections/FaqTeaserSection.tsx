@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
+import { Container } from "@/components/shared/Container";
 import { FAQ_HOME } from "@/lib/constants";
 import { slideInLeft, fadeUp } from "@/lib/animations";
 import { useRevealInView } from "@/lib/useRevealInView";
@@ -14,8 +15,8 @@ export function FaqTeaserSection() {
   const isInView = useRevealInView(ref);
 
   return (
-    <section className="py-10 md:py-20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 md:py-24 lg:py-32">
+      <Container>
         <div
           ref={ref}
           className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start"
@@ -54,7 +55,7 @@ export function FaqTeaserSection() {
             <FaqAccordion items={FAQ_HOME} />
           </motion.div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

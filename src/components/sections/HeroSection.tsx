@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   motion,
@@ -9,64 +9,64 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import {
+  ChevronDown,
+  Globe,
+  Cpu,
+  ShoppingCart,
+  Smartphone,
+} from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { LightRays } from "@/components/ui/LightRays";
+import { Container } from "@/components/shared/Container";
 import { AnimatedCounter } from "@/components/shared/AnimatedCounter";
 import { fadeUp, staggerContainer } from "@/lib/animations";
 
-/* ── Floating particles ──────────────────────────────────────────────────── */
-const PARTICLES = [
-  { x: 12, y: 18, s: 2, a: "animate-particle-1", o: 0.5, d: 0 },
-  { x: 88, y: 12, s: 1.5, a: "animate-particle-2", o: 0.4, d: 1.5 },
-  { x: 22, y: 72, s: 2.5, a: "animate-particle-3", o: 0.6, d: 0.5 },
-  { x: 78, y: 58, s: 1, a: "animate-particle-1", o: 0.3, d: 3 },
-  { x: 55, y: 28, s: 2, a: "animate-particle-2", o: 0.5, d: 2 },
-  { x: 8, y: 88, s: 1.5, a: "animate-particle-3", o: 0.35, d: 4 },
-  { x: 92, y: 82, s: 2, a: "animate-particle-1", o: 0.45, d: 1 },
-  { x: 38, y: 8, s: 1, a: "animate-particle-2", o: 0.4, d: 2.5 },
-  { x: 68, y: 44, s: 2.5, a: "animate-particle-3", o: 0.3, d: 0.5 },
-  { x: 30, y: 62, s: 1, a: "animate-particle-1", o: 0.5, d: 3.5 },
-  { x: 50, y: 92, s: 2, a: "animate-particle-2", o: 0.4, d: 1 },
-  { x: 82, y: 32, s: 1.5, a: "animate-particle-3", o: 0.35, d: 2 },
+const SERVICE_PILLS = [
+  { icon: Globe, label: "Verkkosivut" },
+  { icon: Cpu, label: "AI-ratkaisut" },
+  { icon: ShoppingCart, label: "Verkkokaupat" },
+  { icon: Smartphone, label: "Mobiilisovellukset" },
 ];
 
-function ParticleField({ reduced }: { reduced: boolean | null }) {
-  if (reduced) return null;
-  return (
-    <div
-      aria-hidden
-      className="absolute inset-0 pointer-events-none overflow-hidden"
-    >
-      {PARTICLES.map((p, i) => (
-        <div
-          key={i}
-          className={`absolute rounded-full bg-copper ${p.a}`}
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: `${p.s}px`,
-            height: `${p.s}px`,
-            opacity: p.o,
-            animationDelay: `${p.d}s`,
-          }}
-        />
-      ))}
-    </div>
+/* ── Light Rays hero background — subtle, mouse-reactive, reduced on mobile ── */
+function HeroLightRays({ reduced }: { reduced: boolean | null }) {
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches,
   );
-}
 
-/* ── Cursor glow — receives position via CSS var from section ────────────── */
-function CursorGlow() {
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const onChange = () => setIsMobile(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  if (reduced) return null;
+
   return (
     <div
       aria-hidden
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        background:
-          "radial-gradient(600px circle at var(--cx, -300px) var(--cy, -300px), rgba(200,129,58,0.07), transparent 40%)",
-      }}
-    />
+      className="absolute inset-0 z-0 pointer-events-none opacity-70 mix-blend-screen"
+    >
+      <LightRays
+        raysOrigin="top-center"
+        raysColor="#C8813A"
+        raysSpeed={isMobile ? 0.3 : 0.5}
+        lightSpread={0.85}
+        rayLength={isMobile ? 1.0 : 1.5}
+        pulsating={false}
+        fadeDistance={1.1}
+        saturation={1.15}
+        followMouse={!isMobile}
+        mouseInfluence={0.4}
+        noiseAmount={0.05}
+        distortion={0.0}
+      />
+    </div>
   );
 }
 
@@ -98,7 +98,7 @@ function HeroVisual({ reduced }: { reduced: boolean | null }) {
       initial={{ opacity: 0, scale: 0.92, y: 30 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className={`relative w-full max-w-md mx-auto${!reduced ? " animate-float-slow" : ""}`}
+      className={`glow-ring relative w-full max-w-[280px] sm:max-w-sm md:max-w-md mx-auto${!reduced ? " animate-float-slow" : ""}`}
       style={{ rotate: -2, perspective: 1000 }}
     >
       <motion.div
@@ -231,56 +231,20 @@ const STATS = [
 /* ── Main export ─────────────────────────────────────────────────────────── */
 export function HeroSection() {
   const prefersReduced = useReducedMotion();
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (prefersReduced) return;
-    if ("ontouchstart" in window) return;
-    const el = sectionRef.current;
-    if (!el) return;
-    const onMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect();
-      el.style.setProperty("--cx", `${e.clientX - rect.left}px`);
-      el.style.setProperty("--cy", `${e.clientY - rect.top}px`);
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, [prefersReduced]);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative min-h-[65dvh] md:min-h-[78dvh] flex flex-col overflow-hidden"
-    >
-      {/* Background orbs */}
-      <div
-        aria-hidden
-        className={`absolute -top-40 -right-20 w-[700px] h-[700px] rounded-full bg-copper/5 blur-[120px] pointer-events-none${!prefersReduced ? " animate-float-slow" : ""}`}
-      />
-      <div
-        aria-hidden
-        className={`absolute -bottom-20 -left-20 w-[500px] h-[500px] rounded-full bg-teal-brand/5 blur-[100px] pointer-events-none${!prefersReduced ? " animate-float-fast" : ""}`}
-      />
-      {/* Extra orb for depth */}
-      <div
-        aria-hidden
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[400px] rounded-full bg-copper/[0.03] blur-[140px] pointer-events-none`}
-      />
+    <section className="relative min-h-[65dvh] md:min-h-[78dvh] flex flex-col overflow-hidden bg-base">
+      {/* Light Rays shader background */}
+      <HeroLightRays reduced={prefersReduced} />
 
-      {/* Topographic texture */}
+      {/* Film grain */}
       <div
         aria-hidden
-        className="absolute inset-0 topo-texture pointer-events-none"
+        className="absolute inset-0 z-[1] grain-texture pointer-events-none"
       />
-
-      {/* Floating particles */}
-      <ParticleField reduced={prefersReduced} />
-
-      {/* Cursor glow */}
-      {!prefersReduced && <CursorGlow />}
 
       {/* Main content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex items-center">
+      <Container className="relative z-10 flex-1 flex items-center pt-24 md:pt-28">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center py-14 lg:py-0 w-full">
           {/* Left: copy */}
           <motion.div
@@ -290,11 +254,11 @@ export function HeroSection() {
             className="flex flex-col gap-4 md:gap-6"
           >
             <motion.div variants={fadeUp}>
-              <Badge variant="teal">🇫🇮 Suomalainen ohjelmistotalo</Badge>
+              <Badge variant="teal">Suomalainen ohjelmistotalo</Badge>
             </motion.div>
 
             {/* Word-by-word headline */}
-            <h1 className="font-display font-bold text-ink text-3xl sm:text-5xl lg:text-6xl xl:text-7xl leading-tight tracking-tight">
+            <h1 className="font-display font-bold text-ink text-4xl sm:text-6xl lg:text-7xl xl:text-8xl leading-[1.05] tracking-tighter">
               <span style={{ perspective: 600 }}>
                 {HEADLINE_WORDS.map((word, i) => (
                   <motion.span
@@ -341,6 +305,9 @@ export function HeroSection() {
               <Button size="lg" asChild>
                 <Link href="/yhteystiedot">Pyydä ilmainen tarjous</Link>
               </Button>
+              <Button size="lg" variant="secondary" asChild>
+                <Link href="/portfolio">Katso töitämme</Link>
+              </Button>
             </motion.div>
 
             <motion.div variants={fadeUp} className="space-y-3">
@@ -349,17 +316,12 @@ export function HeroSection() {
                 verkkokaupat, AI-ratkaisut ja mobiilisovellukset.
               </p>
               <div className="flex flex-wrap gap-2">
-                {[
-                  { emoji: "🌐", label: "Verkkosivut" },
-                  { emoji: "🤖", label: "AI-ratkaisut" },
-                  { emoji: "🛒", label: "Verkkokaupat" },
-                  { emoji: "📱", label: "Mobiilisovellukset" },
-                ].map(({ emoji, label }) => (
+                {SERVICE_PILLS.map(({ icon: Icon, label }) => (
                   <span
                     key={label}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-wire bg-surface/60 text-ink-dim hover:border-copper/30 hover:text-ink transition-all duration-150"
                   >
-                    <span>{emoji}</span>
+                    <Icon size={13} strokeWidth={1.5} />
                     {label}
                   </span>
                 ))}
@@ -389,15 +351,15 @@ export function HeroSection() {
           </motion.div>
 
           {/* Right: visual */}
-          <div className="hidden lg:flex items-center justify-center">
+          <div className="flex items-center justify-center">
             <HeroVisual reduced={prefersReduced} />
           </div>
         </div>
-      </div>
+      </Container>
 
       {/* Stats bar */}
       <div className="border-t border-wire bg-surface/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <Container>
           <div className="grid grid-cols-3 divide-x divide-wire py-5">
             {STATS.map((stat, i) => (
               <motion.div
@@ -420,7 +382,7 @@ export function HeroSection() {
               </motion.div>
             ))}
           </div>
-        </div>
+        </Container>
       </div>
 
       {/* Scroll indicator */}

@@ -11,6 +11,7 @@ import {
   Timer,
 } from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
+import { Container } from "@/components/shared/Container";
 import { TiltCard } from "@/components/ui/TiltCard";
 import { fadeUp, staggerContainer } from "@/lib/animations";
 import { useRevealInView } from "@/lib/useRevealInView";
@@ -59,8 +60,8 @@ export function WhyApexSection() {
   const isInView = useRevealInView(ref);
 
   return (
-    <section className="py-10 md:py-20 bg-surface/30">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 md:py-24 lg:py-32 bg-surface/30">
+      <Container>
         <SectionHeader
           eyebrow="Miksi Apex Site"
           heading="Kuusi syytä valita meidät"
@@ -102,7 +103,7 @@ export function WhyApexSection() {
             </motion.div>
           ))}
         </motion.div>
-      </div>
+      </Container>
     </section>
   );
 }

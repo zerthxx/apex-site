@@ -2,24 +2,10 @@
 
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  Globe,
-  ShoppingCart,
-  Smartphone,
-  Cpu,
-  Code2,
-  type LucideProps,
-} from "lucide-react";
+import { Globe, ArrowRight } from "lucide-react";
 import { dropdownMenu } from "@/lib/animations";
 import { SERVICES } from "@/lib/constants";
-
-const ICON_MAP: Record<string, React.FC<LucideProps>> = {
-  Globe,
-  ShoppingCart,
-  Smartphone,
-  Cpu,
-  Code2,
-};
+import { ICON_MAP } from "@/lib/serviceIcons";
 
 interface ServicesDropdownProps {
   isOpen: boolean;
@@ -59,6 +45,18 @@ export function ServicesDropdown({ isOpen }: ServicesDropdownProps) {
                 </Link>
               );
             })}
+            <Link
+              href="/palvelut"
+              className="flex items-center justify-between gap-3 p-3 rounded-xl border border-dashed border-wire-bold hover:border-teal-brand/40 hover:bg-subtle transition-colors duration-150 group"
+            >
+              <span className="text-sm font-semibold text-ink-dim group-hover:text-teal-brand transition-colors duration-150">
+                Kaikki palvelut
+              </span>
+              <ArrowRight
+                size={15}
+                className="text-ink-ghost group-hover:text-teal-brand group-hover:translate-x-0.5 transition-all duration-150"
+              />
+            </Link>
           </div>
         </motion.div>
       )}

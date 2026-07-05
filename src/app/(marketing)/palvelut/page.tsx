@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { PageHero } from "@/components/shared/PageHero";
-import { ServiceCard } from "@/components/shared/ServiceCard";
 import { ContactCtaSection } from "@/components/sections/ContactCtaSection";
+import { Container } from "@/components/shared/Container";
+import { ServicesBentoGrid } from "./ServicesBentoGrid";
 import { SERVICES } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -23,14 +22,10 @@ export default function PalvelutPage() {
         cta={{ label: "Pyydä tarjous", href: "/yhteystiedot" }}
       />
 
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SERVICES.map((service) => (
-              <ServiceCard key={service.id} service={service} className="h-full" />
-            ))}
-          </div>
-        </div>
+      <section className="py-16 md:py-24 lg:py-32">
+        <Container>
+          <ServicesBentoGrid services={SERVICES} />
+        </Container>
       </section>
 
       <ContactCtaSection />

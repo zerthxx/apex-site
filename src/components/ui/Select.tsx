@@ -15,13 +15,30 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   hint?: string;
   options: SelectOption[];
   placeholder?: string;
+  leftIcon?: React.ReactNode;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, hint, options, placeholder, className, id, onChange, ...props }, ref) => {
+  (
+    {
+      label,
+      error,
+      hint,
+      options,
+      placeholder,
+      leftIcon,
+      className,
+      id,
+      onChange,
+      ...props
+    },
+    ref,
+  ) => {
     const generatedId = useId();
     const selectId = id ?? generatedId;
-    const [hasValue, setHasValue] = useState(!!props.value || !!props.defaultValue);
+    const [hasValue, setHasValue] = useState(
+      !!props.value || !!props.defaultValue,
+    );
 
     useEffect(() => {
       setHasValue(!!props.value || !!props.defaultValue);
@@ -30,23 +47,32 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={selectId} className="text-sm font-medium text-ink-dim">
+          <label
+            htmlFor={selectId}
+            className="text-sm font-medium text-ink-dim"
+          >
             {label}
           </label>
         )}
         <div className="relative">
+          {leftIcon && (
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost pointer-events-none">
+              {leftIcon}
+            </span>
+          )}
           <select
             ref={ref}
             id={selectId}
             className={cn(
               "w-full h-10 rounded-lg bg-elevated border text-sm appearance-none",
-              "pl-3 pr-8 transition-colors duration-150",
+              "pr-8 transition-colors duration-150",
+              leftIcon ? "pl-10" : "pl-3",
               "focus:outline-none focus:ring-1",
               error
                 ? "border-bad focus:border-bad focus:ring-bad/30"
                 : "border-wire focus:border-copper focus:ring-copper/30",
               hasValue ? "text-ink" : "text-ink-ghost",
-              className
+              className,
             )}
             onChange={(e) => {
               setHasValue(!!e.target.value);
@@ -60,7 +86,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             )}
             {options.map((opt) => (
-              <option key={opt.value} value={opt.value} className="bg-elevated text-ink">
+              <option
+                key={opt.value}
+                value={opt.value}
+                className="bg-elevated text-ink"
+              >
                 {opt.label}
               </option>
             ))}
@@ -74,6 +104,6 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {hint && !error && <p className="text-xs text-ink-ghost">{hint}</p>}
       </div>
     );
-  }
+  },
 );
 Select.displayName = "Select";

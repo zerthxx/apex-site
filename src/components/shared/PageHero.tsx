@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Container } from "@/components/shared/Container";
 
 interface PageHeroProps {
   eyebrow?: string;
@@ -27,7 +28,7 @@ export function PageHero({
     <section
       className={cn(
         "relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28",
-        className
+        className,
       )}
     >
       {/* Background decoration */}
@@ -37,7 +38,7 @@ export function PageHero({
             aria-hidden
             className={cn(
               "absolute -top-40 right-0 w-[600px] h-[600px] rounded-full pointer-events-none",
-              "bg-copper/5 blur-[120px]"
+              "bg-copper/5 blur-[120px]",
             )}
           />
           {backgroundVariant === "service" && (
@@ -49,7 +50,7 @@ export function PageHero({
         </>
       )}
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <Container className="relative">
         <div className="max-w-3xl">
           {eyebrow && (
             <Badge variant="teal" className="mb-6">
@@ -72,14 +73,19 @@ export function PageHero({
                 </Button>
               )}
               {secondaryCta && (
-                <Button variant="secondary" size="lg" asChild rightIcon={<ArrowRight size={18} />}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  asChild
+                  rightIcon={<ArrowRight size={18} />}
+                >
                   <Link href={secondaryCta.href}>{secondaryCta.label}</Link>
                 </Button>
               )}
             </div>
           )}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

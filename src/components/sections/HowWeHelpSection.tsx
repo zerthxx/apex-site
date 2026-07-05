@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { motion } from "motion/react";
 import { AlertTriangle, Zap, TrendingUp } from "lucide-react";
 import { useRevealInView } from "@/lib/useRevealInView";
+import { Container } from "@/components/shared/Container";
 
 const PHASES = [
   {
@@ -78,8 +79,8 @@ export function HowWeHelpSection() {
   const inView = useRevealInView(ref);
 
   return (
-    <section ref={ref} className="py-20 bg-surface/30">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section ref={ref} className="py-16 md:py-24 lg:py-32 bg-surface/30">
+      <Container>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -169,7 +170,7 @@ export function HowWeHelpSection() {
             },
           )}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
