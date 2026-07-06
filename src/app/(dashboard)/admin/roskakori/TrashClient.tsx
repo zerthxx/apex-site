@@ -108,6 +108,24 @@ export function TrashClient() {
     }
   }
 
+  const [showDeleteAll, setShowDeleteAll] = useState(false);
+
+  async function permanentlyDeleteAll() {
+    const results = await Promise.all(
+      items.map((item) =>
+        fetch("/api/admin/trash/permanent-delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ entity_type: item.entity_type, id: item.id }),
+        }),
+      ),
+    );
+    if (results.some((r) => !r.ok)) {
+      setError("Osaa tietueista ei voitu poistaa pysyvästi");
+    }
+    await load();
+  }
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
@@ -134,6 +152,15 @@ export function TrashClient() {
             </option>
           ))}
         </select>
+        {items.length > 0 && (
+          <button
+            onClick={() => setShowDeleteAll(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-bad/30 text-sm font-medium text-bad hover:bg-bad/10 transition-colors shrink-0"
+          >
+            <Trash2 size={14} />
+            Poista kaikki pysyvästi
+          </button>
+        )}
       </div>
 
       {error && <p className="text-sm text-bad mb-3">{error}</p>}
@@ -220,6 +247,17 @@ export function TrashClient() {
           danger
           onClose={() => setPermanentTarget(null)}
           onConfirm={() => permanentlyDelete(permanentTarget)}
+        />
+      )}
+
+      {showDeleteAll && (
+        <ConfirmDialog
+          title="Poista kaikki pysyvästi"
+          message={`Kaikki ${items.length} näkyvää tietuetta${typeFilter || search ? " (nykyisen suodattimen mukaan)" : ""} poistetaan pysyvästi tietokannasta. Tätä ei voi kumota.`}
+          confirmLabel="Poista kaikki pysyvästi"
+          danger
+          onClose={() => setShowDeleteAll(false)}
+          onConfirm={permanentlyDeleteAll}
         />
       )}
     </div>

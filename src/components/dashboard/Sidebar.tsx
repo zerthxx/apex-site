@@ -117,6 +117,18 @@ export function Sidebar({
               onClick={onMobileClose}
             />
             <SidebarLink
+              href="/portaali/tarjoukset"
+              label="Tarjoukset"
+              icon={<FileText size={16} />}
+              onClick={onMobileClose}
+            />
+            <SidebarLink
+              href="/portaali/projektit"
+              label="Projektit"
+              icon={<FolderOpen size={16} />}
+              onClick={onMobileClose}
+            />
+            <SidebarLink
               href="/crm/yritykset"
               label="Yritykset"
               icon={<Briefcase size={16} />}

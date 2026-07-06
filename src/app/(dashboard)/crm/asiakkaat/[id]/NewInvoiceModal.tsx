@@ -7,19 +7,22 @@ import type { Invoice, Project } from "./types";
 export function NewInvoiceModal({
   customerId,
   projects,
+  invoice,
   onClose,
-  onCreated,
+  onSaved,
 }: {
   customerId: string;
   projects: Project[];
+  invoice?: Invoice;
   onClose: () => void;
-  onCreated: (inv: Invoice) => void;
+  onSaved: (inv: Invoice) => void;
 }) {
+  const isEdit = !!invoice;
   const [form, setForm] = useState({
     project_id: "",
-    amount: "",
-    due_date: "",
-    status: "pending",
+    amount: invoice?.amount != null ? String(invoice.amount) : "",
+    due_date: invoice?.due_date ? invoice.due_date.slice(0, 10) : "",
+    status: invoice?.status ?? "pending",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -27,16 +30,24 @@ export function NewInvoiceModal({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    const body = isEdit
+      ? {
+          id: invoice!.id,
+          amount: form.amount ? parseFloat(form.amount) : null,
+          due_date: form.due_date || null,
+          status: form.status,
+        }
+      : {
+          customer_id: customerId,
+          project_id: form.project_id || null,
+          amount: form.amount ? parseFloat(form.amount) : null,
+          due_date: form.due_date || null,
+          status: form.status,
+        };
     const res = await fetch("/api/invoices", {
-      method: "POST",
+      method: isEdit ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customer_id: customerId,
-        project_id: form.project_id || null,
-        amount: form.amount ? parseFloat(form.amount) : null,
-        due_date: form.due_date || null,
-        status: form.status,
-      }),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
     setSaving(false);
@@ -44,7 +55,7 @@ export function NewInvoiceModal({
       setError(data.error ?? "Virhe");
       return;
     }
-    onCreated(data.invoice);
+    onSaved(data.invoice);
     onClose();
   }
 
@@ -56,29 +67,35 @@ export function NewInvoiceModal({
       />
       <div className="relative w-full max-w-md mx-4 bg-elevated border border-wire rounded-xl shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-ink">Uusi lasku</h2>
+          <h2 className="text-base font-semibold text-ink">
+            {isEdit ? "Muokkaa laskua" : "Uusi lasku"}
+          </h2>
           <button onClick={onClose} className="text-ink-ghost hover:text-ink">
             <X size={16} />
           </button>
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
-          <div>
-            <label className="block text-xs text-ink-ghost mb-1">
-              Projekti
-            </label>
-            <select
-              value={form.project_id}
-              onChange={(e) => setForm({ ...form, project_id: e.target.value })}
-              className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
-            >
-              <option value="">Ei projektia</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {!isEdit && (
+            <div>
+              <label className="block text-xs text-ink-ghost mb-1">
+                Projekti
+              </label>
+              <select
+                value={form.project_id}
+                onChange={(e) =>
+                  setForm({ ...form, project_id: e.target.value })
+                }
+                className="w-full bg-surface border border-wire rounded-lg px-3 py-2 text-sm text-ink outline-none focus:border-copper transition-colors"
+              >
+                <option value="">Ei projektia</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-ink-ghost mb-1">
@@ -114,6 +131,14 @@ export function NewInvoiceModal({
             >
               <option value="pending">Odottaa</option>
               <option value="sent">Lähetetty</option>
+              {isEdit && (
+                <>
+                  <option value="paid">Maksettu</option>
+                  <option value="overdue">Myöhässä</option>
+                  <option value="refunded">Palautettu</option>
+                  <option value="cancelled">Peruttu</option>
+                </>
+              )}
             </select>
           </div>
           {error && <p className="text-xs text-bad">{error}</p>}
@@ -130,7 +155,7 @@ export function NewInvoiceModal({
               disabled={saving}
               className="flex-1 py-2 rounded-lg bg-copper text-white text-sm font-medium hover:bg-copper/90 disabled:opacity-50 transition-colors"
             >
-              {saving ? "..." : "Luo lasku"}
+              {saving ? "..." : isEdit ? "Tallenna" : "Luo lasku"}
             </button>
           </div>
         </form>

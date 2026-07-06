@@ -51,6 +51,7 @@ interface Props {
   invoices: Invoice[];
   payments: Payment[];
   leadRequests: LeadRequest[];
+  canModerate: boolean;
 }
 
 export function CustomerDetailClient({
@@ -60,6 +61,7 @@ export function CustomerDetailClient({
   invoices: initialInvoices,
   payments,
   leadRequests: initialLeadRequests,
+  canModerate,
 }: Props) {
   const [customer, setCustomer] = useState(initial);
   const [quotes, setQuotes] = useState(initialQuotes);
@@ -234,6 +236,42 @@ export function CustomerDetailClient({
     }
   }
 
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+
+  async function deleteInvoice(id: string) {
+    const res = await fetch("/api/invoices", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error ?? "Poisto epäonnistui");
+    }
+    setInvoices((prev) => prev.filter((i) => i.id !== id));
+  }
+
+  const [showDeleteAllInvoices, setShowDeleteAllInvoices] = useState(false);
+
+  async function deleteAllInvoices() {
+    const results = await Promise.all(
+      invoices.map(async (i) => {
+        const res = await fetch("/api/invoices", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: i.id }),
+        });
+        return { id: i.id, ok: res.ok };
+      }),
+    );
+    const deletedIds = new Set(results.filter((r) => r.ok).map((r) => r.id));
+    setInvoices((prev) => prev.filter((i) => !deletedIds.has(i.id)));
+    if (deletedIds.size < results.length) {
+      throw new Error("Osaa laskuista ei voitu poistaa");
+    }
+  }
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   async function deleteCustomer() {
@@ -370,8 +408,12 @@ export function CustomerDetailClient({
       {tab === "laskut" && (
         <InvoicesTab
           invoices={invoices}
+          canModerate={canModerate}
           onNewInvoice={() => setShowNewInvoice(true)}
           onMarkPaid={markInvoicePaid}
+          onEdit={setEditingInvoice}
+          onDelete={setInvoiceToDelete}
+          onDeleteAll={() => setShowDeleteAllInvoices(true)}
         />
       )}
 
@@ -398,7 +440,42 @@ export function CustomerDetailClient({
           customerId={customer.id}
           projects={projects}
           onClose={() => setShowNewInvoice(false)}
-          onCreated={(inv) => setInvoices((prev) => [inv, ...prev])}
+          onSaved={(inv) => setInvoices((prev) => [inv, ...prev])}
+        />
+      )}
+
+      {editingInvoice && (
+        <NewInvoiceModal
+          customerId={customer.id}
+          projects={projects}
+          invoice={editingInvoice}
+          onClose={() => setEditingInvoice(null)}
+          onSaved={(inv) => {
+            setInvoices((prev) =>
+              prev.map((i) => (i.id === inv.id ? { ...i, ...inv } : i)),
+            );
+            setEditingInvoice(null);
+          }}
+        />
+      )}
+
+      {invoiceToDelete && (
+        <ConfirmDialog
+          title="Poista lasku"
+          message={`Lasku "${invoiceToDelete.invoice_number ?? "Lasku"}" siirretään roskakoriin.`}
+          confirmLabel="Poista"
+          onClose={() => setInvoiceToDelete(null)}
+          onConfirm={() => deleteInvoice(invoiceToDelete.id)}
+        />
+      )}
+
+      {showDeleteAllInvoices && (
+        <ConfirmDialog
+          title="Poista kaikki laskut"
+          message={`Kaikki ${invoices.length} laskua siirretään roskakoriin. Tätä ei voi kumota tältä näkymältä, mutta laskut voi palauttaa Roskakorista.`}
+          confirmLabel="Poista kaikki"
+          onClose={() => setShowDeleteAllInvoices(false)}
+          onConfirm={deleteAllInvoices}
         />
       )}
 

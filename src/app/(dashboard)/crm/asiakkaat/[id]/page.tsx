@@ -23,6 +23,7 @@ export default async function CustomerDetailPage({
     .single();
   if (!["owner", "admin", "employee"].includes(profile?.role ?? ""))
     redirect("/dashboard");
+  const canModerate = ["owner", "admin"].includes(profile?.role ?? "");
 
   const [
     customerRes,
@@ -94,6 +95,7 @@ export default async function CustomerDetailPage({
         invoices={invoicesRes.data ?? []}
         payments={paymentsRes.data ?? []}
         leadRequests={leadRequestsRes.data ?? []}
+        canModerate={canModerate}
       />
     </div>
   );
