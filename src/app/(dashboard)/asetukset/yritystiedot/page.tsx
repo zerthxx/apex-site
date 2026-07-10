@@ -1,21 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { Building2 } from "lucide-react";
+import {
+  SettingsButton,
+  SettingsField,
+  SettingsSection,
+  StatusBanner,
+  settingsInputClass,
+} from "@/components/settings/SettingsKit";
+import { companySchema, fieldErrors } from "@/lib/validation";
 
-const inputClass = "w-full px-4 py-3 rounded-xl bg-surface border border-wire text-ink placeholder:text-ink-ghost text-sm focus:outline-none focus:border-copper/50 transition-colors";
-const textareaClass = `${inputClass} resize-y min-h-[160px]`;
+type CompanyForm = {
+  company_name: string;
+  y_tunnus: string;
+  toimiala: string;
+  lisatiedot: string;
+};
+
+const EMPTY: CompanyForm = {
+  company_name: "",
+  y_tunnus: "",
+  toimiala: "",
+  lisatiedot: "",
+};
 
 export default function YritystiedotPage() {
-  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState<CompanyForm>(EMPTY);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [fetching, setFetching] = useState(true);
-  const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [form, setForm] = useState({
-    company_name: "",
-    y_tunnus: "",
-    toimiala: "",
-    lisatiedot: "",
-  });
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     fetch("/api/account/company-info")
@@ -33,110 +51,152 @@ export default function YritystiedotPage() {
       .finally(() => setFetching(false));
   }, []);
 
-  function setF(key: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm((p) => ({ ...p, [key]: e.target.value }));
+  function set(key: keyof CompanyForm) {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm((f) => ({ ...f, [key]: e.target.value }));
+      if (errors[key]) setErrors((prev) => ({ ...prev, [key]: "" }));
+    };
+  }
+
+  function validateField(key: keyof CompanyForm) {
+    const result = companySchema.safeParse(form);
+    if (result.success) {
+      setErrors({});
+      return;
+    }
+    const all = fieldErrors(result.error);
+    setErrors((prev) => ({ ...prev, [key]: all[key] ?? "" }));
   }
 
   function showStatus(type: "success" | "error", message: string) {
     setStatus({ type, message });
-    setTimeout(() => setStatus(null), 4000);
+    setTimeout(() => setStatus(null), 5000);
   }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    const result = companySchema.safeParse(form);
+    if (!result.success) {
+      setErrors(fieldErrors(result.error));
+      showStatus("error", "Tarkista punaisella merkityt kentät.");
+      return;
+    }
+    setErrors({});
     setLoading(true);
     const res = await fetch("/api/account/company-info", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(result.data),
     });
+    const data = await res.json().catch(() => ({}));
     setLoading(false);
-    if (res.ok) showStatus("success", "Yritystiedot tallennettu.");
-    else {
-      const body = await res.json().catch(() => ({}));
-      showStatus("error", body?.error ?? "Tallennus epäonnistui.");
+    if (!res.ok) {
+      if (data.fields) setErrors(data.fields);
+      showStatus("error", data.error ?? "Tallennus epäonnistui.");
+      return;
     }
+    showStatus("success", "Yritystiedot tallennettu.");
   }
 
   if (fetching) {
-    return <div className="h-32 flex items-center justify-center text-sm text-ink-ghost">Ladataan...</div>;
+    return (
+      <div className="h-32 flex items-center justify-center text-sm text-ink-ghost">
+        Ladataan...
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={save} className="flex flex-col gap-4 max-w-lg">
-      <div>
-        <h2 className="text-sm font-semibold text-ink mb-0.5">Yritystiedot</h2>
-        <p className="text-xs text-ink-ghost">Täydennä yrityksesi tiedot — ne näkyvät henkilöstöllemme projektin taustatietona.</p>
-      </div>
+    <div className="flex flex-col gap-5 max-w-lg">
+      {status && <StatusBanner type={status.type} message={status.message} />}
 
-      {status && (
-        <div className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm ${
-          status.type === "success"
-            ? "bg-green-500/10 border border-green-500/20 text-green-400"
-            : "bg-red-500/10 border border-red-500/20 text-red-400"
-        }`}>
-          {status.type === "success" ? <CheckCircle size={15} /> : <AlertCircle size={15} />}
-          {status.message}
-        </div>
-      )}
-
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-ink-dim">Yrityksen nimi</label>
-        <input
-          type="text"
-          value={form.company_name}
-          onChange={setF("company_name")}
-          placeholder="Esimerkki Oy"
-          className={inputClass}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-ink-dim">Y-tunnus</label>
-          <input
-            type="text"
-            value={form.y_tunnus}
-            onChange={setF("y_tunnus")}
-            placeholder="1234567-8"
-            className={inputClass}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-ink-dim">Toimiala</label>
-          <input
-            type="text"
-            value={form.toimiala}
-            onChange={setF("toimiala")}
-            placeholder="esim. Rakennusala"
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <div className="flex justify-between items-baseline">
-          <label className="text-xs font-medium text-ink-dim">Lisätiedot</label>
-          <span className="text-[10px] text-ink-ghost">{form.lisatiedot.length} merkkiä</span>
-        </div>
-        <textarea
-          value={form.lisatiedot}
-          onChange={setF("lisatiedot")}
-          placeholder="Kerro yrityksestäsi, tavoitteistasi, toiveistasi projektin suhteen tai muista tärkeistä tiedoista..."
-          className={textareaClass}
-          rows={8}
-        />
-        <p className="text-[11px] text-ink-ghost">Voit kirjoittaa vapaasti — ei merkkirajoitusta.</p>
-      </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-3 rounded-xl bg-copper text-[#0A0C10] font-semibold text-sm hover:bg-copper-light transition-colors disabled:opacity-60 mt-2"
+      <SettingsSection
+        icon={Building2}
+        title="Yritystiedot"
+        description="Tiedot näkyvät henkilöstöllemme projektin taustatietona — ne eivät ole julkisia."
       >
-        {loading ? "Tallennetaan..." : "Tallenna yritystiedot"}
-      </button>
-    </form>
+        <form onSubmit={save} className="flex flex-col gap-4">
+          <SettingsField
+            label="Yrityksen nimi"
+            htmlFor="company_name"
+            error={errors.company_name}
+            helper="Virallinen nimi kaupparekisterissä."
+          >
+            <input
+              id="company_name"
+              type="text"
+              value={form.company_name}
+              onChange={set("company_name")}
+              onBlur={() => validateField("company_name")}
+              placeholder="Esimerkki Oy"
+              autoComplete="organization"
+              className={settingsInputClass}
+            />
+          </SettingsField>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <SettingsField
+              label="Y-tunnus"
+              htmlFor="y_tunnus"
+              error={errors.y_tunnus}
+              helper="Muoto 1234567-8 — tarkistamme tarkistusnumeron."
+            >
+              <input
+                id="y_tunnus"
+                type="text"
+                value={form.y_tunnus}
+                onChange={set("y_tunnus")}
+                onBlur={() => validateField("y_tunnus")}
+                placeholder="1234567-8"
+                maxLength={9}
+                className={settingsInputClass}
+              />
+            </SettingsField>
+            <SettingsField
+              label="Toimiala"
+              htmlFor="toimiala"
+              error={errors.toimiala}
+              helper="Esim. rakennusala, ravintola, verkkokauppa."
+            >
+              <input
+                id="toimiala"
+                type="text"
+                value={form.toimiala}
+                onChange={set("toimiala")}
+                onBlur={() => validateField("toimiala")}
+                placeholder="Rakennusala"
+                className={settingsInputClass}
+              />
+            </SettingsField>
+          </div>
+
+          <SettingsField
+            label="Lisätiedot"
+            htmlFor="lisatiedot"
+            error={errors.lisatiedot}
+            helper={`${form.lisatiedot.length} / 5000 merkkiä`}
+          >
+            <textarea
+              id="lisatiedot"
+              value={form.lisatiedot}
+              onChange={set("lisatiedot")}
+              onBlur={() => validateField("lisatiedot")}
+              placeholder="Kerro yrityksestäsi, tavoitteistasi ja toiveistasi projektin suhteen…"
+              rows={8}
+              maxLength={5000}
+              className={`${settingsInputClass} resize-y min-h-[160px]`}
+            />
+          </SettingsField>
+
+          <SettingsButton
+            type="submit"
+            loading={loading}
+            className="w-full mt-1"
+          >
+            Tallenna yritystiedot
+          </SettingsButton>
+        </form>
+      </SettingsSection>
+    </div>
   );
 }

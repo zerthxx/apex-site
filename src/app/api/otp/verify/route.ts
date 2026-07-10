@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { consumeVerification, normalizeEmail } from "@/lib/verification";
 import { findUserByEmail } from "@/lib/users";
-import { recordLoginSession } from "@/lib/sessions";
+import { recordLoginSession, SESSION_ROW_COOKIE } from "@/lib/sessions";
 import { logActivity } from "@/lib/supabase/activityLog";
 import { getClientIp, getUserAgent, sameOriginOk } from "@/lib/requestMeta";
 
@@ -77,7 +77,19 @@ export async function POST(req: NextRequest) {
       })
       .eq("id", user.id)
       .eq("email_verified", false);
-    await recordLoginSession(admin, user.id, req);
+    const session = await recordLoginSession(admin, user.id, req);
+    const response = NextResponse.json({ success: true });
+    if (session) {
+      // Lets /istunnot truthfully mark this browser's row as "Tämä laite".
+      response.cookies.set(SESSION_ROW_COOKIE, session.id, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * 30,
+        path: "/",
+      });
+    }
+    return response;
   }
 
   return NextResponse.json({ success: true });

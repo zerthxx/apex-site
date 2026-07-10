@@ -18,7 +18,10 @@ export type ActivityEventType =
   | "account_locked"
   | "account_unlocked"
   | "force_password_reset"
-  | "role_changed";
+  | "role_changed"
+  | "api_key_created"
+  | "api_key_revoked"
+  | "api_key_deleted";
 
 export async function logActivity(
   supabase: SupabaseClient,
@@ -58,6 +61,9 @@ export const EVENT_LABELS: Record<string, string> = {
   account_locked: "Tili lukittu",
   account_unlocked: "Lukitus poistettu",
   force_password_reset: "Pakotettu salasanan vaihto",
+  api_key_created: "API-avain luotu",
+  api_key_revoked: "API-avain peruttu",
+  api_key_deleted: "API-avain poistettu",
   role_changed: "Rooli muutettu",
   user_suspended: "Käyttäjä jäädytetty",
   user_unsuspended: "Jäädytys poistettu",

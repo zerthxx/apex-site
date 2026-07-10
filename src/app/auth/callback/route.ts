@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 import { logActivity } from "@/lib/supabase/activityLog";
-import { recordLoginSession } from "@/lib/sessions";
+import { recordLoginSession, SESSION_ROW_COOKIE } from "@/lib/sessions";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -20,9 +20,11 @@ export async function GET(request: Request) {
 
       // Login-history row + email-verified backstop (Google verifies the
       // address, so first-time OAuth users skip the email OTP). Best effort.
+      let sessionRowId: string | null = null;
       try {
         const admin = createAdminClient();
-        await recordLoginSession(admin, data.user.id, request);
+        const session = await recordLoginSession(admin, data.user.id, request);
+        sessionRowId = session?.id ?? null;
         await admin
           .from("profiles")
           .update({
@@ -42,11 +44,22 @@ export async function GET(request: Request) {
         meta.address &&
         meta.postal_code &&
         meta.city;
-      if (!profileComplete) {
-        return NextResponse.redirect(`${origin}/?tiedot=1`);
+      const destination = !profileComplete
+        ? `${origin}/?tiedot=1`
+        : `${origin}${next === "/" ? "/dashboard" : next}`;
+
+      const response = NextResponse.redirect(destination);
+      if (sessionRowId) {
+        // Lets /istunnot truthfully mark this browser's row as "Tämä laite".
+        response.cookies.set(SESSION_ROW_COOKIE, sessionRowId, {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 60 * 60 * 24 * 30,
+          path: "/",
+        });
       }
-      const destination = next === "/" ? "/dashboard" : next;
-      return NextResponse.redirect(`${origin}${destination}`);
+      return response;
     }
   }
 
