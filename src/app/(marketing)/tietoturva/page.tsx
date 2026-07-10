@@ -58,7 +58,11 @@ export default function TietoturvaPage() {
         eyebrow="Tietoturva"
         title="Rakennamme verkkosivustot turvallisuus edellä."
         description="Tietoturva ei ole lisäominaisuus — se on perusvaatimus. Näin suojaamme asiakkaidemme verkkosivustot ja käyttäjien tiedot."
-        cta={{ label: "Pyydä tarjous", href: "/yhteystiedot" }}
+        cta={{
+          label: "Pyydä tarjous",
+          href: "/yhteystiedot",
+          requiresAuth: true,
+        }}
         backgroundVariant="service"
       />
 
@@ -76,8 +80,12 @@ export default function TietoturvaPage() {
                   <div className="mb-4 inline-flex p-2.5 rounded-lg bg-copper/10">
                     <Icon size={20} className="text-copper" />
                   </div>
-                  <h3 className="font-heading font-semibold text-ink mb-2">{feature.title}</h3>
-                  <p className="text-ink-dim text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="font-heading font-semibold text-ink mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-ink-dim text-sm leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               );
             })}
@@ -95,9 +103,10 @@ export default function TietoturvaPage() {
             Tietoturva sisältyy jokaiseen projektiin
           </h2>
           <p className="text-ink-dim leading-relaxed mb-8 max-w-xl mx-auto">
-            Emme veloita tietoturvasta erikseen. SSL, suojattu koodi ja tietosuojamyönteinen
-            rakenne kuuluvat jokaisen projektin toimitukseen — oli kyse verkkosivustosta,
-            verkkokaupasta tai sovelluksesta.
+            Emme veloita tietoturvasta erikseen. SSL, suojattu koodi ja
+            tietosuojamyönteinen rakenne kuuluvat jokaisen projektin
+            toimitukseen — oli kyse verkkosivustosta, verkkokaupasta tai
+            sovelluksesta.
           </p>
           <Button size="lg" asChild>
             <Link href="/yhteystiedot">Aloita turvallinen projekti</Link>

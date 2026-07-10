@@ -1,13 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  Clock, MessageCircle, BarChart2, Zap, Timer, TrendingUp,
-  Bot, Plug, Wand2, Shield, Lock, Headphones, ArrowRight, Phone,
+  Clock,
+  MessageCircle,
+  BarChart2,
+  Zap,
+  Timer,
+  TrendingUp,
+  Bot,
+  Plug,
+  Wand2,
+  Shield,
+  Lock,
+  Headphones,
+  ArrowRight,
+  Phone,
   CheckCircle2,
 } from "lucide-react";
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { RevealSection } from "@/components/shared/RevealSection";
 import { ProcessTimeline } from "@/components/shared/ProcessTimeline";
 import { AiDashboardMockup } from "./AiDashboardMockup";
@@ -57,31 +70,80 @@ const SERVICE_CARDS = [
     icon: Bot,
     title: "AI Chatbotit",
     desc: "Asiakaspalvelu, joka ei nuku.",
-    items: ["24/7 asiakaspalvelu", "Useita kieliä", "FAQ-automaatio", "Leadien kerääminen"],
+    items: [
+      "24/7 asiakaspalvelu",
+      "Useita kieliä",
+      "FAQ-automaatio",
+      "Leadien kerääminen",
+    ],
   },
   {
     icon: Zap,
     title: "AI Automaatiot",
     desc: "Toistuvat tehtävät pois tiimiltäsi.",
-    items: ["Sähköpostiautomaatio", "CRM-päivitykset", "PDF-käsittely", "Raportit", "Työnkulut"],
+    items: [
+      "Sähköpostiautomaatio",
+      "CRM-päivitykset",
+      "PDF-käsittely",
+      "Raportit",
+      "Työnkulut",
+    ],
   },
   {
     icon: Plug,
     title: "AI Integraatiot",
     desc: "AI osaksi nykyisiä järjestelmiäsi.",
-    items: ["OpenAI & Anthropic", "Gemini", "REST API", "Dashboardit", "Olemassaoleva infra"],
+    items: [
+      "OpenAI & Anthropic",
+      "Gemini",
+      "REST API",
+      "Dashboardit",
+      "Olemassaoleva infra",
+    ],
   },
 ];
 
 const USE_CASES = [
-  { emoji: "🤖", title: "Asiakaspalvelu", text: "AI vastaa kysymyksiin 24/7 ilman odotusaikaa" },
-  { emoji: "📧", title: "Sähköpostit", text: "Automaattinen lajittelu ja vastausluonnokset" },
-  { emoji: "📄", title: "Dokumentit", text: "Analysointi, yhteenvedot ja tiedon haku" },
-  { emoji: "📊", title: "Raportointi", text: "Automaattiset raportit ajastettuna" },
-  { emoji: "📅", title: "Varausjärjestelmät", text: "Automaattiset vahvistukset ja muistutukset" },
-  { emoji: "🛒", title: "Verkkokauppa", text: "Tuotesuositukset ja asiakastuki" },
-  { emoji: "📈", title: "Myyntianalytiikka", text: "Ennusteet, trendit ja myyntiputken hallinta" },
-  { emoji: "🔗", title: "CRM-integraatiot", text: "Automaattiset asiakastietojen päivitykset" },
+  {
+    emoji: "🤖",
+    title: "Asiakaspalvelu",
+    text: "AI vastaa kysymyksiin 24/7 ilman odotusaikaa",
+  },
+  {
+    emoji: "📧",
+    title: "Sähköpostit",
+    text: "Automaattinen lajittelu ja vastausluonnokset",
+  },
+  {
+    emoji: "📄",
+    title: "Dokumentit",
+    text: "Analysointi, yhteenvedot ja tiedon haku",
+  },
+  {
+    emoji: "📊",
+    title: "Raportointi",
+    text: "Automaattiset raportit ajastettuna",
+  },
+  {
+    emoji: "📅",
+    title: "Varausjärjestelmät",
+    text: "Automaattiset vahvistukset ja muistutukset",
+  },
+  {
+    emoji: "🛒",
+    title: "Verkkokauppa",
+    text: "Tuotesuositukset ja asiakastuki",
+  },
+  {
+    emoji: "📈",
+    title: "Myyntianalytiikka",
+    text: "Ennusteet, trendit ja myyntiputken hallinta",
+  },
+  {
+    emoji: "🔗",
+    title: "CRM-integraatiot",
+    text: "Automaattiset asiakastietojen päivitykset",
+  },
 ];
 
 const TECHS = [
@@ -96,19 +158,50 @@ const TECHS = [
   { name: "Node.js", slug: "nodedotjs", desc: "Palvelinpuolen JS" },
   { name: "Docker", slug: "docker", desc: "Konttipohjainen deploy" },
   { name: "PostgreSQL", slug: "postgresql", desc: "Luotettava tietokanta" },
-  { name: "Azure OpenAI", slug: "microsoftazure", desc: "Enterprise AI-palvelu" },
+  {
+    name: "Azure OpenAI",
+    slug: "microsoftazure",
+    desc: "Enterprise AI-palvelu",
+  },
 ];
 
 const STEPS = [
-  { title: "Ota yhteyttä", text: "Live Chat, AI-chatbotti tai yhteydenottolomake — valitse sinulle sopivin tapa." },
-  { title: "Maksuton 30 min kartoitus", text: "Selvitämme yrityksesi tarpeet, tavoitteet ja mahdollisuudet." },
-  { title: "AI-prosessien kartoitus", text: "Tunnistamme prosessit, joissa AI tuo eniten hyötyä ja konkreettisia säästöjä." },
-  { title: "Ratkaisun suunnittelu", text: "Suunnittelemme teknisen arkkitehtuurin ja valitsemme oikeat mallit." },
-  { title: "Prototyyppi", text: "Rakennamme toimivan prototyypin ja validoimme sen kanssasi nopeasti." },
-  { title: "Kehitys", text: "Rakennamme ja integroimme AI-ratkaisun olemassaoleviin järjestelmiisi." },
-  { title: "Testaus", text: "Testaamme tarkkuuden, suorituskyvyn ja tietoturvan perusteellisesti." },
-  { title: "Käyttöönotto", text: "Käynnistämme ratkaisun turvallisesti ja koulutamme tiimisi." },
-  { title: "Tuki ja jatkokehitys", text: "Mittaamme hyödyt jatkuvasti ja kehitämme ratkaisua liiketoimintasi mukana." },
+  {
+    title: "Ota yhteyttä",
+    text: "Live Chat, AI-chatbotti tai yhteydenottolomake — valitse sinulle sopivin tapa.",
+  },
+  {
+    title: "Maksuton 30 min kartoitus",
+    text: "Selvitämme yrityksesi tarpeet, tavoitteet ja mahdollisuudet.",
+  },
+  {
+    title: "AI-prosessien kartoitus",
+    text: "Tunnistamme prosessit, joissa AI tuo eniten hyötyä ja konkreettisia säästöjä.",
+  },
+  {
+    title: "Ratkaisun suunnittelu",
+    text: "Suunnittelemme teknisen arkkitehtuurin ja valitsemme oikeat mallit.",
+  },
+  {
+    title: "Prototyyppi",
+    text: "Rakennamme toimivan prototyypin ja validoimme sen kanssasi nopeasti.",
+  },
+  {
+    title: "Kehitys",
+    text: "Rakennamme ja integroimme AI-ratkaisun olemassaoleviin järjestelmiisi.",
+  },
+  {
+    title: "Testaus",
+    text: "Testaamme tarkkuuden, suorituskyvyn ja tietoturvan perusteellisesti.",
+  },
+  {
+    title: "Käyttöönotto",
+    text: "Käynnistämme ratkaisun turvallisesti ja koulutamme tiimisi.",
+  },
+  {
+    title: "Tuki ja jatkokehitys",
+    text: "Mittaamme hyödyt jatkuvasti ja kehitämme ratkaisua liiketoimintasi mukana.",
+  },
 ];
 
 const KARTOITUS_ITEMS = [
@@ -157,42 +250,50 @@ const FAQ = [
   {
     id: "1",
     question: "Tarvitsenko AI-osaamista?",
-    answer: "Ei lainkaan. Hoidamme kaiken teknisen toteutuksen. Sinun tarvitsee vain kertoa, mitä haluat automatisoida — me huolehdimme lopusta.",
+    answer:
+      "Ei lainkaan. Hoidamme kaiken teknisen toteutuksen. Sinun tarvitsee vain kertoa, mitä haluat automatisoida — me huolehdimme lopusta.",
   },
   {
     id: "2",
     question: "Voidaanko AI integroida nykyiseen järjestelmääni?",
-    answer: "Kyllä. Rakennamme AI:n integroitumaan olemassaoleviin järjestelmiisi — CRM, sähköposti, ERP tai täysin räätälöity ohjelmisto. Integraatio on osa jokaista projektia.",
+    answer:
+      "Kyllä. Rakennamme AI:n integroitumaan olemassaoleviin järjestelmiisi — CRM, sähköposti, ERP tai täysin räätälöity ohjelmisto. Integraatio on osa jokaista projektia.",
   },
   {
     id: "3",
     question: "Kuinka turvallista AI on?",
-    answer: "Erittäin turvallista. Rakennamme ratkaisut siten, että arkaluonteinen data ei poistu järjestelmistäsi. Voimme käyttää myös paikallisia malleja täydellisen tietosuojan takaamiseksi.",
+    answer:
+      "Erittäin turvallista. Rakennamme ratkaisut siten, että arkaluonteinen data ei poistu järjestelmistäsi. Voimme käyttää myös paikallisia malleja täydellisen tietosuojan takaamiseksi.",
   },
   {
     id: "4",
     question: "Voinko käyttää OpenAI:tä?",
-    answer: "Kyllä. Käytämme OpenAI:n GPT-4o- ja o3-malleja laajasti. Sinulla voi olla oma API-avain tai hoidamme sen puolestasi kustannustehokkaasti.",
+    answer:
+      "Kyllä. Käytämme OpenAI:n GPT-4o- ja o3-malleja laajasti. Sinulla voi olla oma API-avain tai hoidamme sen puolestasi kustannustehokkaasti.",
   },
   {
     id: "5",
     question: "Voinko käyttää Anthropic Claudea?",
-    answer: "Kyllä. Claude 3.5 ja Claude 4 ovat erinomaisia ratkaisuja erityisesti pitkien dokumenttien käsittelyyn, tarkkaan analytiikkaan ja monimutkaisiin tehtäviin.",
+    answer:
+      "Kyllä. Claude 3.5 ja Claude 4 ovat erinomaisia ratkaisuja erityisesti pitkien dokumenttien käsittelyyn, tarkkaan analytiikkaan ja monimutkaisiin tehtäviin.",
   },
   {
     id: "6",
     question: "Kuinka kauan projekti kestää?",
-    answer: "Yksinkertainen automaatio tai chatbot valmistuu 2–4 viikossa. Monimutkaisempi ratkaisu integraatioineen 6–12 viikossa. Saat tarkan aikataulun kartoituspuhelun jälkeen.",
+    answer:
+      "Yksinkertainen automaatio tai chatbot valmistuu 2–4 viikossa. Monimutkaisempi ratkaisu integraatioineen 6–12 viikossa. Saat tarkan aikataulun kartoituspuhelun jälkeen.",
   },
   {
     id: "7",
     question: "Voinko aloittaa pienellä pilotilla?",
-    answer: "Kyllä — ja suosittelemme sitä lämpimästi. Pilotti on nopein tapa osoittaa konkreettiset hyödyt ennen laajempaa käyttöönottoa.",
+    answer:
+      "Kyllä — ja suosittelemme sitä lämpimästi. Pilotti on nopein tapa osoittaa konkreettiset hyödyt ennen laajempaa käyttöönottoa.",
   },
   {
     id: "8",
     question: "Paljonko AI-ratkaisu maksaa?",
-    answer: "Projekti alkaen 4 000 €. API-kulut vaihtelevat käytön mukaan, tyypillisesti 20–500 €/kk. Saat läpinäkyvän tarjouksen ilman piilokuluja kartoituspuhelun jälkeen.",
+    answer:
+      "Projekti alkaen 4 000 €. API-kulut vaihtelevat käytön mukaan, tyypillisesti 20–500 €/kk. Saat läpinäkyvän tarjouksen ilman piilokuluja kartoituspuhelun jälkeen.",
   },
 ];
 
@@ -201,7 +302,10 @@ export default function AiRatkaisutPage() {
     <>
       {/* ─── HERO ────────────────────────────────────────────── */}
       <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          aria-hidden
+        >
           <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] rounded-full bg-copper/5 blur-3xl" />
           <div className="absolute top-20 right-0 w-[400px] h-[400px] rounded-full bg-teal-brand/5 blur-3xl" />
         </div>
@@ -210,30 +314,48 @@ export default function AiRatkaisutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left — text */}
             <div>
-              <Badge variant="accent" className="mb-5">AI-ratkaisut</Badge>
+              <Badge variant="accent" className="mb-5">
+                AI-ratkaisut
+              </Badge>
               <h1 className="font-display font-bold text-ink text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
-                Tekoäly tekee rutiinityöt puolestasi – sinä keskityt liiketoimintasi kasvattamiseen.
+                Tekoäly tekee rutiinityöt puolestasi – sinä keskityt
+                liiketoimintasi kasvattamiseen.
               </h1>
               <p className="text-ink-dim text-lg leading-relaxed mb-8">
-                Rakennamme yrityksellesi räätälöityjä AI-ratkaisuja, jotka automatisoivat työvaiheita, nopeuttavat asiakaspalvelua, analysoivat dataa ja vapauttavat aikaa tärkeämpiin tehtäviin.
+                Rakennamme yrityksellesi räätälöityjä AI-ratkaisuja, jotka
+                automatisoivat työvaiheita, nopeuttavat asiakaspalvelua,
+                analysoivat dataa ja vapauttavat aikaa tärkeämpiin tehtäviin.
               </p>
               <div className="flex flex-wrap gap-4 mb-8">
                 <Button asChild size="lg" className="group">
                   <Link href="/yhteystiedot">
                     Varaa maksuton 30 min kartoitus
-                    <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+                    <ArrowRight
+                      size={16}
+                      className="transition-transform duration-200 group-hover:translate-x-1"
+                    />
                   </Link>
                 </Button>
                 <Button asChild variant="secondary" size="lg">
-                  <Link href="/yhteystiedot?palvelu=ai-ratkaisut">
-                    <Phone size={16} />Pyydä tarjous
-                  </Link>
+                  <RequestQuoteLink href="/yhteystiedot?palvelu=ai-ratkaisut">
+                    <Phone size={16} />
+                    Pyydä tarjous
+                  </RequestQuoteLink>
                 </Button>
               </div>
               <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {["Maksuton kartoitus", "Ei sitoutumista", "Räätälöity ratkaisu", "Integrointi järjestelmiisi"].map(t => (
-                  <span key={t} className="flex items-center gap-1.5 text-sm text-ink-dim">
-                    <span className="text-copper font-bold">✓</span>{t}
+                {[
+                  "Maksuton kartoitus",
+                  "Ei sitoutumista",
+                  "Räätälöity ratkaisu",
+                  "Integrointi järjestelmiisi",
+                ].map((t) => (
+                  <span
+                    key={t}
+                    className="flex items-center gap-1.5 text-sm text-ink-dim"
+                  >
+                    <span className="text-copper font-bold">✓</span>
+                    {t}
                   </span>
                 ))}
               </div>
@@ -241,7 +363,10 @@ export default function AiRatkaisutPage() {
 
             {/* Right — AI dashboard mockup */}
             <div className="relative">
-              <div className="pointer-events-none absolute -inset-4 rounded-3xl bg-copper/6 blur-2xl" aria-hidden />
+              <div
+                className="pointer-events-none absolute -inset-4 rounded-3xl bg-copper/6 blur-2xl"
+                aria-hidden
+              />
               <AiDashboardMockup />
             </div>
           </div>
@@ -253,21 +378,29 @@ export default function AiRatkaisutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <RevealSection>
             <div className="text-center mb-10">
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Miksi AI?</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">
+                Miksi AI?
+              </span>
               <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
                 Tunnistetko nämä haasteet?
               </h2>
               <p className="text-ink-dim mt-3 max-w-lg mx-auto">
-                Nämä ovat yleisimmät syyt, miksi yritykset ottavat AI:n käyttöön.
+                Nämä ovat yleisimmät syyt, miksi yritykset ottavat AI:n
+                käyttöön.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {WHY_AI_CARDS.map(({ icon: Icon, title, text }) => (
-                <div key={title} className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/40 hover:shadow-glow hover:scale-[1.01] transition-all duration-200">
+                <div
+                  key={title}
+                  className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/40 hover:shadow-glow hover:scale-[1.01] transition-all duration-200"
+                >
                   <div className="w-10 h-10 rounded-xl bg-copper/10 flex items-center justify-center mb-4">
                     <Icon size={18} className="text-copper" />
                   </div>
-                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <h3 className="font-heading font-semibold text-ink mb-2">
+                    {title}
+                  </h3>
                   <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
               ))}
@@ -281,24 +414,42 @@ export default function AiRatkaisutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <RevealSection>
             <div className="text-center mb-10">
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Palvelut</span>
-              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Mitä saat meiltä</h2>
-              <p className="text-ink-dim mt-3 max-w-lg mx-auto">Konkreettisia, mitattavia tuloksia — ei pelkkiä kokeiluja.</p>
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">
+                Palvelut
+              </span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
+                Mitä saat meiltä
+              </h2>
+              <p className="text-ink-dim mt-3 max-w-lg mx-auto">
+                Konkreettisia, mitattavia tuloksia — ei pelkkiä kokeiluja.
+              </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {SERVICE_CARDS.map(({ icon: Icon, title, desc, items }) => (
-                <div key={title} className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:shadow-glow transition-all duration-200">
+                <div
+                  key={title}
+                  className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:shadow-glow transition-all duration-200"
+                >
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-9 h-9 rounded-lg bg-copper/10 flex items-center justify-center">
                       <Icon size={16} className="text-copper" />
                     </div>
-                    <h3 className="font-heading font-semibold text-ink">{title}</h3>
+                    <h3 className="font-heading font-semibold text-ink">
+                      {title}
+                    </h3>
                   </div>
                   <p className="text-ink-dim text-sm mb-4">{desc}</p>
                   <ul className="space-y-2">
-                    {items.map(item => (
-                      <li key={item} className="flex items-center gap-2 text-sm text-ink-dim">
-                        <CheckCircle2 size={14} className="text-copper shrink-0" />{item}
+                    {items.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-center gap-2 text-sm text-ink-dim"
+                      >
+                        <CheckCircle2
+                          size={14}
+                          className="text-copper shrink-0"
+                        />
+                        {item}
                       </li>
                     ))}
                   </ul>
@@ -309,13 +460,18 @@ export default function AiRatkaisutPage() {
               <div>
                 <span className="text-ink-ghost text-sm">Alkaen </span>
                 <span className="text-copper font-bold text-2xl">4 000 €</span>
-                <span className="text-ink-ghost text-sm ml-1">räätälöity AI-projekti</span>
+                <span className="text-ink-ghost text-sm ml-1">
+                  räätälöity AI-projekti
+                </span>
               </div>
               <Button asChild size="md" className="group">
-                <Link href="/yhteystiedot?palvelu=ai-ratkaisut">
+                <RequestQuoteLink href="/yhteystiedot?palvelu=ai-ratkaisut">
                   Pyydä tarjous
-                  <ArrowRight size={15} className="transition-transform duration-200 group-hover:translate-x-1" />
-                </Link>
+                  <ArrowRight
+                    size={15}
+                    className="transition-transform duration-200 group-hover:translate-x-1"
+                  />
+                </RequestQuoteLink>
               </Button>
             </div>
           </RevealSection>
@@ -327,18 +483,30 @@ export default function AiRatkaisutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <RevealSection>
             <div className="text-center mb-10">
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Käyttökohteet</span>
-              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Missä AI auttaa?</h2>
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">
+                Käyttökohteet
+              </span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
+                Missä AI auttaa?
+              </h2>
               <p className="text-ink-dim mt-3 max-w-lg mx-auto">
-                AI sopii lähes kaikkiin toistuviin prosesseihin. Tässä yleisimmät käyttökohteet.
+                AI sopii lähes kaikkiin toistuviin prosesseihin. Tässä
+                yleisimmät käyttökohteet.
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {USE_CASES.map(({ emoji, title, text }) => (
-                <div key={title} className="p-5 rounded-xl border border-wire bg-elevated hover:border-copper/40 hover:shadow-glow hover:scale-[1.02] transition-all duration-200 text-center">
+                <div
+                  key={title}
+                  className="p-5 rounded-xl border border-wire bg-elevated hover:border-copper/40 hover:shadow-glow hover:scale-[1.02] transition-all duration-200 text-center"
+                >
                   <div className="text-3xl mb-3">{emoji}</div>
-                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">{title}</h3>
-                  <p className="text-ink-ghost text-xs leading-relaxed">{text}</p>
+                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">
+                    {title}
+                  </h3>
+                  <p className="text-ink-ghost text-xs leading-relaxed">
+                    {text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -351,14 +519,21 @@ export default function AiRatkaisutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <RevealSection>
             <div className="text-center mb-10">
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Teknologiat</span>
-              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Parhaat AI-työkalut käytössäsi</h2>
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">
+                Teknologiat
+              </span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
+                Parhaat AI-työkalut käytössäsi
+              </h2>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
               {TECHS.map(({ name, slug, desc }) => (
-                <div key={name} className="group relative p-4 rounded-xl bg-elevated border border-wire
+                <div
+                  key={name}
+                  className="group relative p-4 rounded-xl bg-elevated border border-wire
                   hover:border-copper/30 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-glow
-                  transition-all duration-200 flex flex-col items-center gap-2.5 cursor-default">
+                  transition-all duration-200 flex flex-col items-center gap-2.5 cursor-default"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`https://cdn.simpleicons.org/${slug}/C8813A`}
@@ -368,11 +543,19 @@ export default function AiRatkaisutPage() {
                     loading="lazy"
                     className="transition-transform duration-200 group-hover:scale-110"
                   />
-                  <span className="text-[11px] text-ink-ghost text-center leading-tight">{name}</span>
-                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100
-                    transition-opacity duration-150 delay-150 pointer-events-none z-20">
-                    <div className="bg-surface border border-wire rounded-lg px-3 py-1.5 text-[11px]
-                      text-ink whitespace-nowrap shadow-xl">{desc}</div>
+                  <span className="text-[11px] text-ink-ghost text-center leading-tight">
+                    {name}
+                  </span>
+                  <div
+                    className="absolute -top-11 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100
+                    transition-opacity duration-150 delay-150 pointer-events-none z-20"
+                  >
+                    <div
+                      className="bg-surface border border-wire rounded-lg px-3 py-1.5 text-[11px]
+                      text-ink whitespace-nowrap shadow-xl"
+                    >
+                      {desc}
+                    </div>
                     <div className="w-2 h-2 bg-surface border-b border-r border-wire rotate-45 mx-auto -mt-1" />
                   </div>
                 </div>
@@ -387,8 +570,12 @@ export default function AiRatkaisutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <RevealSection>
             <div className="text-center mb-12">
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Prosessi</span>
-              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Näin projekti etenee</h2>
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">
+                Prosessi
+              </span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
+                Näin projekti etenee
+              </h2>
               <p className="text-ink-dim mt-3 max-w-lg mx-auto">
                 Läpinäkyvä prosessi alusta loppuun — tiedät aina missä mennään.
               </p>
@@ -404,24 +591,38 @@ export default function AiRatkaisutPage() {
           <RevealSection>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-4xl mx-auto">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Maksuton kartoitus</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">
+                  Maksuton kartoitus
+                </span>
                 <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2 mb-4">
                   Mitä tapahtuu maksuttomassa kartoituksessa?
                 </h2>
                 <p className="text-ink-dim leading-relaxed mb-6">
-                  Ennen kuin teet mitään päätöksiä, haluamme ymmärtää yrityksesi prosessit. Kartoitus on täysin maksuton, eikä sido sinua mihinkään.
+                  Ennen kuin teet mitään päätöksiä, haluamme ymmärtää yrityksesi
+                  prosessit. Kartoitus on täysin maksuton, eikä sido sinua
+                  mihinkään.
                 </p>
                 <Button asChild size="md" className="group">
                   <Link href="/yhteystiedot">
                     Varaa maksuton kartoitus
-                    <ArrowRight size={15} className="transition-transform duration-200 group-hover:translate-x-1" />
+                    <ArrowRight
+                      size={15}
+                      className="transition-transform duration-200 group-hover:translate-x-1"
+                    />
                   </Link>
                 </Button>
               </div>
               <ul className="space-y-3">
-                {KARTOITUS_ITEMS.map(item => (
-                  <li key={item} className="flex items-start gap-3 p-3.5 rounded-lg bg-elevated border border-wire text-sm text-ink-dim">
-                    <CheckCircle2 size={16} className="text-copper shrink-0 mt-0.5" />{item}
+                {KARTOITUS_ITEMS.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 p-3.5 rounded-lg bg-elevated border border-wire text-sm text-ink-dim"
+                  >
+                    <CheckCircle2
+                      size={16}
+                      className="text-copper shrink-0 mt-0.5"
+                    />
+                    {item}
                   </li>
                 ))}
               </ul>
@@ -435,18 +636,25 @@ export default function AiRatkaisutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <RevealSection>
             <div className="text-center mb-10">
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">Miksi me</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">
+                Miksi me
+              </span>
               <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
                 Miksi yritykset valitsevat Apex Siten?
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {WHY_US.map(({ icon: Icon, title, text }) => (
-                <div key={title} className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/40 hover:shadow-glow hover:scale-[1.01] transition-all duration-200">
+                <div
+                  key={title}
+                  className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/40 hover:shadow-glow hover:scale-[1.01] transition-all duration-200"
+                >
                   <div className="w-10 h-10 rounded-xl bg-copper/10 flex items-center justify-center mb-4">
                     <Icon size={18} className="text-copper" />
                   </div>
-                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <h3 className="font-heading font-semibold text-ink mb-2">
+                    {title}
+                  </h3>
                   <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
               ))}
@@ -460,8 +668,12 @@ export default function AiRatkaisutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
           <RevealSection>
             <div className="text-center mb-8">
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">UKK</span>
-              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">Usein kysyttyä</h2>
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-copper">
+                UKK
+              </span>
+              <h2 className="font-display font-bold text-ink text-3xl sm:text-4xl mt-2">
+                Usein kysyttyä
+              </h2>
             </div>
           </RevealSection>
           <FaqAccordion items={FAQ} />
@@ -475,7 +687,9 @@ export default function AiRatkaisutPage() {
             Valmis ottamaan AI:n hyödyksi?
           </h2>
           <p className="text-ink-dim text-lg leading-relaxed">
-            AI ei ole tulevaisuutta — se on tätä päivää. Kilpailijasi ottavat sen käyttöön nyt. Aloita maksuttomalla kartoituksella ja selvitä, mitä AI voisi tehdä juuri sinun yrityksellesi.
+            AI ei ole tulevaisuutta — se on tätä päivää. Kilpailijasi ottavat
+            sen käyttöön nyt. Aloita maksuttomalla kartoituksella ja selvitä,
+            mitä AI voisi tehdä juuri sinun yrityksellesi.
           </p>
         </RevealSection>
       </section>
@@ -487,32 +701,46 @@ export default function AiRatkaisutPage() {
           <div className="absolute top-0 right-1/4 w-[300px] h-[300px] rounded-full bg-teal-brand/5 blur-3xl" />
         </div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <Badge variant="accent" className="mb-5">Aloitetaan</Badge>
+          <Badge variant="accent" className="mb-5">
+            Aloitetaan
+          </Badge>
           <h2 className="font-display font-bold text-ink text-3xl sm:text-5xl lg:text-6xl mb-4 max-w-2xl mx-auto">
             Anna tekoälyn tehdä rutiinityöt puolestasi.
           </h2>
           <p className="text-ink-dim text-lg mb-8 max-w-xl mx-auto">
-            Varaa maksuton 30 minuutin kartoitus. Selvitämme yhdessä, miten AI voi auttaa yritystäsi säästämään aikaa, vähentämään manuaalista työtä ja kasvattamaan liiketoimintaasi.
+            Varaa maksuton 30 minuutin kartoitus. Selvitämme yhdessä, miten AI
+            voi auttaa yritystäsi säästämään aikaa, vähentämään manuaalista
+            työtä ja kasvattamaan liiketoimintaasi.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button asChild size="lg" className="group">
               <Link href="/yhteystiedot">
                 Varaa maksuton kartoitus
-                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+                <ArrowRight
+                  size={16}
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                />
               </Link>
             </Button>
             <Button asChild variant="secondary" size="lg">
-              <Link href="/yhteystiedot?palvelu=ai-ratkaisut">
-                <Phone size={16} />Pyydä tarjous
-              </Link>
+              <RequestQuoteLink href="/yhteystiedot?palvelu=ai-ratkaisut">
+                <Phone size={16} />
+                Pyydä tarjous
+              </RequestQuoteLink>
             </Button>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center mt-6">
-            {["Maksuton kartoitus", "Tarjous 48 h", "Ei sitoutumista"].map(t => (
-              <span key={t} className="flex items-center gap-1.5 text-sm text-ink-ghost">
-                <span className="text-copper">✓</span>{t}
-              </span>
-            ))}
+            {["Maksuton kartoitus", "Tarjous 48 h", "Ei sitoutumista"].map(
+              (t) => (
+                <span
+                  key={t}
+                  className="flex items-center gap-1.5 text-sm text-ink-ghost"
+                >
+                  <span className="text-copper">✓</span>
+                  {t}
+                </span>
+              ),
+            )}
           </div>
         </div>
       </section>

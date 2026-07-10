@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/Button";
 import { MobileMenu } from "./MobileMenu";
 import { ServicesDropdown } from "./ServicesDropdown";
 import { AuthModal } from "@/components/ui/AuthModal";
+import { QuoteGateModal } from "@/components/ui/QuoteGateModal";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { NAV_LINKS } from "@/lib/constants";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -30,6 +32,7 @@ export function Header() {
   const [servicesOpen, setServicesOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<"signin" | "signup">("signin");
+  const [authRedirect, setAuthRedirect] = useState("/dashboard");
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const servicesRef = useRef<HTMLLIElement>(null);
@@ -56,8 +59,15 @@ export function Header() {
       setAuthOpen(true);
     }
     const handler = (e: Event) => {
-      const tab = (e as CustomEvent).detail as "signin" | "signup";
+      const detail = (e as CustomEvent).detail as
+        | "signin"
+        | "signup"
+        | { tab?: "signin" | "signup"; redirectTo?: string };
+      const tab = typeof detail === "string" ? detail : detail?.tab;
+      const redirectTo =
+        typeof detail === "string" ? undefined : detail?.redirectTo;
       setAuthTab(tab === "signup" ? "signup" : "signin");
+      setAuthRedirect(redirectTo ?? "/dashboard");
       setAuthOpen(true);
     };
     window.addEventListener("open-auth-modal", handler);
@@ -257,7 +267,9 @@ export function Header() {
                 </button>
               )}
               <Button size="sm" asChild className="hidden sm:inline-flex">
-                <Link href="/yhteystiedot">Pyydä tarjous</Link>
+                <RequestQuoteLink href="/yhteystiedot">
+                  Pyydä tarjous
+                </RequestQuoteLink>
               </Button>
               {/* Mobile hamburger */}
               <button
@@ -315,7 +327,9 @@ export function Header() {
         isOpen={authOpen}
         onClose={() => setAuthOpen(false)}
         defaultTab={authTab}
+        redirectTo={authRedirect}
       />
+      <QuoteGateModal />
     </>
   );
 }

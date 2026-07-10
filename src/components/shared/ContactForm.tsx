@@ -131,6 +131,7 @@ const YHTEYDENOTTO_OPTIONS = [
 export function ContactForm() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const isQuoteRequest = searchParams.get("intent") === "quote";
   const palveluParam = searchParams.get("palvelu") ?? "";
   const defaultPalvelu = VALID_PALVELU_VALUES.includes(palveluParam as never)
     ? palveluParam
@@ -185,7 +186,7 @@ export function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, quoteRequest: isQuoteRequest }),
       });
       if (!res.ok) throw new Error("Virhe");
       toast({

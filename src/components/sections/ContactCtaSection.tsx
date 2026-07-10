@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRef } from "react";
 import { motion } from "motion/react";
 import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { Container } from "@/components/shared/Container";
 import { COMPANY_PHONE } from "@/lib/constants";
 import { fadeUp, staggerContainer } from "@/lib/animations";
@@ -54,7 +54,9 @@ export function ContactCtaSection() {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Button size="lg" asChild>
-              <Link href="/yhteystiedot">Pyydä tarjous</Link>
+              <RequestQuoteLink href="/yhteystiedot">
+                Pyydä tarjous
+              </RequestQuoteLink>
             </Button>
             <Button
               variant="secondary"

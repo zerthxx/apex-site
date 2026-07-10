@@ -30,6 +30,7 @@ const contactSchema = z.object({
     .min(20, "Viesti on liian lyhyt")
     .max(2000, "Viesti on liian pitkä"),
   honeypot: z.string().max(0),
+  quoteRequest: z.boolean().optional(),
 });
 
 function getResend() {
@@ -159,10 +160,27 @@ export async function POST(request: NextRequest) {
     yhteydenotto,
     viesti,
     honeypot,
+    quoteRequest,
   } = result.data;
 
   if (honeypot && honeypot.length > 0) {
     return NextResponse.json({ success: true });
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Defense in depth: the "Pyydä tarjous" CTAs already gate this client-side,
+  // but a request that self-identifies as a quote request must also be
+  // rejected server-side if there's no session. General contact submissions
+  // (quoteRequest not set) are unaffected and remain open to anonymous leads.
+  if (quoteRequest && !user) {
+    return NextResponse.json(
+      { error: "Tarjouspyynnön lähettäminen edellyttää kirjautumista." },
+      { status: 401 },
+    );
   }
 
   const serviceLabel = SERVICE_LABELS[palvelu] ?? palvelu;
@@ -173,11 +191,6 @@ export async function POST(request: NextRequest) {
 
   // Create lead in database (service role bypasses RLS)
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
     // Use service role client for DB writes (contact form is unauthenticated)
     const { createClient: createServiceClient } =
       await import("@supabase/supabase-js");

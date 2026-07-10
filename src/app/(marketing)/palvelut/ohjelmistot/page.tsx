@@ -19,13 +19,15 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { RevealSection } from "@/components/shared/RevealSection";
 import { ProcessTimeline } from "@/components/shared/ProcessTimeline";
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { SoftwareDashboardMockup } from "./SoftwareDashboardMockup";
 
 export const metadata: Metadata = {
-  title: "Räätälöidyt ohjelmistot — Dashboardit, portaalit ja verkkosovellukset",
+  title:
+    "Räätälöidyt ohjelmistot — Dashboardit, portaalit ja verkkosovellukset",
   description:
     "Rakennamme yrityksille räätälöityjä verkkosovelluksia, dashboardeja, asiakasportaaleja, varausjärjestelmiä ja muita liiketoimintaa tukevia ohjelmistoja.",
   alternates: { canonical: "https://apexsite.fi/palvelut/ohjelmistot" },
@@ -82,27 +84,87 @@ const BUILD_CARDS = [
 ];
 
 const USE_CASES = [
-  { emoji: "🏗️", title: "Rakennusyritykset", text: "Projektien ja resurssien hallinta" },
-  { emoji: "🍔", title: "Ravintolat", text: "Tilaukset, varaukset ja kanta-asiakkaat" },
-  { emoji: "🚗", title: "Autoliikkeet", text: "Varastonhallinta ja asiakkaiden seuranta" },
-  { emoji: "🏥", title: "Terveyspalvelut", text: "Ajanvaraus ja potilashallinta" },
-  { emoji: "⚖️", title: "Lakitoimistot", text: "Asiakkuudet ja dokumenttien hallinta" },
-  { emoji: "🏠", title: "Kiinteistövälittäjät", text: "Kohteet ja asiakkaiden seuranta" },
+  {
+    emoji: "🏗️",
+    title: "Rakennusyritykset",
+    text: "Projektien ja resurssien hallinta",
+  },
+  {
+    emoji: "🍔",
+    title: "Ravintolat",
+    text: "Tilaukset, varaukset ja kanta-asiakkaat",
+  },
+  {
+    emoji: "🚗",
+    title: "Autoliikkeet",
+    text: "Varastonhallinta ja asiakkaiden seuranta",
+  },
+  {
+    emoji: "🏥",
+    title: "Terveyspalvelut",
+    text: "Ajanvaraus ja potilashallinta",
+  },
+  {
+    emoji: "⚖️",
+    title: "Lakitoimistot",
+    text: "Asiakkuudet ja dokumenttien hallinta",
+  },
+  {
+    emoji: "🏠",
+    title: "Kiinteistövälittäjät",
+    text: "Kohteet ja asiakkaiden seuranta",
+  },
   { emoji: "💼", title: "Konsultit", text: "Projektit, laskutus ja asiakkaat" },
-  { emoji: "🏢", title: "PK-yritykset", text: "Räätälöity juuri teidän prosesseihinne" },
+  {
+    emoji: "🏢",
+    title: "PK-yritykset",
+    text: "Räätälöity juuri teidän prosesseihinne",
+  },
 ];
 
 const FEATURES = [
-  { emoji: "🔐", title: "Käyttäjähallinta", text: "Kirjautuminen ja tunnistautuminen" },
-  { emoji: "👥", title: "Roolit ja oikeudet", text: "Hallitse kuka näkee mitä" },
-  { emoji: "📊", title: "Dashboardit", text: "Reaaliaikaiset mittarit ja KPI:t" },
-  { emoji: "📈", title: "Raportointi", text: "Automaattiset raportit ja vienti" },
-  { emoji: "🔌", title: "API-integraatiot", text: "Yhdistä kolmansien osapuolien palvelut" },
+  {
+    emoji: "🔐",
+    title: "Käyttäjähallinta",
+    text: "Kirjautuminen ja tunnistautuminen",
+  },
+  {
+    emoji: "👥",
+    title: "Roolit ja oikeudet",
+    text: "Hallitse kuka näkee mitä",
+  },
+  {
+    emoji: "📊",
+    title: "Dashboardit",
+    text: "Reaaliaikaiset mittarit ja KPI:t",
+  },
+  {
+    emoji: "📈",
+    title: "Raportointi",
+    text: "Automaattiset raportit ja vienti",
+  },
+  {
+    emoji: "🔌",
+    title: "API-integraatiot",
+    text: "Yhdistä kolmansien osapuolien palvelut",
+  },
   { emoji: "🗄️", title: "Tietokannat", text: "Skaalautuva tietoarkkitehtuuri" },
   { emoji: "🔔", title: "Ilmoitukset", text: "Sähköposti, push ja in-app" },
-  { emoji: "📁", title: "Tiedostojen hallinta", text: "Lataus, tallennus ja jako" },
-  { emoji: "🔍", title: "Hakutoiminnot", text: "Nopea haku kaikesta sisällöstä" },
-  { emoji: "⚡", title: "Automaatiot", text: "Automatisoi toistuvat työnkulut" },
+  {
+    emoji: "📁",
+    title: "Tiedostojen hallinta",
+    text: "Lataus, tallennus ja jako",
+  },
+  {
+    emoji: "🔍",
+    title: "Hakutoiminnot",
+    text: "Nopea haku kaikesta sisällöstä",
+  },
+  {
+    emoji: "⚡",
+    title: "Automaatiot",
+    text: "Automatisoi toistuvat työnkulut",
+  },
 ];
 
 const TECHS = [
@@ -119,11 +181,23 @@ const TECHS = [
 ];
 
 const STEPS = [
-  { title: "Maksuton kartoitus", text: "30 min puhelu: liiketoimintatarpeet, haasteet ja tavoitteet." },
-  { title: "Suunnittelu", text: "Tekninen arkkitehtuuri, tietokantasuunnittelu ja rajapinnat." },
-  { title: "UX/UI-suunnittelu", text: "Wireframe ja visuaalinen design Figmassa." },
+  {
+    title: "Maksuton kartoitus",
+    text: "30 min puhelu: liiketoimintatarpeet, haasteet ja tavoitteet.",
+  },
+  {
+    title: "Suunnittelu",
+    text: "Tekninen arkkitehtuuri, tietokantasuunnittelu ja rajapinnat.",
+  },
+  {
+    title: "UX/UI-suunnittelu",
+    text: "Wireframe ja visuaalinen design Figmassa.",
+  },
   { title: "Kehitys", text: "Sprinteissä — näytämme edistymisen viikoittain." },
-  { title: "Testaus", text: "Automaattiset testit ja käyttäjätestaus oikeilla käyttäjillä." },
+  {
+    title: "Testaus",
+    text: "Automaattiset testit ja käyttäjätestaus oikeilla käyttäjillä.",
+  },
   { title: "Julkaisu", text: "Käyttöönotto, koulutus ja dokumentaatio." },
   { title: "Jatkuva ylläpito", text: "Päivitykset, seuranta ja jatkokehitys." },
 ];
@@ -250,11 +324,14 @@ export default function OhjelmistotPage() {
               </Badge>
               <h1 className="font-display font-bold text-ink text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
                 Rakennamme ohjelmistoja, jotka{" "}
-                <span className="text-copper">automatisoivat yrityksesi työn ja säästävät aikaa.</span>
+                <span className="text-copper">
+                  automatisoivat yrityksesi työn ja säästävät aikaa.
+                </span>
               </h1>
               <p className="text-ink-dim text-lg leading-relaxed mb-8">
-                Lopeta manuaalinen työ. Räätälöity ohjelmisto hoitaa rutiinitehtävät automaattisesti
-                — niin tiimisi voi keskittyä oikeasti tärkeisiin asioihin.
+                Lopeta manuaalinen työ. Räätälöity ohjelmisto hoitaa
+                rutiinitehtävät automaattisesti — niin tiimisi voi keskittyä
+                oikeasti tärkeisiin asioihin.
               </p>
               <div className="flex flex-wrap gap-3 mb-8">
                 <Button asChild size="lg" className="group">
@@ -267,12 +344,17 @@ export default function OhjelmistotPage() {
                   </Link>
                 </Button>
                 <Button asChild variant="secondary" size="lg">
-                  <Link href="/yhteystiedot">Pyydä tarjous</Link>
+                  <RequestQuoteLink href="/yhteystiedot">
+                    Pyydä tarjous
+                  </RequestQuoteLink>
                 </Button>
               </div>
               <div className="flex flex-wrap gap-x-5 gap-y-2">
                 {TRUST_ITEMS.map((t) => (
-                  <span key={t} className="text-sm text-ink-dim flex items-center gap-1.5">
+                  <span
+                    key={t}
+                    className="text-sm text-ink-dim flex items-center gap-1.5"
+                  >
                     <CheckCircle2 size={14} className="text-copper shrink-0" />
                     {t}
                   </span>
@@ -309,7 +391,9 @@ export default function OhjelmistotPage() {
                   <div className="w-10 h-10 rounded-lg bg-copper/10 border border-copper/20 flex items-center justify-center mb-4">
                     <Icon size={20} className="text-copper" />
                   </div>
-                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <h3 className="font-heading font-semibold text-ink mb-2">
+                    {title}
+                  </h3>
                   <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
               ))}
@@ -337,8 +421,12 @@ export default function OhjelmistotPage() {
                   className="p-5 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:-translate-y-0.5 hover:shadow-glow transition-all duration-200 text-center"
                 >
                   <div className="text-3xl mb-3">{emoji}</div>
-                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">{title}</h3>
-                  <p className="text-ink-ghost text-xs leading-relaxed">{text}</p>
+                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">
+                    {title}
+                  </h3>
+                  <p className="text-ink-ghost text-xs leading-relaxed">
+                    {text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -365,8 +453,12 @@ export default function OhjelmistotPage() {
                   className="p-5 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:-translate-y-0.5 hover:shadow-glow transition-all duration-200 text-center"
                 >
                   <div className="text-3xl mb-3">{emoji}</div>
-                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">{title}</h3>
-                  <p className="text-ink-ghost text-xs leading-relaxed">{text}</p>
+                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">
+                    {title}
+                  </h3>
+                  <p className="text-ink-ghost text-xs leading-relaxed">
+                    {text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -401,7 +493,9 @@ export default function OhjelmistotPage() {
                     loading="lazy"
                     className="transition-transform duration-200 group-hover:scale-110"
                   />
-                  <span className="text-[11px] text-ink-ghost text-center leading-tight">{name}</span>
+                  <span className="text-[11px] text-ink-ghost text-center leading-tight">
+                    {name}
+                  </span>
                   <div className="absolute -top-11 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-150 pointer-events-none z-20">
                     <div className="bg-surface border border-wire rounded-lg px-3 py-1.5 text-[11px] text-ink whitespace-nowrap shadow-xl">
                       {desc}
@@ -443,9 +537,9 @@ export default function OhjelmistotPage() {
                   Aloitetaan 30 minuutin puhelulla.
                 </h2>
                 <p className="text-ink-dim leading-relaxed mb-8">
-                  Kerro ohjelmistotarpeesi — me hoidamme loput. Kartoituspuhelu on täysin maksuton
-                  ja ilman sitoutumista. Saat selkeän suosituksen teknologiasta, aikataulusta ja
-                  kustannuksista.
+                  Kerro ohjelmistotarpeesi — me hoidamme loput. Kartoituspuhelu
+                  on täysin maksuton ja ilman sitoutumista. Saat selkeän
+                  suosituksen teknologiasta, aikataulusta ja kustannuksista.
                 </p>
                 <Button asChild size="lg" className="group">
                   <Link href="/yhteystiedot">
@@ -463,8 +557,14 @@ export default function OhjelmistotPage() {
                 </p>
                 <ul className="space-y-3">
                   {KARTOITUS_ITEMS.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm text-ink-dim">
-                      <CheckCircle2 size={16} className="text-copper shrink-0 mt-0.5" />
+                    <li
+                      key={item}
+                      className="flex items-start gap-3 text-sm text-ink-dim"
+                    >
+                      <CheckCircle2
+                        size={16}
+                        className="text-copper shrink-0 mt-0.5"
+                      />
                       {item}
                     </li>
                   ))}
@@ -494,7 +594,9 @@ export default function OhjelmistotPage() {
                   className="p-6 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:-translate-y-0.5 hover:shadow-glow transition-all duration-200 text-center"
                 >
                   <div className="text-3xl mb-3">{emoji}</div>
-                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <h3 className="font-heading font-semibold text-ink mb-2">
+                    {title}
+                  </h3>
                   <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
               ))}
@@ -514,14 +616,15 @@ export default function OhjelmistotPage() {
               Projektimme ovat vielä käynnissä.
             </h2>
             <p className="text-ink-dim mt-4 max-w-lg leading-relaxed">
-              Referenssimme julkaistaan asiakkaiden luvalla heti projektien valmistuttua. Ota
-              yhteyttä — kerromme mielellään tarkemmin millaisiin projekteihin olemme erikoistuneet.
+              Referenssimme julkaistaan asiakkaiden luvalla heti projektien
+              valmistuttua. Ota yhteyttä — kerromme mielellään tarkemmin
+              millaisiin projekteihin olemme erikoistuneet.
             </p>
           </RevealSection>
           <RevealSection>
             <div className="inline-flex items-center gap-3 px-5 py-3 rounded-xl border border-copper/30 bg-copper/5 text-sm text-copper font-medium">
-              <span className="w-2 h-2 rounded-full bg-copper animate-pulse" />
-              3 projektia parhaillaan kehityksessä
+              <span className="w-2 h-2 rounded-full bg-copper animate-pulse" />3
+              projektia parhaillaan kehityksessä
             </div>
           </RevealSection>
         </div>
@@ -548,7 +651,9 @@ export default function OhjelmistotPage() {
                   <div className="w-10 h-10 rounded-lg bg-copper/10 border border-copper/20 flex items-center justify-center mb-4">
                     <Icon size={20} className="text-copper" />
                   </div>
-                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <h3 className="font-heading font-semibold text-ink mb-2">
+                    {title}
+                  </h3>
                   <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
               ))}
@@ -583,11 +688,14 @@ export default function OhjelmistotPage() {
           <Badge className="mb-6">Aloitetaan</Badge>
           <h2 className="font-display font-bold text-ink text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
             Rakennetaan ohjelmisto, joka{" "}
-            <span className="text-copper">säästää aikaa ja kasvattaa yrityksesi tehokkuutta.</span>
+            <span className="text-copper">
+              säästää aikaa ja kasvattaa yrityksesi tehokkuutta.
+            </span>
           </h2>
           <p className="text-ink-dim text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Varaa maksuton 30 minuutin kartoitus. Käymme läpi yrityksesi tarpeet ja suunnittelemme
-            juuri sinulle sopivan ohjelmistoratkaisun ilman sitoutumista.
+            Varaa maksuton 30 minuutin kartoitus. Käymme läpi yrityksesi tarpeet
+            ja suunnittelemme juuri sinulle sopivan ohjelmistoratkaisun ilman
+            sitoutumista.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-10">
             <Button asChild size="lg" className="group">
@@ -600,14 +708,24 @@ export default function OhjelmistotPage() {
               </Link>
             </Button>
             <Button asChild variant="secondary" size="lg">
-              <Link href="tel:+358401234567" className="flex items-center gap-2">
+              <Link
+                href="tel:+358401234567"
+                className="flex items-center gap-2"
+              >
                 <Phone size={16} /> Soita meille
               </Link>
             </Button>
           </div>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {["Maksuton kartoitus", "Ei sitoutumista", "Lähdekoodi sinulle"].map((t) => (
-              <span key={t} className="text-sm text-ink-dim flex items-center gap-1.5">
+            {[
+              "Maksuton kartoitus",
+              "Ei sitoutumista",
+              "Lähdekoodi sinulle",
+            ].map((t) => (
+              <span
+                key={t}
+                className="text-sm text-ink-dim flex items-center gap-1.5"
+              >
                 <CheckCircle2 size={14} className="text-copper shrink-0" />
                 {t}
               </span>

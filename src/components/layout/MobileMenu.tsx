@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { NAV_LINKS, SERVICES } from "@/lib/constants";
 import { mobileMenuOverlay, mobileMenuPanel } from "@/lib/animations";
 
@@ -118,9 +119,9 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             {/* Bottom CTA */}
             <div className="p-4 border-t border-wire">
               <Button size="lg" asChild className="w-full">
-                <Link href="/yhteystiedot" onClick={onClose}>
+                <RequestQuoteLink href="/yhteystiedot" onClick={onClose}>
                   Pyydä tarjous
-                </Link>
+                </RequestQuoteLink>
               </Button>
             </div>
           </motion.div>

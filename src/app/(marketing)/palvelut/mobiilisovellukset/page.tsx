@@ -18,6 +18,7 @@ import {
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { RevealSection } from "@/components/shared/RevealSection";
 import { ProcessTimeline } from "@/components/shared/ProcessTimeline";
 import { MobileAppMockup } from "./MobileAppMockup";
@@ -102,26 +103,50 @@ const USE_CASES = [
   { emoji: "🛒", title: "Verkkokauppa", text: "Mobiiliostos sujuvammin" },
   { emoji: "🍔", title: "Ravintolat", text: "Tilaukset ja kanta-asiakas" },
   { emoji: "🚚", title: "Kuljetukset", text: "Seuranta ja reittioptimoint" },
-  { emoji: "🏥", title: "Terveyspalvelut", text: "Ajanvaraus ja potilastiedot" },
+  {
+    emoji: "🏥",
+    title: "Terveyspalvelut",
+    text: "Ajanvaraus ja potilastiedot",
+  },
   { emoji: "🏋️", title: "Jäsenyydet", text: "Tunnit, kortit, kirjautuminen" },
   { emoji: "📅", title: "Ajanvaraus", text: "Kalenteri ja muistutukset" },
   { emoji: "💬", title: "Asiakasportaali", text: "Viestintä ja tukipyynnöt" },
-  { emoji: "🎓", title: "Verkkokurssit", text: "Opiskelu, edistyminen, sertifikaatit" },
+  {
+    emoji: "🎓",
+    title: "Verkkokurssit",
+    text: "Opiskelu, edistyminen, sertifikaatit",
+  },
 ];
 
 const FEATURES = [
-  { emoji: "🔔", title: "Push-ilmoitukset", text: "Tavoita asiakkaat juuri oikealla hetkellä" },
+  {
+    emoji: "🔔",
+    title: "Push-ilmoitukset",
+    text: "Tavoita asiakkaat juuri oikealla hetkellä",
+  },
   { emoji: "📍", title: "GPS", text: "Sijainti, kartat ja reittioptimoint" },
   { emoji: "📷", title: "Kamera", text: "Kuvaus, skannaus ja AR" },
   { emoji: "💳", title: "Maksaminen", text: "Stripe, Apple Pay, Google Pay" },
   { emoji: "🌐", title: "Offline", text: "Toimii myös ilman verkkoyhteyttä" },
-  { emoji: "🔐", title: "Kirjautuminen", text: "Face ID, Touch ID, Google Sign-in" },
-  { emoji: "📊", title: "Dashboard", text: "Reaaliaikaiset tilastot ja raportit" },
+  {
+    emoji: "🔐",
+    title: "Kirjautuminen",
+    text: "Face ID, Touch ID, Google Sign-in",
+  },
+  {
+    emoji: "📊",
+    title: "Dashboard",
+    text: "Reaaliaikaiset tilastot ja raportit",
+  },
   { emoji: "❤️", title: "Suosikit", text: "Henkilökohtainen käyttökokemus" },
 ];
 
 const TECHS = [
-  { name: "React Native", slug: "reactnative", desc: "Cross-platform iOS & Android" },
+  {
+    name: "React Native",
+    slug: "reactnative",
+    desc: "Cross-platform iOS & Android",
+  },
   { name: "Swift", slug: "swift", desc: "Native iOS kehitys" },
   { name: "Kotlin", slug: "kotlin", desc: "Native Android kehitys" },
   { name: "Flutter", slug: "flutter", desc: "Googlen cross-platform UI" },
@@ -295,8 +320,10 @@ export default function MobiilisovelluksetPage() {
                 <span className="text-copper">avata uudelleen.</span>
               </h1>
               <p className="text-ink-dim text-lg leading-relaxed mb-8">
-                Suunnittelemme ja rakennamme moderneja iOS- ja Android-sovelluksia, jotka tarjoavat
-                erinomaisen käyttökokemuksen, toimivat nopeasti ja kasvavat yrityksesi mukana.
+                Suunnittelemme ja rakennamme moderneja iOS- ja
+                Android-sovelluksia, jotka tarjoavat erinomaisen
+                käyttökokemuksen, toimivat nopeasti ja kasvavat yrityksesi
+                mukana.
               </p>
               <div className="flex flex-wrap gap-3 mb-8">
                 <Button asChild size="lg" className="group">
@@ -309,12 +336,17 @@ export default function MobiilisovelluksetPage() {
                   </Link>
                 </Button>
                 <Button asChild variant="secondary" size="lg">
-                  <Link href="/yhteystiedot">Pyydä tarjous</Link>
+                  <RequestQuoteLink href="/yhteystiedot">
+                    Pyydä tarjous
+                  </RequestQuoteLink>
                 </Button>
               </div>
               <div className="flex flex-wrap gap-x-5 gap-y-2">
                 {TRUST_ITEMS.map((t) => (
-                  <span key={t} className="text-sm text-ink-dim flex items-center gap-1.5">
+                  <span
+                    key={t}
+                    className="text-sm text-ink-dim flex items-center gap-1.5"
+                  >
                     <CheckCircle2 size={14} className="text-copper shrink-0" />
                     {t}
                   </span>
@@ -351,7 +383,9 @@ export default function MobiilisovelluksetPage() {
                   <div className="w-10 h-10 rounded-lg bg-copper/10 border border-copper/20 flex items-center justify-center mb-4">
                     <Icon size={20} className="text-copper" />
                   </div>
-                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <h3 className="font-heading font-semibold text-ink mb-2">
+                    {title}
+                  </h3>
                   <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
               ))}
@@ -381,11 +415,19 @@ export default function MobiilisovelluksetPage() {
                   <div className="w-10 h-10 rounded-lg bg-copper/10 border border-copper/20 flex items-center justify-center mb-4">
                     <Icon size={20} className="text-copper" />
                   </div>
-                  <h3 className="font-heading font-semibold text-ink text-lg mb-4">{title}</h3>
+                  <h3 className="font-heading font-semibold text-ink text-lg mb-4">
+                    {title}
+                  </h3>
                   <ul className="space-y-2 mt-auto">
                     {items.map((item) => (
-                      <li key={item} className="flex items-center gap-2.5 text-sm text-ink-dim">
-                        <CheckCircle2 size={14} className="text-copper shrink-0" />
+                      <li
+                        key={item}
+                        className="flex items-center gap-2.5 text-sm text-ink-dim"
+                      >
+                        <CheckCircle2
+                          size={14}
+                          className="text-copper shrink-0"
+                        />
                         {item}
                       </li>
                     ))}
@@ -416,8 +458,12 @@ export default function MobiilisovelluksetPage() {
                   className="p-5 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:-translate-y-0.5 hover:shadow-glow transition-all duration-200 text-center"
                 >
                   <div className="text-3xl mb-3">{emoji}</div>
-                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">{title}</h3>
-                  <p className="text-ink-ghost text-xs leading-relaxed">{text}</p>
+                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">
+                    {title}
+                  </h3>
+                  <p className="text-ink-ghost text-xs leading-relaxed">
+                    {text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -444,8 +490,12 @@ export default function MobiilisovelluksetPage() {
                   className="p-5 rounded-xl border border-wire bg-elevated hover:border-copper/30 hover:-translate-y-0.5 hover:shadow-glow transition-all duration-200 text-center"
                 >
                   <div className="text-3xl mb-3">{emoji}</div>
-                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">{title}</h3>
-                  <p className="text-ink-ghost text-xs leading-relaxed">{text}</p>
+                  <h3 className="font-heading font-semibold text-ink text-sm mb-1">
+                    {title}
+                  </h3>
+                  <p className="text-ink-ghost text-xs leading-relaxed">
+                    {text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -480,7 +530,9 @@ export default function MobiilisovelluksetPage() {
                     loading="lazy"
                     className="transition-transform duration-200 group-hover:scale-110"
                   />
-                  <span className="text-[11px] text-ink-ghost text-center leading-tight">{name}</span>
+                  <span className="text-[11px] text-ink-ghost text-center leading-tight">
+                    {name}
+                  </span>
                   <div className="absolute -top-11 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-150 pointer-events-none z-20">
                     <div className="bg-surface border border-wire rounded-lg px-3 py-1.5 text-[11px] text-ink whitespace-nowrap shadow-xl">
                       {desc}
@@ -522,9 +574,9 @@ export default function MobiilisovelluksetPage() {
                   Aloitetaan 30 minuutin puhelulla.
                 </h2>
                 <p className="text-ink-dim leading-relaxed mb-8">
-                  Kerro sovelluksesi idea — me hoidamme loput. Kartoituspuhelu on maksuton ja
-                  ilman sitoutumista. Saat selkeän suosituksen teknologiasta, aikataulusta ja
-                  kustannuksista.
+                  Kerro sovelluksesi idea — me hoidamme loput. Kartoituspuhelu
+                  on maksuton ja ilman sitoutumista. Saat selkeän suosituksen
+                  teknologiasta, aikataulusta ja kustannuksista.
                 </p>
                 <Button asChild size="lg" className="group">
                   <Link href="/yhteystiedot">
@@ -542,8 +594,14 @@ export default function MobiilisovelluksetPage() {
                 </p>
                 <ul className="space-y-3">
                   {KARTOITUS_ITEMS.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm text-ink-dim">
-                      <CheckCircle2 size={16} className="text-copper shrink-0 mt-0.5" />
+                    <li
+                      key={item}
+                      className="flex items-start gap-3 text-sm text-ink-dim"
+                    >
+                      <CheckCircle2
+                        size={16}
+                        className="text-copper shrink-0 mt-0.5"
+                      />
                       {item}
                     </li>
                   ))}
@@ -575,7 +633,9 @@ export default function MobiilisovelluksetPage() {
                   <div className="w-10 h-10 rounded-lg bg-copper/10 border border-copper/20 flex items-center justify-center mb-4">
                     <Icon size={20} className="text-copper" />
                   </div>
-                  <h3 className="font-heading font-semibold text-ink mb-2">{title}</h3>
+                  <h3 className="font-heading font-semibold text-ink mb-2">
+                    {title}
+                  </h3>
                   <p className="text-ink-dim text-sm leading-relaxed">{text}</p>
                 </div>
               ))}
@@ -613,8 +673,9 @@ export default function MobiilisovelluksetPage() {
             <span className="text-copper">käyttävät joka päivä.</span>
           </h2>
           <p className="text-ink-dim text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Varaa maksuton 30 minuutin kartoitus. Suunnittelemme yhdessä sovelluksen, joka tarjoaa
-            erinomaisen käyttökokemuksen ja tukee yrityksesi kasvua.
+            Varaa maksuton 30 minuutin kartoitus. Suunnittelemme yhdessä
+            sovelluksen, joka tarjoaa erinomaisen käyttökokemuksen ja tukee
+            yrityksesi kasvua.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-10">
             <Button asChild size="lg" className="group">
@@ -627,14 +688,24 @@ export default function MobiilisovelluksetPage() {
               </Link>
             </Button>
             <Button asChild variant="secondary" size="lg">
-              <Link href="tel:+358401234567" className="flex items-center gap-2">
+              <Link
+                href="tel:+358401234567"
+                className="flex items-center gap-2"
+              >
                 <Phone size={16} /> Soita meille
               </Link>
             </Button>
           </div>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {["Maksuton kartoitus", "Ei sitoutumista", "App Store & Google Play"].map((t) => (
-              <span key={t} className="text-sm text-ink-dim flex items-center gap-1.5">
+            {[
+              "Maksuton kartoitus",
+              "Ei sitoutumista",
+              "App Store & Google Play",
+            ].map((t) => (
+              <span
+                key={t}
+                className="text-sm text-ink-dim flex items-center gap-1.5"
+              >
                 <CheckCircle2 size={14} className="text-copper shrink-0" />
                 {t}
               </span>

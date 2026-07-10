@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { Container } from "@/components/shared/Container";
 import { useRevealInView } from "@/lib/useRevealInView";
 
@@ -47,7 +48,9 @@ export function MidPageCtaSection() {
                 </Link>
               </Button>
               <Button asChild variant="secondary" size="lg">
-                <Link href="/yhteystiedot">Pyydä tarjous</Link>
+                <RequestQuoteLink href="/yhteystiedot">
+                  Pyydä tarjous
+                </RequestQuoteLink>
               </Button>
             </div>
             <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">

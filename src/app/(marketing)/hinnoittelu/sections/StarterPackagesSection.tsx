@@ -72,6 +72,7 @@ export function StarterPackagesSection() {
                 primaryCta={{
                   label: "Pyydä tarjous",
                   href: `/yhteystiedot?palvelu=${pkg.slug}`,
+                  requiresAuth: true,
                 }}
               />
             ))}
@@ -92,6 +93,7 @@ export function StarterPackagesSection() {
                 primaryCta={{
                   label: "Pyydä tarjous",
                   href: `/yhteystiedot?palvelu=${pkg.slug}`,
+                  requiresAuth: true,
                 }}
               />
             </motion.div>

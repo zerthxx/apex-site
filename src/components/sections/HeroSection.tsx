@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { LightRays } from "@/components/ui/LightRays";
 import { Container } from "@/components/shared/Container";
 import { AnimatedCounter } from "@/components/shared/AnimatedCounter";
@@ -303,7 +304,9 @@ export function HeroSection() {
 
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
               <Button size="lg" asChild>
-                <Link href="/yhteystiedot">Pyydä ilmainen tarjous</Link>
+                <RequestQuoteLink href="/yhteystiedot">
+                  Pyydä ilmainen tarjous
+                </RequestQuoteLink>
               </Button>
               <Button size="lg" variant="secondary" asChild>
                 <Link href="/portfolio">Katso töitämme</Link>

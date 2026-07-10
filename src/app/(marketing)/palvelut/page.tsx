@@ -19,7 +19,11 @@ export default function PalvelutPage() {
         eyebrow="Palvelut"
         title="Kaikki digitaaliset palvelut yhdestä paikasta"
         description="Suunnittelusta tuotantoon — rakennamme kaiken mitä yrityksesi tarvitsee digitaaliseen kasvuun."
-        cta={{ label: "Pyydä tarjous", href: "/yhteystiedot" }}
+        cta={{
+          label: "Pyydä tarjous",
+          href: "/yhteystiedot",
+          requiresAuth: true,
+        }}
       />
 
       <section className="py-16 md:py-24 lg:py-32">

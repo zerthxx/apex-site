@@ -40,6 +40,7 @@ export function MaintenanceSection() {
                 primaryCta={{
                   label: "Pyydä tarjous",
                   href: `/yhteystiedot?palvelu=${tier.slug}`,
+                  requiresAuth: true,
                 }}
               />
             ))}
@@ -63,6 +64,7 @@ export function MaintenanceSection() {
                 primaryCta={{
                   label: "Pyydä tarjous",
                   href: `/yhteystiedot?palvelu=${tier.slug}`,
+                  requiresAuth: true,
                 }}
               />
             </motion.div>

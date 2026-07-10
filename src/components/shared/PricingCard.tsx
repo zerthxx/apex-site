@@ -5,6 +5,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import { TiltCard } from "@/components/ui/TiltCard";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 
 export type PricingCardVariant = "neutral" | "copper" | "teal";
 
@@ -21,7 +22,7 @@ interface PricingCardProps {
   priceLine: React.ReactNode;
   description?: string;
   features: string[];
-  primaryCta: { label: string; href: string };
+  primaryCta: { label: string; href: string; requiresAuth?: boolean };
   secondaryCta?: { label: string; href: string };
   onClick?: () => void;
   className?: string;
@@ -85,14 +86,31 @@ export function PricingCard({
             >
               {secondaryCta.label} <ArrowRight size={13} />
             </Link>
-            <Link
-              href={primaryCta.href}
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 text-sm font-medium text-copper"
-            >
-              {primaryCta.label} <ArrowRight size={13} />
-            </Link>
+            {primaryCta.requiresAuth ? (
+              <RequestQuoteLink
+                href={primaryCta.href}
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-sm font-medium text-copper"
+              >
+                {primaryCta.label} <ArrowRight size={13} />
+              </RequestQuoteLink>
+            ) : (
+              <Link
+                href={primaryCta.href}
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-sm font-medium text-copper"
+              >
+                {primaryCta.label} <ArrowRight size={13} />
+              </Link>
+            )}
           </div>
+        ) : primaryCta.requiresAuth ? (
+          <RequestQuoteLink
+            href={primaryCta.href}
+            className="flex items-center gap-1.5 text-sm font-medium text-copper hover:text-copper-light transition-colors"
+          >
+            {primaryCta.label} <ArrowRight size={14} />
+          </RequestQuoteLink>
         ) : (
           <Link
             href={primaryCta.href}

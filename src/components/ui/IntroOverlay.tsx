@@ -180,22 +180,24 @@ export function IntroOverlay() {
                 </button>
               </div>
             )}
-            <button
-              onClick={async () => {
-                if (isSupabaseConfigured()) {
-                  const supabase = createClient();
-                  const { data } = await supabase.auth.getUser();
-                  if (data.user) {
-                    const meta = data.user.user_metadata ?? {};
-                    if (!meta.address) await supabase.auth.signOut();
+            {!loggedIn && (
+              <button
+                onClick={async () => {
+                  if (isSupabaseConfigured()) {
+                    const supabase = createClient();
+                    const { data } = await supabase.auth.getUser();
+                    if (data.user) {
+                      const meta = data.user.user_metadata ?? {};
+                      if (!meta.address) await supabase.auth.signOut();
+                    }
                   }
-                }
-                dismiss();
-              }}
-              className="text-white/50 text-sm hover:text-white/70 transition-colors duration-150 tracking-wide"
-            >
-              Jatka vierailijana →
-            </button>
+                  dismiss();
+                }}
+                className="text-white/50 text-sm hover:text-white/70 transition-colors duration-150 tracking-wide"
+              >
+                Jatka vierailijana →
+              </button>
+            )}
           </motion.div>
         </motion.div>
       )}

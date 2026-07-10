@@ -1,16 +1,16 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
 import { Container } from "@/components/shared/Container";
 import { RevealGroup } from "@/components/shared/RevealSection";
 import { CardCarousel } from "@/components/ui/CardCarousel";
 import { PricingCard } from "@/components/shared/PricingCard";
 import { fadeUp } from "@/lib/animations";
+import { useQuoteGate } from "@/hooks/useQuoteGate";
 import { SERVICES_PRICING } from "../data";
 
 export function ServicePricingSection() {
-  const router = useRouter();
+  const { requestQuote } = useQuoteGate();
 
   return (
     <section className="py-16 bg-surface/30">
@@ -34,10 +34,13 @@ export function ServicePricingSection() {
                 }
                 description={svc.description}
                 features={svc.features}
-                onClick={() => router.push(`/yhteystiedot?palvelu=${svc.slug}`)}
+                onClick={() =>
+                  requestQuote(`/yhteystiedot?palvelu=${svc.slug}`)
+                }
                 primaryCta={{
                   label: "Pyydä tarjous",
                   href: `/yhteystiedot?palvelu=${svc.slug}`,
+                  requiresAuth: true,
                 }}
                 secondaryCta={{ label: "Lue lisää", href: svc.href }}
               />
@@ -59,10 +62,13 @@ export function ServicePricingSection() {
                 }
                 description={svc.description}
                 features={svc.features}
-                onClick={() => router.push(`/yhteystiedot?palvelu=${svc.slug}`)}
+                onClick={() =>
+                  requestQuote(`/yhteystiedot?palvelu=${svc.slug}`)
+                }
                 primaryCta={{
                   label: "Pyydä tarjous",
                   href: `/yhteystiedot?palvelu=${svc.slug}`,
+                  requiresAuth: true,
                 }}
                 secondaryCta={{ label: "Lue lisää", href: svc.href }}
               />

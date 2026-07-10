@@ -31,6 +31,7 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: "signin" | "signup";
+  redirectTo?: string;
 }
 
 const inputClass =
@@ -59,6 +60,7 @@ export function AuthModal({
   isOpen,
   onClose,
   defaultTab = "signin",
+  redirectTo = "/dashboard",
 }: AuthModalProps) {
   const router = useRouter();
   const [tab, setTab] = useState<"signin" | "signup">(defaultTab);
@@ -189,7 +191,7 @@ export function AuthModal({
       }),
     }).catch(() => {});
     onClose();
-    router.push("/dashboard");
+    router.push(redirectTo);
   }
 
   async function resendOtp() {
@@ -219,7 +221,9 @@ export function AuthModal({
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+      },
     });
   }
 
@@ -456,17 +460,25 @@ export function AuthModal({
                           {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                       </div>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={rememberMe}
-                          onChange={(e) => setRememberMe(e.target.checked)}
-                          className="w-4 h-4 accent-copper"
-                        />
-                        <span className="text-xs text-ink-ghost">
-                          Muista minut
-                        </span>
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            className="w-4 h-4 accent-copper"
+                          />
+                          <span className="text-xs text-ink-ghost">
+                            Muista minut
+                          </span>
+                        </label>
+                        <a
+                          href="/palauta-salasana"
+                          className="text-xs text-copper hover:underline"
+                        >
+                          Unohditko salasanasi?
+                        </a>
+                      </div>
                       {err && <p className="text-red-400 text-xs">{err}</p>}
                       <button
                         type="submit"

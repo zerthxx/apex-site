@@ -17,7 +17,11 @@ export function HinnoitteluContent() {
         eyebrow="Hinnoittelu"
         title="Selkeät hinnat. Ei yllätyksiä."
         description="Kaikki tarjouksemme ovat kiinteitä. Tiedät tarkalleen mitä saat ja mitä maksat — ennen kuin allekirjoitat mitään."
-        cta={{ label: "Pyydä ilmainen tarjous", href: "/yhteystiedot" }}
+        cta={{
+          label: "Pyydä ilmainen tarjous",
+          href: "/yhteystiedot",
+          requiresAuth: true,
+        }}
       />
       <ReasonsSection />
       <ProcessStepsSection />

@@ -23,6 +23,7 @@ import {
 import { FaqAccordion } from "@/components/shared/FaqAccordion";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { HeroAnimation } from "./HeroAnimation";
 import { RevealSection } from "@/components/shared/RevealSection";
 import { ProcessTimeline } from "@/components/shared/ProcessTimeline";
@@ -465,13 +466,13 @@ export default function VerkkosivutPage() {
                 </span>
               </div>
               <Button asChild size="md" className="group">
-                <Link href="/yhteystiedot">
+                <RequestQuoteLink href="/yhteystiedot">
                   Pyydä tarjous
                   <ArrowRight
                     size={15}
                     className="transition-transform duration-200 group-hover:translate-x-1"
                   />
-                </Link>
+                </RequestQuoteLink>
               </Button>
             </div>
           </RevealSection>
@@ -814,10 +815,10 @@ export default function VerkkosivutPage() {
               </Link>
             </Button>
             <Button asChild variant="secondary" size="lg" className="group">
-              <Link href="/yhteystiedot?palvelu=verkkosivut">
+              <RequestQuoteLink href="/yhteystiedot?palvelu=verkkosivut">
                 <Phone size={16} />
                 Pyydä tarjous
-              </Link>
+              </RequestQuoteLink>
             </Button>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center mt-6">

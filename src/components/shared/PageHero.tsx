@@ -3,13 +3,14 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { RequestQuoteLink } from "@/components/ui/RequestQuoteLink";
 import { Container } from "@/components/shared/Container";
 
 interface PageHeroProps {
   eyebrow?: string;
   title: string;
   description?: string;
-  cta?: { label: string; href: string };
+  cta?: { label: string; href: string; requiresAuth?: boolean };
   secondaryCta?: { label: string; href: string };
   backgroundVariant?: "default" | "service" | "minimal";
   className?: string;
@@ -67,11 +68,18 @@ export function PageHero({
           )}
           {(cta || secondaryCta) && (
             <div className="flex flex-wrap gap-4">
-              {cta && (
-                <Button size="lg" asChild>
-                  <Link href={cta.href}>{cta.label}</Link>
-                </Button>
-              )}
+              {cta &&
+                (cta.requiresAuth ? (
+                  <Button size="lg" asChild>
+                    <RequestQuoteLink href={cta.href}>
+                      {cta.label}
+                    </RequestQuoteLink>
+                  </Button>
+                ) : (
+                  <Button size="lg" asChild>
+                    <Link href={cta.href}>{cta.label}</Link>
+                  </Button>
+                ))}
               {secondaryCta && (
                 <Button
                   variant="secondary"
