@@ -2,13 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity";
+import { revokeAllSessions } from "@/lib/sessionRevocation";
 
 async function requireAdmin() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { user: null, supabase, profile: null, error: "Ei kirjautunut" };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return { user: null, supabase, profile: null, error: "Ei kirjautunut" };
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   if (!["owner", "admin"].includes(profile?.role ?? "")) {
     return { user: null, supabase, profile: null, error: "Ei admin-oikeuksia" };
   }
@@ -17,16 +25,26 @@ async function requireAdmin() {
 
 export async function GET() {
   const { user, error } = await requireAdmin();
-  if (!user) return NextResponse.json({ error }, { status: error === "Ei kirjautunut" ? 401 : 403 });
+  if (!user)
+    return NextResponse.json(
+      { error },
+      { status: error === "Ei kirjautunut" ? 401 : 403 },
+    );
 
   const admin = createAdminClient();
 
   // List all auth users (paginated, max 1000)
-  const { data: { users }, error: listErr } = await admin.auth.admin.listUsers({ perPage: 1000 });
-  if (listErr) return NextResponse.json({ error: listErr.message }, { status: 500 });
+  const {
+    data: { users },
+    error: listErr,
+  } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  if (listErr)
+    return NextResponse.json({ error: listErr.message }, { status: 500 });
 
   // Use admin client so RLS doesn't filter out other users' profiles
-  const { data: profiles } = await admin.from("profiles").select("id, role, is_suspended, avatar_url");
+  const { data: profiles } = await admin
+    .from("profiles")
+    .select("id, role, is_suspended, avatar_url");
 
   const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
@@ -51,13 +69,30 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { user, supabase, profile: callerProfile, error } = await requireAdmin();
-  if (!user) return NextResponse.json({ error }, { status: error === "Ei kirjautunut" ? 401 : 403 });
+  const {
+    user,
+    supabase,
+    profile: callerProfile,
+    error,
+  } = await requireAdmin();
+  if (!user)
+    return NextResponse.json(
+      { error },
+      { status: error === "Ei kirjautunut" ? 401 : 403 },
+    );
 
   const body = await req.json().catch(() => ({}));
-  const { userId, action, role } = body as { userId?: string; action?: string; role?: string };
+  const { userId, action, role } = body as {
+    userId?: string;
+    action?: string;
+    role?: string;
+  };
 
-  if (!userId || !action) return NextResponse.json({ error: "userId ja action vaaditaan" }, { status: 400 });
+  if (!userId || !action)
+    return NextResponse.json(
+      { error: "userId ja action vaaditaan" },
+      { status: 400 },
+    );
 
   // Use admin client for profile updates — RLS only allows self-update
   const adminDb = createAdminClient();
@@ -65,41 +100,81 @@ export async function PATCH(req: NextRequest) {
   const isOwner = callerRole === "owner";
 
   if (action === "suspend") {
-    const { error: suspendErr } = await adminDb.from("profiles").update({ is_suspended: true }).eq("id", userId);
-    if (suspendErr) return NextResponse.json({ error: suspendErr.message }, { status: 500 });
-    await adminDb.auth.admin.signOut(userId, "global");
-    await logActivity(supabase, user.id, "user_suspended", { target_user_id: userId });
+    const { error: suspendErr } = await adminDb
+      .from("profiles")
+      .update({ is_suspended: true })
+      .eq("id", userId);
+    if (suspendErr)
+      return NextResponse.json({ error: suspendErr.message }, { status: 500 });
+    // auth.admin.signOut() takes a JWT, not a user id — the old call here
+    // silently failed. revokeAllSessions hits GoTrue's admin logout endpoint.
+    await revokeAllSessions(userId);
+    await logActivity(supabase, user.id, "user_suspended", {
+      target_user_id: userId,
+    });
     return NextResponse.json({ success: true });
   }
 
   if (action === "unsuspend") {
-    const { error: unsuspendErr } = await adminDb.from("profiles").update({ is_suspended: false }).eq("id", userId);
-    if (unsuspendErr) return NextResponse.json({ error: unsuspendErr.message }, { status: 500 });
-    await logActivity(supabase, user.id, "user_unsuspended", { target_user_id: userId });
+    const { error: unsuspendErr } = await adminDb
+      .from("profiles")
+      .update({ is_suspended: false })
+      .eq("id", userId);
+    if (unsuspendErr)
+      return NextResponse.json(
+        { error: unsuspendErr.message },
+        { status: 500 },
+      );
+    await logActivity(supabase, user.id, "user_unsuspended", {
+      target_user_id: userId,
+    });
     return NextResponse.json({ success: true });
   }
 
   if (action === "role") {
     const validRoles = ["owner", "admin", "employee", "customer"];
     if (!role || !validRoles.includes(role)) {
-      return NextResponse.json({ error: "Virheellinen rooli" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Virheellinen rooli" },
+        { status: 400 },
+      );
     }
 
     // Security guards
     if (userId === user.id) {
-      return NextResponse.json({ error: "Et voi muuttaa omaa rooliasi" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Et voi muuttaa omaa rooliasi" },
+        { status: 403 },
+      );
     }
     if (role === "owner" && !isOwner) {
-      return NextResponse.json({ error: "Vain owner voi asettaa owner-roolin" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Vain owner voi asettaa owner-roolin" },
+        { status: 403 },
+      );
     }
-    const { data: targetProfile } = await adminDb.from("profiles").select("role").eq("id", userId).single();
+    const { data: targetProfile } = await adminDb
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
     if (targetProfile?.role === "owner" && !isOwner) {
-      return NextResponse.json({ error: "Et voi muuttaa ownerin roolia" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Et voi muuttaa ownerin roolia" },
+        { status: 403 },
+      );
     }
 
-    const { error: roleErr } = await adminDb.from("profiles").update({ role }).eq("id", userId);
-    if (roleErr) return NextResponse.json({ error: roleErr.message }, { status: 500 });
-    await logActivity(supabase, user.id, "role_changed", { target_user_id: userId, new_role: role });
+    const { error: roleErr } = await adminDb
+      .from("profiles")
+      .update({ role })
+      .eq("id", userId);
+    if (roleErr)
+      return NextResponse.json({ error: roleErr.message }, { status: 500 });
+    await logActivity(supabase, user.id, "role_changed", {
+      target_user_id: userId,
+      new_role: role,
+    });
     return NextResponse.json({ success: true });
   }
 

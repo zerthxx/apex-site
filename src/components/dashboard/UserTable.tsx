@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, ChevronUp, ChevronDown, User, Ban, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import {
+  Search,
+  ChevronUp,
+  ChevronDown,
+  User,
+  Ban,
+  CheckCircle,
+  ShieldCheck,
+} from "lucide-react";
 import { RoleBadge } from "./RoleBadge";
 import { cn } from "@/lib/utils";
 
@@ -27,13 +36,22 @@ interface UserTableProps {
   callerRole: string;
 }
 
-export function UserTable({ users: initial, currentUserId, callerRole }: UserTableProps) {
+export function UserTable({
+  users: initial,
+  currentUserId,
+  callerRole,
+}: UserTableProps) {
   const [users, setUsers] = useState(initial);
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<"created_at" | "email" | "role">("created_at");
+  const [sortKey, setSortKey] = useState<"created_at" | "email" | "role">(
+    "created_at",
+  );
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [pending, setPending] = useState<string | null>(null);
-  const [roleError, setRoleError] = useState<{ id: string; msg: string } | null>(null);
+  const [roleError, setRoleError] = useState<{
+    id: string;
+    msg: string;
+  } | null>(null);
 
   const isOwner = callerRole === "owner";
   const roleOptions = isOwner ? ROLE_OPTIONS_OWNER : ROLE_OPTIONS_ADMIN;
@@ -85,7 +103,7 @@ export function UserTable({ users: initial, currentUserId, callerRole }: UserTab
           if (action === "unsuspend") return { ...u, is_suspended: false };
           if (action === "role" && role) return { ...u, role };
           return u;
-        })
+        }),
       );
     } else if (action === "role") {
       const body = await res.json().catch(() => ({}));
@@ -102,14 +120,21 @@ export function UserTable({ users: initial, currentUserId, callerRole }: UserTab
 
   function SortIcon({ k }: { k: typeof sortKey }) {
     if (sortKey !== k) return <ChevronDown size={13} className="opacity-30" />;
-    return sortDir === "asc" ? <ChevronUp size={13} /> : <ChevronDown size={13} />;
+    return sortDir === "asc" ? (
+      <ChevronUp size={13} />
+    ) : (
+      <ChevronDown size={13} />
+    );
   }
 
   return (
     <div className="flex flex-col gap-4">
       {/* Search */}
       <div className="relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost" />
+        <Search
+          size={15}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-ghost"
+        />
         <input
           type="text"
           placeholder="Hae nimellä tai sähköpostilla..."
@@ -135,7 +160,9 @@ export function UserTable({ users: initial, currentUserId, callerRole }: UserTab
                   className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wide cursor-pointer select-none hover:text-ink transition-colors"
                   onClick={() => toggleSort("role")}
                 >
-                  <span className="flex items-center gap-1">Rooli <SortIcon k="role" /></span>
+                  <span className="flex items-center gap-1">
+                    Rooli <SortIcon k="role" />
+                  </span>
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wide">
                   Tila
@@ -144,7 +171,9 @@ export function UserTable({ users: initial, currentUserId, callerRole }: UserTab
                   className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wide cursor-pointer select-none hover:text-ink transition-colors"
                   onClick={() => toggleSort("created_at")}
                 >
-                  <span className="flex items-center gap-1">Rekisteröityi <SortIcon k="created_at" /></span>
+                  <span className="flex items-center gap-1">
+                    Rekisteröityi <SortIcon k="created_at" />
+                  </span>
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-ink-ghost uppercase tracking-wide">
                   Toiminnot
@@ -153,22 +182,31 @@ export function UserTable({ users: initial, currentUserId, callerRole }: UserTab
             </thead>
             <tbody className="divide-y divide-wire bg-elevated">
               {filtered.map((u) => (
-                <tr key={u.id} className="hover:bg-surface/30 transition-colors">
+                <tr
+                  key={u.id}
+                  className="hover:bg-surface/30 transition-colors"
+                >
                   {/* User */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-copper/10 border border-copper/20 flex items-center justify-center shrink-0">
                         <span className="text-copper text-xs font-bold">
-                          {(u.first_name?.[0] ?? u.email?.[0] ?? "?").toUpperCase()}
+                          {(
+                            u.first_name?.[0] ??
+                            u.email?.[0] ??
+                            "?"
+                          ).toUpperCase()}
                         </span>
                       </div>
                       <div>
                         <p className="font-medium text-ink leading-none">
                           {u.first_name && u.last_name
                             ? `${u.first_name} ${u.last_name}`
-                            : u.email ?? "—"}
+                            : (u.email ?? "—")}
                         </p>
-                        <p className="text-xs text-ink-ghost mt-0.5">{u.email}</p>
+                        <p className="text-xs text-ink-ghost mt-0.5">
+                          {u.email}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -178,19 +216,25 @@ export function UserTable({ users: initial, currentUserId, callerRole }: UserTab
                     <div className="flex flex-col gap-1">
                       <select
                         value={u.role}
-                        onChange={(e) => patchUser(u.id, "role", e.target.value)}
-                        disabled={!isRoleChangeable(u) || pending === u.id + "role"}
+                        onChange={(e) =>
+                          patchUser(u.id, "role", e.target.value)
+                        }
+                        disabled={
+                          !isRoleChangeable(u) || pending === u.id + "role"
+                        }
                         className="text-xs bg-elevated border border-wire rounded-lg px-2 py-1 text-ink focus:outline-none focus:border-copper/50 transition-colors disabled:opacity-50"
                         title={
                           u.id === currentUserId
                             ? "Et voi muuttaa omaa rooliasi"
                             : !isOwner && u.role === "owner"
-                            ? "Vain owner voi muuttaa ownerin roolia"
-                            : undefined
+                              ? "Vain owner voi muuttaa ownerin roolia"
+                              : undefined
                         }
                       >
                         {roleOptions.map((r) => (
-                          <option key={r} value={r}>{r}</option>
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
                         ))}
                         {/* Show current role even if not in roleOptions (e.g. admin sees an owner) */}
                         {!roleOptions.includes(u.role) && (
@@ -218,23 +262,40 @@ export function UserTable({ users: initial, currentUserId, callerRole }: UserTab
 
                   {/* Registered */}
                   <td className="px-4 py-3 text-xs text-ink-ghost whitespace-nowrap">
-                    {new Date(u.created_at).toLocaleDateString("fi-FI", { day: "numeric", month: "short", year: "numeric" })}
+                    {new Date(u.created_at).toLocaleDateString("fi-FI", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
                   </td>
 
                   {/* Actions */}
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => patchUser(u.id, u.is_suspended ? "unsuspend" : "suspend")}
-                      disabled={pending !== null}
-                      className={cn(
-                        "text-xs px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40",
-                        u.is_suspended
-                          ? "text-ok border-ok/20 hover:bg-ok/5"
-                          : "text-bad border-bad/20 hover:bg-bad/5"
-                      )}
-                    >
-                      {u.is_suspended ? "Palauta" : "Jäädytä"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/kayttajat/${u.id}`}
+                        className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-copper/30 text-copper hover:bg-copper/5 transition-colors"
+                      >
+                        <ShieldCheck size={12} /> Hallinnoi
+                      </Link>
+                      <button
+                        onClick={() =>
+                          patchUser(
+                            u.id,
+                            u.is_suspended ? "unsuspend" : "suspend",
+                          )
+                        }
+                        disabled={pending !== null}
+                        className={cn(
+                          "text-xs px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40",
+                          u.is_suspended
+                            ? "text-ok border-ok/20 hover:bg-ok/5"
+                            : "text-bad border-bad/20 hover:bg-bad/5",
+                        )}
+                      >
+                        {u.is_suspended ? "Palauta" : "Jäädytä"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

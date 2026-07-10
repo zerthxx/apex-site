@@ -4,11 +4,20 @@ export type ActivityEventType =
   | "login"
   | "logout"
   | "google_login"
+  | "failed_login"
   | "password_change"
+  | "password_reset"
   | "profile_update"
   | "email_verified"
+  | "phone_verified"
+  | "email_changed"
+  | "phone_changed"
+  | "change_reverted"
   | "account_suspended"
   | "account_unsuspended"
+  | "account_locked"
+  | "account_unlocked"
+  | "force_password_reset"
   | "role_changed";
 
 export async function logActivity(
@@ -35,11 +44,20 @@ export const EVENT_LABELS: Record<string, string> = {
   login: "Kirjautuminen sisään",
   logout: "Kirjautuminen ulos",
   google_login: "Google-kirjautuminen",
+  failed_login: "Epäonnistunut kirjautumisyritys",
   password_change: "Salasanan vaihto",
+  password_reset: "Salasanan palautus",
   profile_update: "Profiilin päivitys",
   email_verified: "Sähköposti vahvistettu",
+  phone_verified: "Puhelinnumero vahvistettu",
+  email_changed: "Sähköpostiosoite vaihdettu",
+  phone_changed: "Puhelinnumero vaihdettu",
+  change_reverted: "Muutos peruttu",
   account_suspended: "Tili jäädytetty",
   account_unsuspended: "Jäädytys poistettu",
+  account_locked: "Tili lukittu",
+  account_unlocked: "Lukitus poistettu",
+  force_password_reset: "Pakotettu salasanan vaihto",
   role_changed: "Rooli muutettu",
   user_suspended: "Käyttäjä jäädytetty",
   user_unsuspended: "Jäädytys poistettu",

@@ -21,9 +21,21 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("first_name, last_name, role, is_suspended")
+    .select(
+      "first_name, last_name, role, is_suspended, is_locked, force_password_reset",
+    )
     .eq("id", user.id)
     .single();
+
+  // Per-request enforcement of suspension/lock (previously the flags were
+  // fetched but never checked — a session surviving the suspend-time global
+  // sign-out kept full access). Cookie clearing must happen in a route
+  // handler, hence the redirect.
+  if (profile?.is_suspended || profile?.is_locked) {
+    redirect(
+      `/api/auth/force-logout?syy=${profile.is_suspended ? "jaadytetty" : "lukittu"}`,
+    );
+  }
 
   const role = profile?.role ?? "customer";
 
@@ -86,6 +98,7 @@ export default async function DashboardLayout({
       email={user.email}
       role={role}
       unreadNotifications={unread ?? 0}
+      forcePasswordReset={profile?.force_password_reset ?? false}
     >
       {children}
     </DashboardShell>

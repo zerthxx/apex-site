@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { consumeVerification, normalizeEmail } from "@/lib/verification";
+import { findUserByEmail } from "@/lib/users";
+import { recordLoginSession } from "@/lib/sessions";
+import { logActivity } from "@/lib/supabase/activityLog";
+import { getClientIp, getUserAgent, sameOriginOk } from "@/lib/requestMeta";
 
-function adminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
-
+/**
+ * Verifies the 6-digit login/signup email code. Same request contract as the
+ * legacy version ({ email, code }). On success this now also:
+ *  - marks the account's email verified (this OTP IS the email verification)
+ *  - records a user_sessions row (login history / devices — previously dead)
+ * Failed attempts are rate limited per IP and logged to the account timeline.
+ */
 export async function POST(req: NextRequest) {
+  if (!sameOriginOk(req)) {
+    return NextResponse.json({ error: "Virheellinen pyyntö" }, { status: 403 });
+  }
+
   let email: string, code: string;
   try {
     ({ email, code } = await req.json());
@@ -16,25 +26,59 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Virheellinen pyyntö" }, { status: 400 });
   }
 
-  if (!email || !code) return NextResponse.json({ error: "Puuttuvia tietoja" }, { status: 400 });
+  if (!email || !code) {
+    return NextResponse.json({ error: "Puuttuvia tietoja" }, { status: 400 });
+  }
+  const target = normalizeEmail(email);
+  const ip = getClientIp(req);
 
-  const supabase = adminClient();
+  const admin = createAdminClient();
 
-  const { data, error } = await supabase
-    .from("otp_codes")
-    .select()
-    .eq("email", email)
-    .eq("code", code)
-    .eq("used", false)
-    .gt("expires_at", new Date().toISOString())
-    .single();
+  const ipOk = ip
+    ? await checkRateLimit(admin, `otp-verify:ip:${ip}`, 20, 3600)
+    : true;
+  if (!ipOk) return rateLimitResponse();
 
-  if (error || !data) {
-    return NextResponse.json({ error: "Väärä tai vanhentunut koodi." }, { status: 400 });
+  const result = await consumeVerification(
+    admin,
+    "login_2fa",
+    target,
+    String(code),
+  );
+
+  if (!result.ok) {
+    const user = await findUserByEmail(admin, target);
+    if (user) {
+      await logActivity(
+        admin,
+        user.id,
+        "failed_login",
+        { method: "otp", email: target },
+        {
+          ipAddress: ip ?? undefined,
+          userAgent: getUserAgent(req) ?? undefined,
+        },
+      );
+    }
+    return NextResponse.json(
+      { error: "Väärä tai vanhentunut koodi." },
+      { status: 400 },
+    );
   }
 
-  await supabase.from("otp_codes").update({ used: true }).eq("id", data.id);
+  // Post-success bookkeeping is best effort — the login must not fail on it.
+  const user = await findUserByEmail(admin, target);
+  if (user) {
+    await admin
+      .from("profiles")
+      .update({
+        email_verified: true,
+        email_verified_at: new Date().toISOString(),
+      })
+      .eq("id", user.id)
+      .eq("email_verified", false);
+    await recordLoginSession(admin, user.id, req);
+  }
 
-  // Activity logging happens client-side via /api/activity after the user signs in
   return NextResponse.json({ success: true });
 }

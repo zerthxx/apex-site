@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import {
@@ -9,36 +10,32 @@ import {
 import { codeEmailHtml, sendEmail } from "@/lib/emails";
 import { getClientIp, sameOriginOk } from "@/lib/requestMeta";
 
-/**
- * Sends the 6-digit login/signup email code. Same request contract as the
- * legacy version ({ email }), now backed by verification_codes + durable
- * Postgres rate limiting instead of otp_codes + an in-memory Map.
- */
+/** Re-sends the email verification code for the caller's current address. */
 export async function POST(req: NextRequest) {
   if (!sameOriginOk(req)) {
     return NextResponse.json({ error: "Virheellinen pyyntö" }, { status: 403 });
   }
-
-  let email: string;
-  try {
-    ({ email } = await req.json());
-  } catch {
-    return NextResponse.json({ error: "Virheellinen pyyntö" }, { status: 400 });
-  }
-
-  if (!email || typeof email !== "string") {
-    return NextResponse.json({ error: "Email puuttuu" }, { status: 400 });
-  }
-  const target = normalizeEmail(email);
-  const ip = getClientIp(req);
+  const auth = await requireUser();
+  if (!auth.ok) return auth.response;
 
   const admin = createAdminClient();
 
-  // 60s resend cooldown per address (previous behavior), plus hourly caps
-  // per address and per IP.
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("email_verified")
+    .eq("id", auth.user.id)
+    .single();
+  if (profile?.email_verified) {
+    return NextResponse.json(
+      { error: "Sähköposti on jo vahvistettu." },
+      { status: 400 },
+    );
+  }
+
+  const target = normalizeEmail(auth.user.email!);
   const cooldownOk = await checkRateLimit(
     admin,
-    `otp-send:cool:${target}`,
+    `email-verify:cool:${target}`,
     1,
     60,
   );
@@ -50,35 +47,32 @@ export async function POST(req: NextRequest) {
   }
   const hourlyOk = await checkRateLimit(
     admin,
-    `otp-send:hour:${target}`,
-    5,
+    `email-verify:hour:${target}`,
+    3,
     3600,
   );
-  const ipOk = ip
-    ? await checkRateLimit(admin, `otp-send:ip:${ip}`, 10, 3600)
-    : true;
-  if (!hourlyOk || !ipOk) return rateLimitResponse();
+  if (!hourlyOk) return rateLimitResponse();
 
   const code = generateCode();
   const created = await createVerification(admin, {
-    purpose: "login_2fa",
+    userId: auth.user.id,
+    purpose: "email_verify",
     channel: "email",
     target,
     secret: code,
-    ip,
+    ip: getClientIp(req),
   });
-  if (!created.ok) {
+  if (!created.ok)
     return NextResponse.json({ error: "Tietokantavirhe" }, { status: 500 });
-  }
 
   const sent = await sendEmail(
     target,
-    "Vahvistuskoodisi — Apex Site",
+    "Vahvista sähköpostiosoitteesi — Apex Site",
     codeEmailHtml({
       headingCopper: "Vahvista",
       headingRest: "sähköpostiosoitteesi",
       intro:
-        "Kirjautuminen ApexSiteen vaatii sähköpostiosoitteen vahvistuksen.",
+        "Vahvista sähköpostiosoitteesi viimeistelläksesi tilisi suojauksen.",
       code,
     }),
   );

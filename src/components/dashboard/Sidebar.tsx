@@ -26,6 +26,7 @@ import {
   Wrench,
   UserPlus,
   Trash2,
+  LifeBuoy,
 } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SidebarLink } from "./SidebarLink";
@@ -234,6 +235,12 @@ export function Sidebar({
               href="/admin/kayttajat"
               label="Käyttäjät"
               icon={<Users size={16} />}
+              onClick={onMobileClose}
+            />
+            <SidebarLink
+              href="/admin/palautuspyynnot"
+              label="Palautuspyynnöt"
+              icon={<LifeBuoy size={16} />}
               onClick={onMobileClose}
             />
             <SidebarLink
